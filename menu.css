@@ -1,0 +1,114 @@
+/* **************** */
+
+#menu {
+    z-index: 2;
+}
+
+#menu-bar {
+    width: 45px;
+    height: 40px;
+    margin: 30px 0 20px 20px;
+    cursor: pointer;
+}
+
+.bar {
+    height: 5px;
+    width: 100%;
+    background-color: var(--primary);
+    display: block;
+    border-radius: 5px;
+    transition: 0.3s ease;
+}
+
+#bar1 {
+    transform: translateY(-4px);
+}
+
+#bar3 {
+    transform: translateY(4px);
+}
+
+.nav {
+    transition: 0.3s ease;
+    display: none;
+}
+
+.nav ul {
+    padding: 0 22px;
+}
+
+.nav li {
+    list-style: none;
+    padding: 12px 0;
+}
+
+.nav li a {
+    color: white;
+    font-size: 20px;
+    text-decoration: none;
+}
+
+.nav li a:hover {
+    color: var(--accent);
+}
+
+.menu-bg,
+#menu {
+    top: 0;
+    right: 20px;
+    position: absolute;
+}
+
+.menu-bg {
+    z-index: 1;
+    width: 0;
+    height: 0;
+    margin: 30px 0 20px 20px;
+    background: radial-gradient(circle, var(--secondary), var(--dark-light));
+    border-radius: 50%;
+    transition: 0.3s ease;
+    box-shadow: 0 0 20px var(--secondary);
+}
+
+.change {
+    display: block;
+}
+
+.change .bar {
+    background-color: white;
+}
+
+.change #bar1 {
+    transform: translateY(4px) rotateZ(-45deg);
+}
+
+.change #bar2 {
+    opacity: 0;
+}
+
+.change #bar3 {
+    transform: translateY(-6px) rotateZ(45deg);
+}
+
+.change-bg {
+    width: 620px;
+    height: 620px;
+    transform: translate(60%, -30%);
+}
+
+.github-link {
+    background: linear-gradient(45deg, var(--secondary) 0%, var(--accent) 100%);
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    color: white !important;
+}
+
+@media (max-width: 480px) {
+    .change-bg {
+        width: 550px;
+        height: 680px;
+        transform: translate(60%, -30%);
+    }
+}
+
+/* **************** */
