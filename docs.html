@@ -42,6 +42,76 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Prism.js for syntax highlighting -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        /* Additional styles for documentation boxes */
+        .info-box, .warning-box, .success-box, .danger-box, .note-box {
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid;
+        }
+        
+        .info-box {
+            background-color: #e7f3ff;
+            border-color: #2196F3;
+            color: #0d47a1;
+        }
+        
+        .warning-box {
+            background-color: #fff3cd;
+            border-color: #ff9800;
+            color: #8a6d3b;
+        }
+        
+        .success-box {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .danger-box {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .note-box {
+            background-color: #e8f5e9;
+            border-color: #4caf50;
+            color: #2e7d32;
+        }
+        
+        .doc-section {
+            scroll-margin-top: 2rem;
+        }
+        
+        .doc-section h2 {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 2px solid #eee;
+        }
+        
+        .doc-section h2:first-child {
+            margin-top: 0;
+            border-top: none;
+        }
+        
+        .code-block {
+            margin: 1.5rem 0;
+        }
+        
+        .docs-nav a.active {
+            color: #667eea;
+            font-weight: 600;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        hr {
+            margin: 2rem 0;
+            border: none;
+            border-top: 2px solid #eee;
+        }
+    </style>
 </head>
 <body class="docs-page">
     <!-- Navigation -->
@@ -75,63 +145,110 @@
         <aside class="docs-sidebar">
             <nav class="docs-nav">
                 <div class="nav-section">
-                    <h3>Introdução</h3>
+                    <h3>🚀 Começando</h3>
                     <ul>
-                        <li><a href="#intro">O que é Crescent?</a></li>
-                        <li><a href="#installation">Instalação</a></li>
-                        <li><a href="#dependencies">Dependências</a></li>
-                        <li><a href="#structure">Estrutura do Projeto</a></li>
+                        <li><a href="#o-que-é-crescent">O que é Crescent?</a></li>
+                        <li><a href="#instalação-rápida">📦 Instalação Rápida</a></li>
+                        <li><a href="#dependências">📚 Dependências</a></li>
+                        <li><a href="#estrutura-do-projeto">📁 Estrutura do Projeto</a></li>
+                        <li><a href="#configuração-inicial">🔧 Configuração Inicial</a></li>
+                        <li><a href="#primeiro-módulo">🎮 Primeiro Módulo</a></li>
+                        <li><a href="#iniciando-o-servidor">🚀 Iniciando o Servidor</a></li>
+                        <li><a href="#executando-testes">🧪 Executando Testes</a></li>
+                        <li><a href="#próximos-passos">📖 Próximos Passos</a></li>
+                        <li><a href="#dicas-úteis">💡 Dicas Úteis</a></li>
+                        <li><a href="#troubleshooting">🆘 Troubleshooting</a></li>
+                        <li><a href="#recursos-adicionais">📚 Recursos Adicionais</a></li>
                     </ul>
                 </div>
                 <div class="nav-section">
-                    <h3>Conceitos Básicos</h3>
+                    <h3>🎯 Core Concepts</h3>
                     <ul>
-                        <li><a href="#routing">Rotas</a></li>
-                        <li><a href="#controllers">Controllers</a></li>
-                        <li><a href="#services">Services</a></li>
-                        <li><a href="#models">Models</a></li>
-                        <li><a href="#middleware">Middleware</a></li>
+                        <li><a href="#rotas">🛣️ Rotas</a></li>
+                        <li><a href="#controllers">🎮 Controllers</a></li>
+                        <li><a href="#services">⚙️ Services</a></li>
+                        <li><a href="#models-básico">💾 Models (Básico)</a></li>
+                        <li><a href="#middleware">🔒 Middleware</a></li>
+                        <li><a href="#módulos">🏗️ Módulos</a></li>
+                        <li><a href="#fluxo-de-requisição">📊 Fluxo de Requisição</a></li>
+                        <li><a href="#boas-práticas">💡 Boas Práticas</a></li>
+                        <li><a href="#testando-componentes">🧪 Testando Componentes</a></li>
+                        <li><a href="#próximas-seções">📖 Próximas Seções</a></li>
                     </ul>
                 </div>
                 <div class="nav-section">
-                    <h3>CLI</h3>
+                    <h3>🗄️ Database & ORM</h3>
                     <ul>
-                        <li><a href="#cli">Introdução ao CLI</a></li>
-                        <li><a href="#cli-make">Geradores de Código</a></li>
-                        <li><a href="#cli-migrations">Migrations</a></li>
+                        <li><a href="#configuração-do-banco">🚀 Configuração do Banco</a></li>
+                        <li><a href="#models-orm-activerecord">💾 Models (ORM ActiveRecord)</a></li>
+                        <li><a href="#crud-operations">📝 CRUD Operations</a></li>
+                        <li><a href="#query-builder">🔍 Query Builder</a></li>
+                        <li><a href="#validações">✅ Validações</a></li>
+                        <li><a href="#relações">🔗 Relações</a></li>
+                        <li><a href="#migrations">🔄 Migrations</a></li>
+                        <li><a href="#hooks-lifecycle-events">🪝 Hooks (Lifecycle Events)</a></li>
+                        <li><a href="#boas-práticas">💡 Boas Práticas</a></li>
+                        <li><a href="#testando-database">🧪 Testando Database</a></li>
+                        <li><a href="#próximas-seções">📖 Próximas Seções</a></li>
                     </ul>
                 </div>
                 <div class="nav-section">
-                    <h3>Banco de Dados</h3>
+                    <h3>🛠️ CLI Tools</h3>
                     <ul>
-                        <li><a href="#orm">ORM ActiveRecord</a></li>
-                        <li><a href="#validations">Validações</a></li>
-                        <li><a href="#relations">Relações</a></li>
-                        <li><a href="#migrations">Migrations</a></li>
+                        <li><a href="#comandos-disponíveis">📋 Comandos Disponíveis</a></li>
+                        <li><a href="#criar-novo-projeto">🆕 Criar Novo Projeto</a></li>
+                        <li><a href="#servidor-de-desenvolvimento">🚀 Servidor de Desenvolvimento</a></li>
+                        <li><a href="#executar-testes">✅ Executar Testes</a></li>
+                        <li><a href="#geradores-de-código">🏗️ Geradores de Código</a></li>
+                        <li><a href="#migrations">🔄 Migrations</a></li>
+                        <li><a href="#casos-de-uso-comuns">🎯 Casos de Uso Comuns</a></li>
+                        <li><a href="#instalação-global-do-cli">🔧 Instalação Global do CLI</a></li>
+                        <li><a href="#dicas-avançadas">💡 Dicas Avançadas</a></li>
+                        <li><a href="#referência-rápida">📖 Referência Rápida</a></li>
+                        <li><a href="#troubleshooting">🆘 Troubleshooting</a></li>
+                        <li><a href="#próximas-seções">📚 Próximas Seções</a></li>
                     </ul>
                 </div>
                 <div class="nav-section">
-                    <h3>Configuração</h3>
+                    <h3>🧰 Utilities</h3>
                     <ul>
-                        <li><a href="#env">Variáveis de Ambiente</a></li>
-                        <li><a href="#config">Arquivos de Config</a></li>
-                        <li><a href="#scripts">Scripts Shell</a></li>
+                        <li><a href="#sistema-de-testes">✅ Sistema de Testes</a></li>
+                        <li><a href="#assertions-disponíveis">📋 Assertions Disponíveis</a></li>
+                        <li><a href="#exemplo-completo-de-teste">📝 Exemplo Completo de Teste</a></li>
+                        <li><a href="#hash-de-senhas-pbkdf2">🔐 Hash de Senhas (PBKDF2)</a></li>
+                        <li><a href="#variáveis-de-ambiente">🌐 Variáveis de Ambiente</a></li>
+                        <li><a href="#headers-http">📨 Headers HTTP</a></li>
+                        <li><a href="#path-utilities">🛤️ Path Utilities</a></li>
+                        <li><a href="#string-utilities">🔤 String Utilities</a></li>
+                        <li><a href="#testando-utilities">🧪 Testando Utilities</a></li>
+                        <li><a href="#boas-práticas">💡 Boas Práticas</a></li>
+                        <li><a href="#próximas-seções">📖 Próximas Seções</a></li>
                     </ul>
                 </div>
                 <div class="nav-section">
-                    <h3>Deploy</h3>
+                    <h3>🚀 Deployment</h3>
                     <ul>
-                        <li><a href="#production">Produção</a></li>
-                        <li><a href="#nginx">Configuração NGINX</a></li>
+                        <li><a href="#pré-requisitos">📋 Pré-requisitos</a></li>
+                        <li><a href="#configuração-do-projeto">🔧 Configuração do Projeto</a></li>
+                        <li><a href="#nginx-reverse-proxy">🌐 NGINX Reverse Proxy</a></li>
+                        <li><a href="#sslhttps-com-lets-encrypt">🔒 SSL/HTTPS com Let's Encrypt</a></li>
+                        <li><a href="#systemd-service">🔧 Systemd Service</a></li>
+                        <li><a href="#monitoramento-e-logs">📊 Monitoramento e Logs</a></li>
+                        <li><a href="#performance">⚡ Performance</a></li>
+                        <li><a href="#segurança">🔐 Segurança</a></li>
+                        <li><a href="#deploy-automatizado">🔄 Deploy Automatizado</a></li>
+                        <li><a href="#health-checks">🩺 Health Checks</a></li>
+                        <li><a href="#troubleshooting">🐛 Troubleshooting</a></li>
+                        <li><a href="#próximas-seções">📖 Próximas Seções</a></li>
                     </ul>
                 </div>
+
             </nav>
         </aside>
 
         <!-- Main Content -->
         <main class="docs-content">
-            <!-- Introdução -->
-            <section id="intro" class="doc-section">
+            <div class="hero-section">
                 <h1>🌙 Crescent Framework</h1>
                 <p class="lead">Framework web moderno e performático construído em Lua, Luvit e MySQL.</p>
                 
@@ -145,344 +262,684 @@
                         📦 Download crescent-starter.zip
                     </a>
                 </div>
-                
+            </div>
+
+            <section id="o-que-é-crescent" class="doc-section">
                 <h2>O que é Crescent?</h2>
-                <p>Crescent é um framework web completo que combina a performance do Lua/LuaJIT com uma arquitetura moderna e modular inspirada em frameworks como NestJS e Laravel. Foi projetado para criar APIs REST e aplicações web de alto desempenho com código limpo e organizado.</p>
-
-                <div class="highlight-box">
-                    <h3>✨ Principais Características</h3>
-                    <ul>
-                        <li><strong>Performance Excepcional:</strong> LuaJIT oferece velocidade comparável a C</li>
-                        <li><strong>Arquitetura Modular:</strong> Controllers, Services, Models separados</li>
-                        <li><strong>ORM ActiveRecord:</strong> Trabalhe com banco de dados de forma intuitiva</li>
-                        <li><strong>CLI Poderoso:</strong> Gerador de código estilo Laravel Artisan</li>
-                        <li><strong>Middlewares Prontos:</strong> Auth, CORS, Security, Logger</li>
-                        <li><strong>Sistema de Migrations:</strong> Controle de versão do banco</li>
-                    </ul>
-                </div>
-            </section>
-
-            <!-- Instalação -->
-            <section id="installation" class="doc-section">
-                <h2>📦 Instalação</h2>
                 
-                <h3>1. Baixe o Crescent Starter</h3>
-                <div class="code-block">
-                    <pre><code># Download via curl
-curl -L https://github.com/daniel-m-tfs/crescent-framework/releases/download/Versões/crescent-starter.zip -o crescent-starter.zip
+<p>Crescent é um framework web completo que combina a performance do Lua/LuaJIT com uma arquitetura moderna e modular inspirada em frameworks como NestJS e Laravel. Foi projetado para criar APIs REST e aplicações web de alto desempenho com código limpo e organizado.</p>
 
-# Ou baixe diretamente pelo navegador:
-# https://github.com/daniel-m-tfs/crescent-framework/releases</code></pre>
-                </div>
+<h3>🌟 Principais Características</h3>
 
-                <h3>2. Descompacte e Acesse a Pasta</h3>
-                <div class="code-block">
-                    <pre><code>unzip crescent-starter.zip
-cd crescent-starter</code></pre>
-                </div>
+<ul>
+<li><strong>⚡ Performance</strong>: Built on LuaJIT + libuv (Luvit) for blazing fast execution</li>
+<li><strong>🎯 Modular</strong>: Organize código em módulos independentes e reutilizáveis</li>
+<li><strong>🗄️ ORM ActiveRecord</strong>: Interaja com banco de dados MySQL de forma elegante</li>
+<li><strong>🔄 Migrations</strong>: Sistema completo de versionamento de schema</li>
+<li><strong>🛠️ CLI Poderoso</strong>: Geração automática de código (como Artisan do Laravel)</li>
+<li><strong>🔐 Segurança</strong>: Middleware de segurança, validações e hash de senhas PBKDF2</li>
+<li><strong>✅ Testes</strong>: Biblioteca completa de assertions para testes automatizados</li>
+<li><strong>📦 Pronto para Produção</strong>: Configuração NGINX e systemd incluídas</li>
+</ul>
 
-                <h3>3. Instale as Dependências (se necessário)</h3>
-                <div class="code-block">
-                    <pre><code># Script automatizado que instala tudo
-./install-dependencies.sh</code></pre>
-                </div>
+<hr>
 
-                <p>O script instalará (se necessário):</p>
-                <ul>
-                    <li><strong>Luvit:</strong> Runtime Lua assíncrono</li>
-                    <li><strong>LuaRocks:</strong> Gerenciador de pacotes</li>
-                    <li><strong>MySQL + luasql-mysql:</strong> Banco de dados (opcional)</li>
-                    <li><strong>Dependências Lua:</strong> Bibliotecas adicionais (opcional)</li>
-                </ul>
-
-                <div class="info-box">
-                    <strong>💡 Dica:</strong> O script é interativo e pergunta antes de instalar cada componente. Se você já tem Luvit e LuaRocks instalados, ele apenas verificará e continuará.
-                </div>
-
-                <h3>4. Inicie o Servidor</h3>
-                <div class="code-block">
-                    <pre><code>luvit app.lua
-# Servidor rodando em http://localhost:8080</code></pre>
-                </div>
-
-                <h3>5. Configure o Ambiente (Opcional)</h3>
-                <div class="code-block">
-                    <pre><code>cp .env.example .env
-nano .env  # Configure MySQL, porta, etc.</code></pre>
-                </div>
             </section>
 
-            <!-- Dependências -->
-            <section id="dependencies" class="doc-section">
+            <section id="instalação-rápida" class="doc-section">
+                <h2>📦 Instalação Rápida</h2>
+                
+<h3>Método 1: Download Direto (Recomendado)</h3>
+
+<p>Baixe o template starter pronto para uso:</p>
+
+
+<h3>Método 1: Via Lit Package Manager</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Instale o framework via Lit
+lit install daniel-m-tfs/crescent-framework
+
+# Clone o starter template
+git clone https://github.com/daniel-m-tfs/crescent-starter.git meu-projeto
+cd meu-projeto
+
+# Configure e inicie
+cp .env.example .env
+nano .env
+luvit app.lua</code></pre></div>
+
+<h3>Método 2: CLI (Criar Novo Projeto)</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Se você tem o CLI instalado globalmente
+crescent new meu-projeto
+cd meu-projeto
+cp .env.example .env
+nano .env
+luvit app.lua</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="dependências" class="doc-section">
                 <h2>📚 Dependências</h2>
                 
-                <h3>Requisitos do Sistema</h3>
-                <ul>
-                    <li><strong>macOS/Linux:</strong> Sistema operacional suportado</li>
-                    <li><strong>MySQL 5.7+:</strong> Banco de dados</li>
-                    <li><strong>NGINX (opcional):</strong> Para produção</li>
-                </ul>
+<h3>Requisitos do Sistema</h3>
 
-                <h3>Dependências Lua</h3>
-                <div class="deps-grid">
-                    <div class="dep-card">
-                        <h4>Luvit</h4>
-                        <p>Runtime assíncrono baseado em LuaJIT, similar ao Node.js</p>
-                    </div>
-                    <div class="dep-card">
-                        <h4>luasql-mysql</h4>
-                        <p>Driver MySQL para conexão com banco de dados</p>
-                    </div>
-                    <div class="dep-card">
-                        <h4>LuaRocks</h4>
-                        <p>Gerenciador de pacotes para módulos Lua</p>
-                    </div>
-                </div>
+<ul>
+<li><strong>Luvit 2.18+</strong>: Runtime Lua assíncrono</li>
+<li><strong>Lit 3.8+</strong>: Gerenciador de pacotes</li>
+<li><strong>MySQL 5.7+</strong> ou <strong>MariaDB 10+</strong>: Banco de dados</li>
+<li><strong>Linux/macOS</strong>: Sistema operacional (Windows via WSL)</li>
+</ul>
+
+<h3>Instalando Luvit e Lit</h3>
+
+<div class="code-block"><pre><code class="language-bash"># macOS via Homebrew
+brew install luvit
+
+# Linux - Download manual
+curl -L https://github.com/luvit/lit/raw/master/get-lit.sh | sh</code></pre></div>
+
+<h3>Dependências do Framework</h3>
+
+<p>O Crescent Framework automaticamente inclui:</p>
+
+<ul>
+<li><code>luvit/luvit@2.18.1</code> - Runtime base</li>
+<li><code>creationix/mysql</code> - Driver MySQL (instalar separadamente)</li>
+</ul>
+
+<p>Para instalar o driver MySQL:</p>
+
+<div class="code-block"><pre><code class="language-bash">lit install creationix/mysql</code></pre></div>
+
+<hr>
+
             </section>
 
-            <!-- Estrutura -->
-            <section id="structure" class="doc-section">
+            <section id="estrutura-do-projeto" class="doc-section">
                 <h2>📁 Estrutura do Projeto</h2>
                 
-                <div class="code-block">
-                    <pre><code>crescent-starter/
-├── crescent/              # Core do framework
-│   ├── init.lua          # Inicialização
-│   ├── server.lua        # Servidor HTTP
-│   ├── core/             # Núcleo (Router, Request, Response)
-│   ├── middleware/       # Middlewares padrão
-│   ├── database/         # ORM e MySQL
-│   └── utils/            # Utilitários
-├── src/                  # Seu código da aplicação
-│   └── hello/            # Módulo de exemplo
-│       ├── controllers/  # Controladores
-│       ├── services/     # Lógica de negócio
-│       ├── models/       # Models do banco
-│       └── routes/       # Definição de rotas
-├── migrations/           # Migrations do banco
-├── config/               # Arquivos de configuração
-├── bootstrap.lua         # Bootstrap da aplicação
-├── crescent-cli.lua      # CLI para geração de código
-├── install-dependencies.sh  # Instalador de dependências
-├── .env.example          # Exemplo de variáveis de ambiente
-└── app.lua              # Ponto de entrada</code></pre>
-                </div>
+<div class="code-block"><pre><code class="language-">crescent-starter/
+├── app.lua                    # 🚀 Arquivo principal da aplicação
+├── bootstrap.lua              # 🔧 Bootstrap do framework
+├── crescent-cli.lua          # 🛠️ CLI para geração de código
+├── .env                      # 🔐 Variáveis de ambiente (não versionar!)
+├── .env.example              # 📝 Template de variáveis
+├── config/
+│   ├── development.lua       # ⚙️ Config de desenvolvimento
+│   ├── production.lua        # ⚙️ Config de produção
+│   ├── nginx.conf            # 🌐 Configuração NGINX
+│   └── crescent.service      # 🔄 Systemd service
+├── crescent/                 # 📦 Core do framework
+│   ├── init.lua
+│   ├── server.lua
+│   ├── core/
+│   │   ├── context.lua       # Contexto HTTP (req/res)
+│   │   ├── request.lua       # Request object
+│   │   ├── response.lua      # Response object
+│   │   └── router.lua        # Sistema de rotas
+│   ├── database/
+│   │   ├── model.lua         # ORM ActiveRecord
+│   │   ├── query_builder.lua # Query Builder
+│   │   ├── mysql.lua         # Driver MySQL
+│   │   └── migrate.lua       # Sistema de migrations
+│   ├── middleware/
+│   │   ├── auth.lua          # Autenticação
+│   │   ├── cors.lua          # CORS
+│   │   ├── logger.lua        # Logging
+│   │   └── security.lua      # Segurança
+│   └── utils/
+│       ├── env.lua           # Variáveis de ambiente
+│       ├── hash.lua          # 🔐 Hash de senhas PBKDF2
+│       ├── tests.lua         # ✅ Biblioteca de testes
+│       ├── headers.lua       # HTTP headers
+│       ├── path.lua          # Path utilities
+│       └── string.lua        # String utilities
+├── src/                      # 📝 Seu código (módulos)
+│   └── users/                # Exemplo de módulo
+│       ├── init.lua          # Registrador do módulo
+│       ├── controllers/
+│       │   └── users.lua
+│       ├── services/
+│       │   └── users.lua
+│       ├── models/
+│       │   └── users.lua
+│       └── routes/
+│           └── users.lua
+├── migrations/               # 🔄 Database migrations
+│   └── 20260108230701_create_users_table.lua
+└── tests/                    # ✅ Testes automatizados
+    └── test-*.lua</code></pre></div>
 
-                <div class="info-box">
-                    <strong>💡 Dica:</strong> Use o CLI para gerar novos módulos automaticamente com <code>luvit crescent-cli.lua make:module NomeDoModulo</code>
-                </div>
+<h3>🎯 Convenções de Diretórios</h3>
+
+<ul>
+<li><strong><code>src/</code></strong>: Todos os seus módulos de negócio</li>
+<li><strong><code>crescent/</code></strong>: Core do framework (não modificar)</li>
+<li><strong><code>config/</code></strong>: Arquivos de configuração</li>
+<li><strong><code>migrations/</code></strong>: Versionamento do banco de dados</li>
+<li><strong><code>tests/</code></strong>: Testes automatizados</li>
+</ul>
+
+<hr>
+
             </section>
 
-            <!-- Rotas -->
-            <section id="routing" class="doc-section">
+            <section id="configuração-inicial" class="doc-section">
+                <h2>🔧 Configuração Inicial</h2>
+                
+<h3>1. Variáveis de Ambiente (.env)</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Ambiente
+ENV=development
+
+# Banco de Dados
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=meu_banco
+DB_USER=root
+DB_PASSWORD=senha_segura
+
+# Servidor
+PORT=8080
+HOST=0.0.0.0</code></pre></div>
+
+<h3>2. Testar Conexão MySQL</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- teste-conexao.lua
+local MySQL = require('crescent.database.mysql')
+
+MySQL:test()</code></pre></div>
+
+<div class="code-block"><pre><code class="language-bash">luvit teste-conexao.lua</code></pre></div>
+
+<h3>3. Criar Primeira Migration</h3>
+
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli make:migration create_products_table</code></pre></div>
+
+<h3>4. Executar Migrations</h3>
+
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli migrate</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="primeiro-módulo" class="doc-section">
+                <h2>🎮 Primeiro Módulo</h2>
+                
+<p>Crie um módulo CRUD completo com um único comando:</p>
+
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli make:module Product</code></pre></div>
+
+<p>Isso cria:</p>
+<ul>
+<li>✅ Controller (<code>src/product/controllers/product.lua</code>)</li>
+<li>✅ Service (<code>src/product/services/product.lua</code>)</li>
+<li>✅ Model (<code>src/product/models/product.lua</code>)</li>
+<li>✅ Routes (<code>src/product/routes/product.lua</code>)</li>
+<li>✅ Module Init (<code>src/product/init.lua</code>)</li>
+</ul>
+
+<h3>Registrar Módulo no app.lua</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- app.lua
+local Crescent = require('crescent')
+local app = Crescent.create()
+
+-- Registra módulo Product
+local ProductModule = require("src.product")
+ProductModule.register(app)
+
+app:listen(8080, function()
+    print("✓ Servidor rodando em http://localhost:8080")
+end)</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="iniciando-o-servidor" class="doc-section">
+                <h2>🚀 Iniciando o Servidor</h2>
+                
+<h3>Modo Desenvolvimento</h3>
+
+<div class="code-block"><pre><code class="language-bash">luvit app.lua</code></pre></div>
+
+<p>Ou use o CLI:</p>
+
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli server</code></pre></div>
+
+<h3>Acessar API</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Listar produtos
+curl http://localhost:8080/product
+
+# Criar produto
+curl -X POST http://localhost:8080/product \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Notebook","price":2500}'
+
+# Buscar por ID
+curl http://localhost:8080/product/1
+
+# Atualizar
+curl -X PUT http://localhost:8080/product/1 \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Notebook Dell","price":2800}'
+
+# Deletar
+curl -X DELETE http://localhost:8080/product/1</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="executando-testes" class="doc-section">
+                <h2>🧪 Executando Testes</h2>
+                
+<div class="code-block"><pre><code class="language-bash"># Rodar todos os testes
+luvit crescent-cli test
+
+# Rodar teste específico
+luvit tests/test-users.lua</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="próximos-passos" class="doc-section">
+                <h2>📖 Próximos Passos</h2>
+                
+<p>Agora que você tem um projeto rodando, explore:</p>
+
+<ol>
+<li><strong><a href="/docs/cli">CLI</a></strong> - Aprenda todos os comandos disponíveis</li>
+<li><strong><a href="/docs/core-concepts">Core Concepts</a></strong> - Rotas, Controllers, Services</li>
+<li><strong><a href="/docs/database">Database & ORM</a></strong> - Modelos, relações, migrations</li>
+<li><strong><a href="/docs/utilities">Utilities</a></strong> - Testes, hash, helpers</li>
+<li><strong><a href="/docs/deployment">Deployment</a></strong> - Deploy em produção</li>
+</ol>
+
+<hr>
+
+            </section>
+
+            <section id="dicas-úteis" class="doc-section">
+                <h2>💡 Dicas Úteis</h2>
+                
+<h3>Hot Reload (Desenvolvimento)</h3>
+
+<p>Use <code>nodemon</code> ou <code>entr</code> para reload automático:</p>
+
+<div class="code-block"><pre><code class="language-bash"># Com entr
+find . -name "*.lua" | entr -r luvit app.lua</code></pre></div>
+
+<h3>Debug</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Use p() para debug (pretty-print)
+p(user)  -- Imprime tabela formatada
+p(ctx.body)</code></pre></div>
+
+<h3>Performance</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Use LuaJIT JIT compilation
+-- Já habilitado por padrão no Luvit</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="troubleshooting" class="doc-section">
+                <h2>🆘 Troubleshooting</h2>
+                
+<h3>Erro: "Module not found"</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Instale dependências
+lit install</code></pre></div>
+
+<h3>Erro: "MySQL connection failed"</h3>
+
+<ol>
+<li>Verifique se MySQL está rodando: <code>mysql.server status</code></li>
+<li>Teste credenciais: <code>mysql -u root -p</code></li>
+<li>Confira <code>.env</code>: <code>DB_HOST</code>, <code>DB_USER</code>, <code>DB_PASSWORD</code></li>
+</ol>
+
+<h3>Porta já em uso</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Mate processo na porta 8080
+lsof -ti:8080 | xargs kill -9
+
+# Ou mude a porta no .env
+PORT=3000</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="recursos-adicionais" class="doc-section">
+                <h2>📚 Recursos Adicionais</h2>
+                
+<ul>
+<li><a href="https://github.com/daniel-m-tfs/crescent-framework">GitHub Repository</a></li>
+<li><a href="https://github.com/daniel-m-tfs/crescent-starter">Starter Template</a></li>
+<li><a href="https://luvit.io/">Luvit Documentation</a></li>
+<li><a href="https://luvit.io/lit.html">Lit Package Manager</a></li>
+</ul>
+
+            </section>
+
+            <section id="rotas" class="doc-section">
                 <h2>🛣️ Rotas</h2>
                 
-                <p>O sistema de rotas do Crescent é simples e poderoso, permitindo definir endpoints HTTP facilmente.</p>
+<p>Rotas definem os endpoints da sua API e conectam URLs aos controllers.</p>
 
-                <h3>Definindo Rotas</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- src/users/routes/user.lua
-local UserController = require("src.users.controllers.user")
+<h3>Definindo Rotas Básicas</h3>
 
-return function(app)
-    -- GET /users
-    app:get("/users", UserController.index)
-    
-    -- GET /users/:id
-    app:get("/users/:id", UserController.show)
-    
-    -- POST /users
-    app:post("/users", UserController.create)
-    
-    -- PUT /users/:id
-    app:put("/users/:id", UserController.update)
-    
-    -- DELETE /users/:id
-    app:delete("/users/:id", UserController.delete)
-end</code></pre>
-                </div>
+<div class="code-block"><pre><code class="language-lua">-- app.lua
+local Crescent = require('crescent')
+local app = Crescent.create()
 
-                <h3>Parâmetros de Rota</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- Acesse parâmetros via ctx.params
-function UserController.show(ctx)
+-- GET
+app:get('/hello', function(ctx)
+    return ctx.json(200, { message = "Hello World" })
+end)
+
+-- POST
+app:post('/users', function(ctx)
+    local body = ctx.body
+    return ctx.json(201, body)
+end)
+
+-- PUT
+app:put('/users/{id}', function(ctx)
     local id = ctx.params.id
-    -- ...
-end</code></pre>
-                </div>
+    return ctx.json(200, { id = id })
+end)
 
-                <h3>Query Strings</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- GET /users?active=true&limit=10
-function UserController.index(ctx)
-    local active = ctx.query.active
-    local limit = ctx.query.limit
-    -- ...
-end</code></pre>
-                </div>
+-- DELETE
+app:delete('/users/{id}', function(ctx)
+    local id = ctx.params.id
+    return ctx.no_content()
+end)
 
-                <h3>Middleware em Rotas</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">local auth = require("crescent.middleware.auth")
+app:listen(8080)</code></pre></div>
 
-return function(app)
-    -- Rota protegida
-    app:get("/admin", auth.verify, AdminController.index)
-end</code></pre>
-                </div>
+<h3>Parâmetros de Rota</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Parâmetro único
+app:get('/users/{id}', function(ctx)
+    local id = ctx.params.id
+    return ctx.json(200, { userId = id })
+end)
+
+-- Múltiplos parâmetros
+app:get('/posts/{postId}/comments/{commentId}', function(ctx)
+    local postId = ctx.params.postId
+    local commentId = ctx.params.commentId
+    return ctx.json(200, { postId = postId, commentId = commentId })
+end)</code></pre></div>
+
+<h3>Query Parameters</h3>
+
+<div class="code-block"><pre><code class="language-lua">app:get('/search', function(ctx)
+    local query = ctx.query.q
+    local page = ctx.query.page or 1
+    local limit = ctx.query.limit or 10
+    
+    return ctx.json(200, {
+        query = query,
+        page = tonumber(page),
+        limit = tonumber(limit)
+    })
+end)
+
+-- GET /search?q=lua&amp;page=2&amp;limit=20</code></pre></div>
+
+<h3>Request Body</h3>
+
+<div class="code-block"><pre><code class="language-lua">app:post('/users', function(ctx)
+    local body = ctx.body
+    
+    -- Acessar campos
+    local name = body.name
+    local email = body.email
+    
+    return ctx.json(201, {
+        name = name,
+        email = email
+    })
+end)</code></pre></div>
+
+<h3>Organização em Arquivos</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- src/users/routes/users.lua
+local controller = require("src.users.controllers.users")
+
+return function(app, prefix)
+    prefix = prefix or "/users"
+    
+    app:get(prefix, function(ctx)
+        return controller:index(ctx)
+    end)
+    
+    app:get(prefix .. "/{id}", function(ctx)
+        return controller:show(ctx)
+    end)
+    
+    app:post(prefix, function(ctx)
+        return controller:create(ctx)
+    end)
+    
+    app:put(prefix .. "/{id}", function(ctx)
+        return controller:update(ctx)
+    end)
+    
+    app:delete(prefix .. "/{id}", function(ctx)
+        return controller:delete(ctx)
+    end)
+end</code></pre></div>
+
+<h3>Registrar Rotas no App</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- app.lua
+local userRoutes = require("src.users.routes.users")
+userRoutes(app, "/api/users")</code></pre></div>
+
+<hr>
+
             </section>
 
-            <!-- Controllers -->
             <section id="controllers" class="doc-section">
                 <h2>🎮 Controllers</h2>
                 
-                <p>Controllers são responsáveis por receber requisições HTTP e retornar respostas. Eles orquestram a lógica de negócio através dos Services.</p>
+<p>Controllers recebem requisições HTTP e retornam respostas. Devem ser finos e delegar lógica para services.</p>
 
-                <h3>Criando um Controller</h3>
-                <div class="code-block">
-                    <pre><code class="language-bash">luvit crescent-cli.lua make:controller User</code></pre>
-                </div>
+<h3>Estrutura Básica</h3>
 
-                <h3>Estrutura de um Controller</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- src/users/controllers/user.lua
-local UserService = require("src.users.services.user")
+<div class="code-block"><pre><code class="language-lua">-- src/users/controllers/users.lua
+local service = require("src.users.services.users")
+local UsersController = {}
 
-local UserController = {}
-
--- GET /users
-function UserController.index(ctx)
-    local users = UserService.findAll()
-    return ctx.json({ users = users })
+function UsersController:index(ctx)
+    local users = service:getAll()
+    return ctx.json(200, users)
 end
 
--- GET /users/:id
-function UserController.show(ctx)
+function UsersController:show(ctx)
     local id = ctx.params.id
-    local user = UserService.findById(id)
+    local user = service:getById(id)
     
-    if not user then
-        return ctx.status(404).json({ error = "Usuário não encontrado" })
+    if user then
+        return ctx.json(200, user)
     end
     
-    return ctx.json({ user = user })
+    return ctx.json(404, { error = "User not found" })
 end
 
--- POST /users
-function UserController.create(ctx)
-    local data = ctx.body
-    local user, err = UserService.create(data)
+function UsersController:create(ctx)
+    local body = ctx.body or {}
     
-    if err then
-        return ctx.status(400).json({ error = err })
+    -- Validação básica
+    if not body.name or not body.email then
+        return ctx.json(400, { error = "Name and email are required" })
     end
     
-    return ctx.status(201).json({ user = user })
+    local user = service:create(body)
+    return ctx.json(201, user)
 end
 
--- PUT /users/:id
-function UserController.update(ctx)
+function UsersController:update(ctx)
     local id = ctx.params.id
-    local data = ctx.body
+    local body = ctx.body or {}
     
-    local user, err = UserService.update(id, data)
+    local user = service:update(id, body)
     
-    if err then
-        return ctx.status(400).json({ error = err })
+    if user then
+        return ctx.json(200, user)
     end
     
-    return ctx.json({ user = user })
+    return ctx.json(404, { error = "User not found" })
 end
 
--- DELETE /users/:id
-function UserController.delete(ctx)
+function UsersController:delete(ctx)
     local id = ctx.params.id
-    local success = UserService.delete(id)
+    local success = service:delete(id)
+    
+    if success then
+        return ctx.no_content()
+    end
+    
+    return ctx.json(404, { error = "User not found" })
+end
+
+return UsersController</code></pre></div>
+
+<h3>Context Object (ctx)</h3>
+
+<p>O objeto <code>ctx</code> contém toda informação da requisição:</p>
+
+<div class="code-block"><pre><code class="language-lua">function Controller:example(ctx)
+    -- Parâmetros de rota
+    local id = ctx.params.id
+    
+    -- Query parameters
+    local page = ctx.query.page
+    
+    -- Request body
+    local body = ctx.body
+    
+    -- Headers
+    local auth = ctx.headers['authorization']
+    
+    -- Method
+    local method = ctx.method  -- GET, POST, etc
+    
+    -- Path
+    local path = ctx.path  -- /users/123
+    
+    -- Response helpers
+    return ctx.json(200, data)
+    return ctx.text(200, "Hello")
+    return ctx.html(200, "&lt;h1&gt;Hello&lt;/h1&gt;")
+    return ctx.no_content()  -- 204
+    return ctx.redirect(302, "/new-url")
+end</code></pre></div>
+
+<h3>Validação no Controller</h3>
+
+<div class="code-block"><pre><code class="language-lua">function UsersController:create(ctx)
+    local body = ctx.body or {}
+    
+    -- Validação manual
+    local errors = {}
+    
+    if not body.name or body.name == "" then
+        table.insert(errors, "Name is required")
+    end
+    
+    if not body.email or not string.match(body.email, ".+@.+%.%w+") then
+        table.insert(errors, "Valid email is required")
+    end
+    
+    if #errors &gt; 0 then
+        return ctx.json(422, { errors = errors })
+    end
+    
+    -- Criar usuário
+    local user = service:create(body)
+    return ctx.json(201, user)
+end</code></pre></div>
+
+<h3>Error Handling</h3>
+
+<div class="code-block"><pre><code class="language-lua">function UsersController:create(ctx)
+    local success, result = pcall(function()
+        return service:create(ctx.body)
+    end)
     
     if not success then
-        return ctx.status(404).json({ error = "Usuário não encontrado" })
+        -- Log error
+        print("Error creating user:", result)
+        
+        return ctx.json(500, {
+            error = "Internal server error",
+            message = result
+        })
     end
     
-    return ctx.status(204).send()
-end
+    return ctx.json(201, result)
+end</code></pre></div>
 
-return UserController</code></pre>
-                </div>
+<hr>
 
-                <h3>Métodos de Resposta</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- JSON response
-ctx.json({ data = "valor" })
-
--- Status code
-ctx.status(404)
-
--- Text response
-ctx.send("Hello World")
-
--- Headers
-ctx.header("Content-Type", "application/json")
-
--- Redirect
-ctx.redirect("/login")</code></pre>
-                </div>
             </section>
 
-            <!-- Services -->
             <section id="services" class="doc-section">
                 <h2>⚙️ Services</h2>
                 
-                <p>Services contêm a lógica de negócio da aplicação. Eles são responsáveis por processar dados, validar regras e interagir com Models.</p>
+<p>Services contêm a lógica de negócio da aplicação. Devem ser independentes de HTTP.</p>
 
-                <h3>Criando um Service</h3>
-                <div class="code-block">
-                    <pre><code class="language-bash">luvit crescent-cli.lua make:service User</code></pre>
-                </div>
+<h3>Estrutura Básica</h3>
 
-                <h3>Estrutura de um Service</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- src/users/services/user.lua
+<div class="code-block"><pre><code class="language-lua">-- src/users/services/users.lua
+local UsersService = {}
 local User = require("src.users.models.user")
 
-local UserService = {}
-
-function UserService.findAll()
+function UsersService:getAll()
     return User:all()
 end
 
-function UserService.findById(id)
+function UsersService:getById(id)
     return User:find(id)
 end
 
-function UserService.create(data)
-    -- Validação de negócio
-    if not data.email or data.email == "" then
-        return nil, "Email é obrigatório"
+function UsersService:create(data)
+    -- Validação adicional
+    if not data.name or #data.name &lt; 3 then
+        error("Name must be at least 3 characters")
     end
     
-    -- Verifica se email já existe
-    local existing = User:where("email", data.email):first()
-    if existing then
-        return nil, "Email já cadastrado"
-    end
-    
-    -- Cria usuário
-    local user = User:create(data)
-    return user
+    return User:create(data)
 end
 
-function UserService.update(id, data)
+function UsersService:update(id, data)
     local user = User:find(id)
+    
     if not user then
-        return nil, "Usuário não encontrado"
+        return nil
     end
     
     user:update(data)
     return user
 end
 
-function UserService.delete(id)
+function UsersService:delete(id)
     local user = User:find(id)
+    
     if not user then
         return false
     end
@@ -491,675 +948,3230 @@ function UserService.delete(id)
     return true
 end
 
-return UserService</code></pre>
-                </div>
+return UsersService</code></pre></div>
 
-                <div class="info-box">
-                    <strong>💡 Melhor Prática:</strong> Mantenha Controllers magros e Services gordos. A lógica de negócio deve estar nos Services, não nos Controllers.
-                </div>
+<h3>Lógica de Negócio Complexa</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- src/orders/services/orders.lua
+local OrdersService = {}
+local Order = require("src.orders.models.order")
+local Product = require("src.products.models.product")
+local User = require("src.users.models.user")
+
+function OrdersService:createOrder(userId, items)
+    -- Validar usuário
+    local user = User:find(userId)
+    if not user then
+        error("User not found")
+    end
+    
+    -- Validar produtos e calcular total
+    local total = 0
+    local validatedItems = {}
+    
+    for _, item in ipairs(items) do
+        local product = Product:find(item.productId)
+        
+        if not product then
+            error("Product " .. item.productId .. " not found")
+        end
+        
+        if product.stock &lt; item.quantity then
+            error("Insufficient stock for " .. product.name)
+        end
+        
+        local subtotal = product.price * item.quantity
+        total = total + subtotal
+        
+        table.insert(validatedItems, {
+            product_id = product.id,
+            quantity = item.quantity,
+            price = product.price,
+            subtotal = subtotal
+        })
+    end
+    
+    -- Criar pedido
+    local order = Order:create({
+        user_id = userId,
+        total = total,
+        status = "pending"
+    })
+    
+    -- Adicionar itens ao pedido
+    for _, item in ipairs(validatedItems) do
+        order:addItem(item)
+        
+        -- Atualizar estoque
+        local product = Product:find(item.product_id)
+        product:update({
+            stock = product.stock - item.quantity
+        })
+    end
+    
+    return order
+end
+
+function OrdersService:cancelOrder(orderId)
+    local order = Order:find(orderId)
+    
+    if not order then
+        error("Order not found")
+    end
+    
+    if order.status ~= "pending" then
+        error("Only pending orders can be cancelled")
+    end
+    
+    -- Devolver produtos ao estoque
+    local items = order:items()
+    
+    for _, item in ipairs(items) do
+        local product = Product:find(item.product_id)
+        product:update({
+            stock = product.stock + item.quantity
+        })
+    end
+    
+    -- Atualizar status
+    order:update({ status = "cancelled" })
+    
+    return order
+end
+
+return OrdersService</code></pre></div>
+
+<h3>Services com Transações</h3>
+
+<div class="code-block"><pre><code class="language-lua">function OrdersService:processPayment(orderId, paymentData)
+    local db = require('crescent.database.mysql')
+    
+    -- Iniciar transação
+    db:query("START TRANSACTION")
+    
+    local success, err = pcall(function()
+        local order = Order:find(orderId)
+        
+        if not order then
+            error("Order not found")
+        end
+        
+        -- Processar pagamento (API externa)
+        local paymentResult = PaymentGateway:charge(paymentData)
+        
+        if not paymentResult.success then
+            error("Payment failed: " .. paymentResult.error)
+        end
+        
+        -- Atualizar pedido
+        order:update({
+            status = "paid",
+            payment_id = paymentResult.id
+        })
+        
+        -- Enviar email de confirmação
+        EmailService:sendOrderConfirmation(order)
+    end)
+    
+    if success then
+        db:query("COMMIT")
+        return true
+    else
+        db:query("ROLLBACK")
+        error(err)
+    end
+end</code></pre></div>
+
+<hr>
+
             </section>
 
-            <!-- Models -->
-            <section id="models" class="doc-section">
-                <h2>💾 Models</h2>
+            <section id="models-básico" class="doc-section">
+                <h2>💾 Models (Básico)</h2>
                 
-                <p>Models representam as entidades do banco de dados e herdam do ORM ActiveRecord.</p>
+<p>Models representam dados e interagem com o banco via ORM ActiveRecord.</p>
 
-                <h3>Criando um Model</h3>
-                <div class="code-block">
-                    <pre><code class="language-bash">luvit crescent-cli.lua make:model User</code></pre>
-                </div>
+<h3>Definição Básica</h3>
 
-                <h3>Estrutura de um Model</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- src/users/models/user.lua
+<div class="code-block"><pre><code class="language-lua">-- src/users/models/user.lua
 local Model = require("crescent.database.model")
 
 local User = Model:extend({
     table = "users",
+    primary_key = "id",
+    timestamps = true,
     
-    -- Campos que podem ser preenchidos em massa
     fillable = {
         "name",
         "email",
         "password"
     },
     
-    -- Campos ocultos (não aparecem em toTable())
     hidden = {
         "password"
     },
     
-    -- Validações
-    validations = {
-        name = { "required", "min_length:3" },
-        email = { "required", "email", "unique:users,email" },
-        password = { "required", "min_length:6" }
+    validates = {
+        name = { required = true, min = 3, max = 100 },
+        email = { required = true, email = true, unique = true },
+        password = { required = true, min = 6 }
+    }
+})
+
+return User</code></pre></div>
+
+<h3>Operações CRUD</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- CREATE
+local user = User:create({
+    name = "John Doe",
+    email = "john@example.com",
+    password = "hashed_password"
+})
+
+-- READ
+local user = User:find(1)
+local users = User:all()
+local user = User:where({email = "john@example.com"}):first()
+
+-- UPDATE
+user:update({name = "Jane Doe"})
+
+-- DELETE
+user:delete()</code></pre></div>
+
+<p>Para mais detalhes sobre Models, veja <a href="/docs/database">Database & ORM</a>.</p>
+
+<hr>
+
+            </section>
+
+            <section id="middleware" class="doc-section">
+                <h2>🔒 Middleware</h2>
+                
+<p>Middleware processa requisições antes que cheguem aos controllers.</p>
+
+<h3>Middleware de Autenticação</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- crescent/middleware/auth.lua
+local Auth = {}
+
+function Auth.middleware(ctx, next)
+    local token = ctx.headers['authorization']
+    
+    if not token then
+        return ctx.json(401, { error = "No token provided" })
+    end
+    
+    -- Validar token
+    local user = validateToken(token)
+    
+    if not user then
+        return ctx.json(401, { error = "Invalid token" })
+    end
+    
+    -- Adicionar usuário ao contexto
+    ctx.user = user
+    
+    -- Continuar para próximo middleware/controller
+    return next()
+end
+
+return Auth</code></pre></div>
+
+<h3>Aplicar Middleware</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- app.lua
+local auth = require('crescent.middleware.auth')
+
+-- Global (todas as rotas)
+app:use(auth.middleware)
+
+-- Específico para rota
+app:get('/protected', auth.middleware, function(ctx)
+    return ctx.json(200, { user = ctx.user })
+end)</code></pre></div>
+
+<h3>Middleware de Logging</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- crescent/middleware/logger.lua
+local Logger = {}
+
+function Logger.middleware(ctx, next)
+    local start = os.clock()
+    
+    -- Log request
+    print(string.format("[%s] %s %s", os.date(), ctx.method, ctx.path))
+    
+    -- Executar próximo
+    local response = next()
+    
+    -- Log response time
+    local duration = (os.clock() - start) * 1000
+    print(string.format("  → %d (%dms)", response.status or 200, duration))
+    
+    return response
+end
+
+return Logger</code></pre></div>
+
+<h3>Middleware CORS</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- crescent/middleware/cors.lua
+local CORS = {}
+
+function CORS.middleware(ctx, next)
+    -- Adicionar headers CORS
+    ctx.headers['Access-Control-Allow-Origin'] = '*'
+    ctx.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    ctx.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    
+    -- Handle preflight
+    if ctx.method == 'OPTIONS' then
+        return ctx.no_content()
+    end
+    
+    return next()
+end
+
+return CORS</code></pre></div>
+
+<h3>Ordem dos Middlewares</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- app.lua
+local cors = require('crescent.middleware.cors')
+local logger = require('crescent.middleware.logger')
+local auth = require('crescent.middleware.auth')
+
+-- Ordem importa!
+app:use(cors.middleware)      -- 1. CORS primeiro
+app:use(logger.middleware)    -- 2. Logging
+app:use(auth.middleware)      -- 3. Auth por último
+
+-- Rotas
+app:get('/api/users', usersController.index)</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="módulos" class="doc-section">
+                <h2>🏗️ Módulos</h2>
+                
+<p>Módulos agrupam funcionalidades relacionadas (controllers, services, models, routes).</p>
+
+<h3>Estrutura de Módulo</h3>
+
+<div class="code-block"><pre><code class="language-">src/users/
+├── init.lua                 # Registrador do módulo
+├── controllers/
+│   └── users.lua
+├── services/
+│   └── users.lua
+├── models/
+│   └── user.lua
+└── routes/
+    └── users.lua</code></pre></div>
+
+<h3>Module Init</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- src/users/init.lua
+local Module = {}
+
+function Module.register(app)
+    -- Registrar rotas
+    local routes = require("src.users.routes.users")
+    routes(app, "/api/users")
+    
+    print("✓ Módulo Users carregado")
+end
+
+return Module</code></pre></div>
+
+<h3>Registrar no App</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- app.lua
+local Crescent = require('crescent')
+local app = Crescent.create()
+
+-- Registrar módulos
+local UsersModule = require("src.users")
+local ProductsModule = require("src.products")
+
+UsersModule.register(app)
+ProductsModule.register(app)
+
+app:listen(8080)</code></pre></div>
+
+<h3>Gerar Módulo via CLI</h3>
+
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli make:module Product</code></pre></div>
+
+<p>Cria toda a estrutura automaticamente!</p>
+
+<hr>
+
+            </section>
+
+            <section id="fluxo-de-requisição" class="doc-section">
+                <h2>📊 Fluxo de Requisição</h2>
+                
+<div class="code-block"><pre><code class="language-">Cliente HTTP
+    ↓
+[Middleware CORS]
+    ↓
+[Middleware Logger]
+    ↓
+[Middleware Auth]
+    ↓
+[Router] → Encontra rota
+    ↓
+[Controller] → Recebe requisição
+    ↓
+[Service] → Lógica de negócio
+    ↓
+[Model/ORM] → Banco de dados
+    ↓
+[Service] ← Retorna dados
+    ↓
+[Controller] ← Formata resposta
+    ↓
+Cliente HTTP ← JSON response</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="boas-práticas" class="doc-section">
+                <h2>💡 Boas Práticas</h2>
+                
+<h3>Controllers</h3>
+
+<ul>
+<li>✅ Mantenha finos (thin controllers)</li>
+<li>✅ Delegue lógica para services</li>
+<li>✅ Valide entrada básica</li>
+<li>✅ Trate erros com try/catch (pcall)</li>
+<li>✅ Retorne status codes apropriados</li>
+</ul>
+
+<h3>Services</h3>
+
+<ul>
+<li>✅ Lógica de negócio aqui</li>
+<li>✅ Independente de HTTP</li>
+<li>✅ Reutilizável entre controllers</li>
+<li>✅ Use transações quando necessário</li>
+<li>✅ Valide regras de negócio</li>
+</ul>
+
+<h3>Rotas</h3>
+
+<ul>
+<li>✅ Use padrões RESTful</li>
+<li>✅ Agrupe por prefixo (<code>/api/v1</code>)</li>
+<li>✅ Organize em arquivos separados</li>
+<li>✅ Use nomes descritivos</li>
+</ul>
+
+<h3>Middleware</h3>
+
+<ul>
+<li>✅ Ordem importa</li>
+<li>✅ CORS primeiro</li>
+<li>✅ Auth/validação depois</li>
+<li>✅ Use <code>next()</code> para continuar</li>
+</ul>
+
+<hr>
+
+            </section>
+
+            <section id="testando-componentes" class="doc-section">
+                <h2>🧪 Testando Componentes</h2>
+                
+<div class="code-block"><pre><code class="language-lua">-- tests/test-users.lua
+local tests = require('crescent.utils.tests')
+local UsersService = require('src.users.services.users')
+
+local userTests = {
+    testCreate = function()
+        local user = UsersService:create({
+            name = "Test User",
+            email = "test@example.com"
+        })
+        
+        tests.assertNotNil(user)
+        tests.assertEquals(user.name, "Test User")
+    end,
+    
+    testValidation = function()
+        tests.assertError(function()
+            UsersService:create({ name = "AB" })  -- Too short
+        end, "at least 3 characters")
+    end
+}
+
+tests.runSuite("Users Service Tests", userTests)</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="próximas-seções" class="doc-section">
+                <h2>📖 Próximas Seções</h2>
+                
+<ul>
+<li><strong><a href="/docs/database">Database & ORM</a></strong> - Models em detalhes</li>
+<li><strong><a href="/docs/utilities">Utilities</a></strong> - Testes e helpers</li>
+<li><strong><a href="/docs/cli">CLI</a></strong> - Geradores de código</li>
+</ul>
+
+            </section>
+
+            <section id="configuração-do-banco" class="doc-section">
+                <h2>🚀 Configuração do Banco</h2>
+                
+<h3>.env</h3>
+
+<div class="code-block"><pre><code class="language-bash">DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=meu_banco
+DB_USER=root
+DB_PASSWORD=senha123</code></pre></div>
+
+<h3>Testar Conexão</h3>
+
+<div class="code-block"><pre><code class="language-lua">local MySQL = require('crescent.database.mysql')
+MySQL:test()</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="models-orm-activerecord" class="doc-section">
+                <h2>💾 Models (ORM ActiveRecord)</h2>
+                
+<h3>Definição Completa</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- src/products/models/product.lua
+local Model = require("crescent.database.model")
+
+local Product = Model:extend({
+    -- Nome da tabela
+    table = "products",
+    
+    -- Chave primária (padrão: "id")
+    primary_key = "id",
+    
+    -- Timestamps automáticos (created_at, updated_at)
+    timestamps = true,
+    
+    -- Soft deletes (deleted_at)
+    soft_deletes = false,
+    
+    -- Campos que podem ser preenchidos em massa
+    fillable = {
+        "name",
+        "description",
+        "price",
+        "stock",
+        "category_id"
     },
     
-    -- Timestamps automáticos
-    timestamps = true
+    -- Campos escondidos em JSON (não serializar)
+    hidden = {
+        "deleted_at"
+    },
+    
+    -- Campos protegidos (nunca preenchidos em massa)
+    guarded = {
+        "id",
+        "created_at",
+        "updated_at"
+    },
+    
+    -- Validações
+    validates = {
+        name = {
+            required = true,
+            min = 3,
+            max = 255,
+            unique = true
+        },
+        price = {
+            required = true,
+            numeric = true,
+            min = 0
+        },
+        stock = {
+            numeric = true,
+            min = 0
+        },
+        category_id = {
+            exists = {table = "categories", column = "id"}
+        }
+    },
+    
+    -- Relações
+    relations = {
+        category = {
+            type = "belongsTo",
+            model = "Category",
+            foreign_key = "category_id"
+        },
+        orders = {
+            type = "hasMany",
+            model = "OrderItem",
+            foreign_key = "product_id"
+        }
+    }
 })
 
-return User</code></pre>
-                </div>
+-- Métodos personalizados
+function Product:isLowStock()
+    return self.stock &lt; 10
+end
+
+function Product:applyDiscount(percentage)
+    self.price = self.price * (1 - percentage / 100)
+    self:save()
+end
+
+return Product</code></pre></div>
+
+<hr>
+
             </section>
 
-            <!-- ORM -->
-            <section id="orm" class="doc-section">
-                <h2>🗄️ ORM ActiveRecord</h2>
+            <section id="crud-operations" class="doc-section">
+                <h2>📝 CRUD Operations</h2>
                 
-                <p>O Crescent inclui um ORM ActiveRecord completo inspirado no Laravel Eloquent.</p>
+<h3>CREATE</h3>
 
-                <h3>Operações Básicas</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- Buscar todos
-local users = User:all()
+<div class="code-block"><pre><code class="language-lua">local Product = require('src.products.models.product')
 
--- Buscar por ID
-local user = User:find(1)
-
--- Criar
-local user = User:create({
-    name = "João",
-    email = "joao@example.com"
+-- Método 1: create()
+local product = Product:create({
+    name = "Notebook Dell",
+    price = 2500,
+    stock = 10
 })
 
--- Atualizar
-user:update({ name = "João Silva" })
+-- Método 2: new() + save()
+local product = Product:new({
+    name = "Mouse Logitech",
+    price = 50
+})
+product:save()</code></pre></div>
 
--- Deletar
-user:delete()
+<h3>READ</h3>
 
--- Salvar (insert ou update)
-user.name = "Novo Nome"
-user:save()</code></pre>
-                </div>
+<div class="code-block"><pre><code class="language-lua">-- Buscar por ID
+local product = Product:find(1)
 
-                <h3>Query Builder</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- WHERE
-User:where("active", true):all()
+-- Todos os registros
+local products = Product:all()
 
--- WHERE com operadores
-User:where("age", ">", 18):all()
-
--- ORDER BY
-User:orderBy("created_at", "desc"):all()
-
--- LIMIT
-User:limit(10):all()
-
--- SELECT específico
-User:select("id", "name", "email"):all()
+-- Com condições
+local products = Product:where({category_id = 5}):get()
 
 -- Primeiro resultado
-local user = User:where("email", "test@example.com"):first()
+local product = Product:where({name = "Notebook"}):first()
 
--- Contar
-local count = User:where("active", true):count()</code></pre>
-                </div>
+-- Ordenar
+local products = Product:orderBy('price', 'DESC'):get()
 
-                <h3>Timestamps Automáticos</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- Com timestamps = true, o ORM gerencia automaticamente:
--- created_at - definido no insert
--- updated_at - atualizado a cada save/update</code></pre>
-                </div>
-            </section>
+-- Limitar
+local products = Product:limit(10):get()
 
-            <!-- Validações -->
-            <section id="validations" class="doc-section">
-                <h2>✅ Validações</h2>
-                
-                <p>O ORM inclui sistema de validação integrado.</p>
+-- Paginação
+local products = Product:paginate(10, 1)  -- 10 por página, página 1</code></pre></div>
 
-                <h3>Validações Disponíveis</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">validations = {
-    -- Campo obrigatório
-    name = { "required" },
-    
-    -- Tamanho mínimo
-    password = { "min_length:6" },
-    
-    -- Tamanho máximo
-    bio = { "max_length:500" },
-    
-    -- Email válido
-    email = { "email" },
-    
-    -- Valor único no banco
-    email = { "unique:users,email" },
-    
-    -- Múltiplas validações
-    name = { "required", "min_length:3", "max_length:100" }
-}</code></pre>
-                </div>
+<h3>UPDATE</h3>
 
-                <h3>Validação Manual</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">local user = User:new({ name = "A" })
-local valid, errors = user:validate()
-
-if not valid then
-    for field, error in pairs(errors) do
-        print(field .. ": " .. error)
-    end
-end</code></pre>
-                </div>
-            </section>
-
-            <!-- Relações -->
-            <section id="relations" class="doc-section">
-                <h2>🔗 Relações</h2>
-                
-                <p>Defina relações entre models facilmente.</p>
-
-                <h3>Has Many</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- User tem muitos Posts
-local User = Model:extend({
-    table = "users"
+<div class="code-block"><pre><code class="language-lua">-- Método 1: Buscar e atualizar
+local product = Product:find(1)
+product:update({
+    price = 2300,
+    stock = 15
 })
 
-function User:posts()
-    return self:hasMany(Post, "user_id")
-end
+-- Método 2: Modificar e salvar
+local product = Product:find(1)
+product.price = 2300
+product:save()
+
+-- Método 3: Update direto
+Product:where({id = 1}):update({price = 2300})</code></pre></div>
+
+<h3>DELETE</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Soft delete (se soft_deletes = true)
+local product = Product:find(1)
+product:delete()
+
+-- Hard delete (força remoção permanente)
+product:forceDelete()
+
+-- Delete direto por condição
+Product:where({stock = 0}):delete()</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="query-builder" class="doc-section">
+                <h2>🔍 Query Builder</h2>
+                
+<h3>Condições WHERE</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Igualdade simples
+Product:where({category_id = 5}):get()
+
+-- Múltiplas condições (AND)
+Product:where({
+    category_id = 5,
+    stock = {"&gt;", 10}
+}):get()
+
+-- Operadores
+Product:where({price = {"&gt;", 1000}}):get()
+Product:where({stock = {"&lt;=", 5}}):get()
+Product:where({name = {"LIKE", "%Dell%"}}):get()
+
+-- WHERE IN
+Product:whereIn('category_id', {1, 2, 3}):get()
+
+-- WHERE BETWEEN
+Product:whereBetween('price', 1000, 5000):get()
+
+-- WHERE NULL
+Product:whereNull('deleted_at'):get()
+Product:whereNotNull('discount'):get()</code></pre></div>
+
+<h3>OR Conditions</h3>
+
+<div class="code-block"><pre><code class="language-lua">Product:where({category_id = 5})
+       :orWhere({category_id = 10})
+       :get()</code></pre></div>
+
+<h3>Ordenação</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- ASC
+Product:orderBy('name'):get()
+Product:orderBy('name', 'ASC'):get()
+
+-- DESC
+Product:orderBy('price', 'DESC'):get()
+
+-- Múltiplas ordenações
+Product:orderBy('category_id')
+       :orderBy('price', 'DESC')
+       :get()</code></pre></div>
+
+<h3>Limit e Offset</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- LIMIT
+Product:limit(10):get()
+
+-- OFFSET
+Product:offset(20):limit(10):get()
+
+-- Paginação
+Product:paginate(20, 2)  -- 20 por página, página 2</code></pre></div>
+
+<h3>Select</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Selecionar campos específicos
+Product:select('id', 'name', 'price'):get()
+
+-- Com alias
+Product:select('id', 'name', 'price as valor'):get()</code></pre></div>
+
+<h3>Joins</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- INNER JOIN
+Product:join('categories', 'products.category_id', 'categories.id')
+       :select('products.*', 'categories.name as category_name')
+       :get()
+
+-- LEFT JOIN
+Product:leftJoin('categories', 'products.category_id', 'categories.id'):get()</code></pre></div>
+
+<h3>Agrupamento</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- GROUP BY
+Product:select('category_id', 'COUNT(*) as total')
+       :groupBy('category_id')
+       :get()
+
+-- HAVING
+Product:select('category_id', 'AVG(price) as avg_price')
+       :groupBy('category_id')
+       :having('avg_price', '&gt;', 1000)
+       :get()</code></pre></div>
+
+<h3>Agregações</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- COUNT
+local total = Product:count()
+local inStock = Product:where({stock = {"&gt;", 0}}):count()
+
+-- SUM
+local totalValue = Product:sum('price')
+
+-- AVG
+local avgPrice = Product:avg('price')
+
+-- MIN / MAX
+local minPrice = Product:min('price')
+local maxPrice = Product:max('price')</code></pre></div>
+
+<h3>Raw Queries</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- SELECT raw
+local products = Product:raw([[
+    SELECT * FROM products 
+    WHERE price &gt; ? AND stock &gt; ?
+]], {1000, 0})
+
+-- INSERT raw
+Product:raw([[
+    INSERT INTO products (name, price) 
+    VALUES (?, ?)
+]], {"Teclado", 150})
+
+-- Com bindings para segurança (evita SQL injection)
+local search = ctx.query.search
+local products = Product:raw([[
+    SELECT * FROM products 
+    WHERE name LIKE ?
+]], {"%" .. search .. "%"})</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="validações" class="doc-section">
+                <h2>✅ Validações</h2>
+                
+<h3>Validações Disponíveis</h3>
+
+<div class="code-block"><pre><code class="language-lua">validates = {
+    -- Obrigatório
+    name = { required = true },
+    
+    -- Tamanho string
+    name = { min = 3, max = 255 },
+    
+    -- Numérico
+    price = { numeric = true },
+    
+    -- Range numérico
+    stock = { min = 0, max = 9999 },
+    
+    -- Email
+    email = { email = true },
+    
+    -- Único na tabela
+    email = { unique = true },
+    
+    -- Existe em outra tabela
+    category_id = {
+        exists = {
+            table = "categories",
+            column = "id"
+        }
+    },
+    
+    -- Regex customizado
+    phone = { pattern = "^%d%d%d%-%d%d%d%d$" },
+    
+    -- Valores permitidos
+    status = { in_array = {"pending", "paid", "shipped"} }
+}</code></pre></div>
+
+<h3>Validação Manual</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- No Model
+function Product:validate()
+    local errors = {}
+    
+    if not self.name or #self.name &lt; 3 then
+        table.insert(errors, "Name must be at least 3 characters")
+    end
+    
+    if self.price and self.price &lt; 0 then
+        table.insert(errors, "Price cannot be negative")
+    end
+    
+    if #errors &gt; 0 then
+        error(table.concat(errors, ", "))
+    end
+    
+    return true
+end</code></pre></div>
+
+<h3>Validação no Service</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- src/products/services/products.lua
+function ProductService:create(data)
+    -- Validação customizada
+    if not data.price or data.price &lt;= 0 then
+        error("Invalid price")
+    end
+    
+    if data.stock and data.stock &lt; 0 then
+        error("Stock cannot be negative")
+    end
+    
+    -- ORM faz validações do Model automaticamente
+    return Product:create(data)
+end</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="relações" class="doc-section">
+                <h2>🔗 Relações</h2>
+                
+<h3>BelongsTo (N:1)</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Product pertence a Category
+local Product = Model:extend({
+    table = "products",
+    
+    relations = {
+        category = {
+            type = "belongsTo",
+            model = "Category",
+            foreign_key = "category_id"
+        }
+    }
+})
+
+-- Uso
+local product = Product:find(1)
+local category = product:category()  -- Busca a categoria
+
+print(category.name)</code></pre></div>
+
+<h3>HasMany (1:N)</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Category tem muitos Products
+local Category = Model:extend({
+    table = "categories",
+    
+    relations = {
+        products = {
+            type = "hasMany",
+            model = "Product",
+            foreign_key = "category_id"
+        }
+    }
+})
+
+-- Uso
+local category = Category:find(1)
+local products = category:products()  -- Array de produtos
+
+for _, product in ipairs(products) do
+    print(product.name)
+end</code></pre></div>
+
+<h3>HasOne (1:1)</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- User tem um Profile
+local User = Model:extend({
+    table = "users",
+    
+    relations = {
+        profile = {
+            type = "hasOne",
+            model = "Profile",
+            foreign_key = "user_id"
+        }
+    }
+})
 
 -- Uso
 local user = User:find(1)
-local posts = user:posts()</code></pre>
-                </div>
+local profile = user:profile()
 
-                <h3>Belongs To</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- Post pertence a um User
-local Post = Model:extend({
-    table = "posts"
+print(profile.bio)</code></pre></div>
+
+<h3>BelongsToMany (N:N)</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Product pertence a muitos Tags (via pivot)
+local Product = Model:extend({
+    table = "products",
+    
+    relations = {
+        tags = {
+            type = "belongsToMany",
+            model = "Tag",
+            pivot_table = "product_tags",
+            foreign_key = "product_id",
+            related_key = "tag_id"
+        }
+    }
 })
 
-function Post:user()
-    return self:belongsTo(User, "user_id")
+-- Uso
+local product = Product:find(1)
+local tags = product:tags()
+
+for _, tag in ipairs(tags) do
+    print(tag.name)
+end</code></pre></div>
+
+<h3>Eager Loading</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- N+1 Problem (ruim)
+local products = Product:all()
+for _, product in ipairs(products) do
+    local category = product:category()  -- Query por produto!
 end
 
--- Uso
-local post = Post:find(1)
-local user = post:user()</code></pre>
-                </div>
+-- Eager Loading (bom)
+local products = Product:with('category'):get()
+for _, product in ipairs(products) do
+    print(product.category.name)  -- Já carregado!
+end
 
-                <h3>Has One</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- User tem um Profile
-function User:profile()
-    return self:hasOne(Profile, "user_id")
-end</code></pre>
-                </div>
+-- Múltiplas relações
+local products = Product:with('category', 'tags'):get()</code></pre></div>
+
+<hr>
+
             </section>
 
-            <!-- CLI -->
-            <section id="cli" class="doc-section">
-                <h2>🔨 CLI - Command Line Interface</h2>
-                
-                <p>O Crescent CLI é uma ferramenta poderosa para gerar código e gerenciar seu projeto.</p>
-
-                <h3>Comandos Disponíveis</h3>
-                <div class="code-block">
-                    <pre><code class="language-bash"># Ver todos os comandos
-luvit crescent-cli.lua
-
-# Criar controller
-luvit crescent-cli.lua make:controller User
-
-# Criar service
-luvit crescent-cli.lua make:service User
-
-# Criar model
-luvit crescent-cli.lua make:model User
-
-# Criar rotas
-luvit crescent-cli.lua make:routes User
-
-# Criar módulo completo (Controller + Service + Model + Routes)
-luvit crescent-cli.lua make:module User
-
-# Criar migration
-luvit crescent-cli.lua make:migration create_users_table</code></pre>
-                </div>
-            </section>
-
-            <!-- CLI Make -->
-            <section id="cli-make" class="doc-section">
-                <h2>🎨 Geradores de Código</h2>
-                
-                <h3>Make Module</h3>
-                <p>Gera um módulo completo com CRUD:</p>
-                <div class="code-block">
-                    <pre><code class="language-bash">luvit crescent-cli.lua make:module Product</code></pre>
-                </div>
-                <p>Cria automaticamente:</p>
-                <ul>
-                    <li>Controller com métodos index, show, create, update, delete</li>
-                    <li>Service com lógica de negócio</li>
-                    <li>Model com configuração básica</li>
-                    <li>Routes com endpoints REST</li>
-                </ul>
-
-                <h3>Make Controller</h3>
-                <div class="code-block">
-                    <pre><code class="language-bash"># Controller em módulo padrão
-luvit crescent-cli.lua make:controller Product
-
-# Controller em módulo específico
-luvit crescent-cli.lua make:controller Product inventory</code></pre>
-                </div>
-
-                <h3>Make Service</h3>
-                <div class="code-block">
-                    <pre><code class="language-bash">luvit crescent-cli.lua make:service Product</code></pre>
-                </div>
-
-                <h3>Make Model</h3>
-                <div class="code-block">
-                    <pre><code class="language-bash">luvit crescent-cli.lua make:model Product</code></pre>
-                </div>
-            </section>
-
-            <!-- Migrations CLI -->
-            <section id="cli-migrations" class="doc-section">
-                <h2>📋 Comandos de Migration</h2>
-                
-                <h3>Criar Migration</h3>
-                <div class="code-block">
-                    <pre><code class="language-bash"># O nome da tabela é extraído automaticamente
-luvit crescent-cli.lua make:migration create_products_table
-luvit crescent-cli.lua make:migration create_users_table
-luvit crescent-cli.lua make:migration add_column_to_users</code></pre>
-                </div>
-
-                <h3>Executar Migrations</h3>
-                <div class="code-block">
-                    <pre><code class="language-bash"># Executa todas as migrations pendentes
-luvit crescent-cli.lua migrate</code></pre>
-                </div>
-
-                <h3>Rollback</h3>
-                <div class="code-block">
-                    <pre><code class="language-bash"># Desfaz o último batch de migrations
-luvit crescent-cli.lua migrate:rollback</code></pre>
-                </div>
-
-                <h3>Status</h3>
-                <div class="code-block">
-                    <pre><code class="language-bash"># Mostra quais migrations foram executadas
-luvit crescent-cli.lua migrate:status</code></pre>
-                </div>
-            </section>
-
-            <!-- Migrations -->
             <section id="migrations" class="doc-section">
-                <h2>🔄 Sistema de Migrations</h2>
+                <h2>🔄 Migrations</h2>
                 
-                <p>Migrations são uma forma de versionar as mudanças no banco de dados.</p>
+<h3>Criar Migration</h3>
 
-                <h3>Estrutura de uma Migration</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- migrations/20260106123456_create_products_table.lua
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli make:migration create_products_table</code></pre></div>
+
+<h3>Migration de Criação</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- migrations/20260109123456_create_products_table.lua
 local Migration = {}
 
--- Método up: aplica a migration
 function Migration:up()
     return [[
         CREATE TABLE IF NOT EXISTS products (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             description TEXT,
-            price DECIMAL(10,2) NOT NULL,
+            price DECIMAL(10, 2) NOT NULL,
             stock INT DEFAULT 0,
-            active BOOLEAN DEFAULT true,
+            category_id INT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            INDEX idx_name (name),
-            INDEX idx_active (active)
+            
+            INDEX idx_category (category_id),
+            INDEX idx_price (price),
+            
+            FOREIGN KEY (category_id) 
+                REFERENCES categories(id) 
+                ON DELETE SET NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ]]
 end
 
--- Método down: desfaz a migration
 function Migration:down()
     return [[
         DROP TABLE IF EXISTS products;
     ]]
 end
 
-return Migration</code></pre>
-                </div>
+return Migration</code></pre></div>
 
-                <h3>Padrões de Nome</h3>
-                <ul>
-                    <li><code>create_xxx_table</code> - Cria tabela xxx</li>
-                    <li><code>add_column_to_xxx</code> - Adiciona coluna na tabela xxx</li>
-                    <li><code>drop_xxx_table</code> - Remove tabela xxx</li>
-                    <li><code>update_xxx_table</code> - Modifica tabela xxx</li>
-                </ul>
+<h3>Migration de Alteração</h3>
 
-                <div class="info-box">
-                    <strong>💡 Dica:</strong> O CLI extrai automaticamente o nome da tabela do nome da migration!
-                </div>
-            </section>
+<div class="code-block"><pre><code class="language-lua">-- migrations/20260109134500_add_discount_to_products.lua
+local Migration = {}
 
-            <!-- Middleware -->
-            <section id="middleware" class="doc-section">
-                <h2>🔌 Middleware</h2>
-                
-                <p>Middlewares são funções que processam requisições antes de chegarem aos controllers.</p>
-
-                <h3>Middlewares Disponíveis</h3>
-                
-                <h4>Logger</h4>
-                <div class="code-block">
-                    <pre><code class="language-lua">local logger = require("crescent.middleware.logger")
-app:use(logger)</code></pre>
-                </div>
-
-                <h4>CORS</h4>
-                <div class="code-block">
-                    <pre><code class="language-lua">local cors = require("crescent.middleware.cors")
-app:use(cors({
-    origin = "*",
-    methods = "GET,POST,PUT,DELETE",
-    headers = "Content-Type,Authorization"
-}))</code></pre>
-                </div>
-
-                <h4>Security</h4>
-                <div class="code-block">
-                    <pre><code class="language-lua">local security = require("crescent.middleware.security")
-app:use(security)</code></pre>
-                </div>
-
-                <h4>Auth</h4>
-                <div class="code-block">
-                    <pre><code class="language-lua">local auth = require("crescent.middleware.auth")
-
--- Proteger rota específica
-app:get("/admin", auth.verify, AdminController.index)</code></pre>
-                </div>
-
-                <h3>Criando Middleware Customizado</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">-- middleware/custom.lua
-local function myMiddleware(ctx, next)
-    -- Código antes do controller
-    print("Antes da requisição")
-    
-    -- Chama próximo middleware/controller
-    next()
-    
-    -- Código depois do controller
-    print("Depois da requisição")
+function Migration:up()
+    return [[
+        ALTER TABLE products
+        ADD COLUMN discount DECIMAL(5, 2) DEFAULT 0,
+        ADD COLUMN is_featured BOOLEAN DEFAULT FALSE;
+        
+        CREATE INDEX idx_featured ON products(is_featured);
+    ]]
 end
 
-return myMiddleware</code></pre>
-                </div>
+function Migration:down()
+    return [[
+        ALTER TABLE products
+        DROP COLUMN discount,
+        DROP COLUMN is_featured;
+        
+        DROP INDEX idx_featured ON products;
+    ]]
+end
+
+return Migration</code></pre></div>
+
+<h3>Executar Migrations</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Executar pendentes
+luvit crescent-cli migrate
+
+# Desfazer última
+luvit crescent-cli migrate:rollback
+
+# Status
+luvit crescent-cli migrate:status</code></pre></div>
+
+<hr>
+
             </section>
 
-            <!-- Env -->
-            <section id="env" class="doc-section">
-                <h2>🔐 Variáveis de Ambiente</h2>
+            <section id="hooks-lifecycle-events" class="doc-section">
+                <h2>🪝 Hooks (Lifecycle Events)</h2>
                 
-                <p>Configure sua aplicação usando arquivo .env</p>
+<h3>Hooks Disponíveis</h3>
 
-                <h3>Arquivo .env</h3>
-                <div class="code-block">
-                    <pre><code class="language-bash"># Servidor
-APP_HOST=0.0.0.0
-APP_PORT=8080
-APP_ENV=development
+<div class="code-block"><pre><code class="language-lua">local Product = Model:extend({
+    table = "products",
+    
+    hooks = {
+        before_save = function(self)
+            -- Antes de salvar (CREATE ou UPDATE)
+            print("Saving product:", self.name)
+        end,
+        
+        after_save = function(self)
+            -- Depois de salvar
+            print("Product saved:", self.id)
+        end,
+        
+        before_create = function(self)
+            -- Antes de criar
+            self.slug = slugify(self.name)
+        end,
+        
+        after_create = function(self)
+            -- Depois de criar
+            print("New product created!")
+        end,
+        
+        before_update = function(self)
+            -- Antes de atualizar
+        end,
+        
+        after_update = function(self)
+            -- Depois de atualizar
+        end,
+        
+        before_delete = function(self)
+            -- Antes de deletar
+        end,
+        
+        after_delete = function(self)
+            -- Depois de deletar
+        end
+    }
+})</code></pre></div>
 
-# Database
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=crescent_db
-DB_USER=root
-DB_PASSWORD=senha
+<h3>Exemplo Prático</h3>
 
-# Segurança
-JWT_SECRET=seu_secret_aqui
-API_KEY=sua_api_key_aqui</code></pre>
-                </div>
+<div class="code-block"><pre><code class="language-lua">local Product = Model:extend({
+    table = "products",
+    
+    hooks = {
+        before_save = function(self)
+            -- Gerar slug automaticamente
+            if self.name and not self.slug then
+                self.slug = self.name:lower():gsub("%s+", "-")
+            end
+        end,
+        
+        before_delete = function(self)
+            -- Verificar se pode deletar
+            local orderCount = OrderItem:where({product_id = self.id}):count()
+            
+            if orderCount &gt; 0 then
+                error("Cannot delete product with existing orders")
+            end
+        end,
+        
+        after_create = function(self)
+            -- Notificar sistema
+            EventBus:emit('product.created', self)
+        end
+    }
+})</code></pre></div>
 
-                <h3>Acessando Variáveis</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">local env = require("crescent.utils.env")
+<hr>
 
-local port = env.get("APP_PORT", "8080")  -- com default
-local dbHost = env.get("DB_HOST")</code></pre>
-                </div>
             </section>
 
-            <!-- Config -->
-            <section id="config" class="doc-section">
-                <h2>⚙️ Arquivos de Configuração</h2>
+            <section id="boas-práticas" class="doc-section">
+                <h2>💡 Boas Práticas</h2>
                 
-                <p>Configurações específicas por ambiente.</p>
+<h3>Índices</h3>
 
-                <h3>config/development.lua</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">return {
-    database = {
-        host = "localhost",
-        port = 3306,
-        name = "crescent_dev",
-        user = "root",
-        password = ""
-    },
-    server = {
-        port = 8080,
-        host = "localhost"
-    },
-    debug = true
-}</code></pre>
-                </div>
+<div class="code-block"><pre><code class="language-sql">-- Campos frequentemente buscados
+CREATE INDEX idx_email ON users(email);
+CREATE INDEX idx_status ON orders(status);
 
-                <h3>config/production.lua</h3>
-                <div class="code-block">
-                    <pre><code class="language-lua">return {
-    database = {
-        host = os.getenv("DB_HOST"),
-        port = tonumber(os.getenv("DB_PORT")),
-        name = os.getenv("DB_NAME"),
-        user = os.getenv("DB_USER"),
-        password = os.getenv("DB_PASSWORD")
-    },
-    server = {
-        port = tonumber(os.getenv("APP_PORT")),
-        host = os.getenv("APP_HOST")
-    },
-    debug = false
-}</code></pre>
-                </div>
+-- Chaves estrangeiras
+CREATE INDEX idx_category_id ON products(category_id);
+
+-- Compostos para queries complexas
+CREATE INDEX idx_category_price ON products(category_id, price);</code></pre></div>
+
+<h3>Transações</h3>
+
+<div class="code-block"><pre><code class="language-lua">local db = require('crescent.database.mysql')
+
+function OrderService:processOrder(orderData)
+    db:query("START TRANSACTION")
+    
+    local success, err = pcall(function()
+        -- Criar pedido
+        local order = Order:create(orderData)
+        
+        -- Atualizar estoque
+        for _, item in ipairs(orderData.items) do
+            local product = Product:find(item.product_id)
+            product:update({
+                stock = product.stock - item.quantity
+            })
+        end
+        
+        -- Criar pagamento
+        Payment:create({order_id = order.id, ...})
+    end)
+    
+    if success then
+        db:query("COMMIT")
+        return true
+    else
+        db:query("ROLLBACK")
+        error(err)
+    end
+end</code></pre></div>
+
+<h3>N+1 Problem</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- ❌ Ruim (N+1 queries)
+local products = Product:all()
+for _, product in ipairs(products) do
+    local category = product:category()  -- +1 query por produto
+end
+
+-- ✅ Bom (2 queries)
+local products = Product:with('category'):get()
+for _, product in ipairs(products) do
+    print(product.category.name)  -- Já carregado
+end</code></pre></div>
+
+<h3>Paginação</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- No controller
+function ProductController:index(ctx)
+    local page = tonumber(ctx.query.page) or 1
+    local perPage = tonumber(ctx.query.per_page) or 20
+    
+    local result = Product:paginate(perPage, page)
+    
+    return ctx.json(200, {
+        data = result.data,
+        current_page = result.current_page,
+        total = result.total,
+        per_page = result.per_page,
+        last_page = result.last_page
+    })
+end</code></pre></div>
+
+<hr>
+
             </section>
 
-            <!-- Scripts -->
-            <section id="scripts" class="doc-section">
-                <h2>📜 Scripts Disponíveis</h2>
+            <section id="testando-database" class="doc-section">
+                <h2>🧪 Testando Database</h2>
                 
-                <p>Scripts incluídos no Crescent Starter para facilitar o desenvolvimento.</p>
+<div class="code-block"><pre><code class="language-lua">-- tests/test-product.lua
+local tests = require('crescent.utils.tests')
+local Product = require('src.products.models.product')
 
-                <h3>install-dependencies.sh</h3>
-                <p>Instala todas as dependências necessárias automaticamente (Luvit, LuaRocks, MySQL opcional)</p>
-                <div class="code-block">
-                    <pre><code class="language-bash">./install-dependencies.sh</code></pre>
-                </div>
-
-                <h3>deploy.example.sh</h3>
-                <p>Template de exemplo para deploy automático em produção. Copie e customize para seu ambiente:</p>
-                <div class="code-block">
-                    <pre><code class="language-bash"># Copie e customize
-cp deploy.example.sh deploy.sh
-nano deploy.sh
-chmod +x deploy.sh
-
-# Execute o deploy
-./deploy.sh</code></pre>
-                </div>
-
-                <div class="info-box">
-                    <strong>💡 Nota:</strong> Para iniciar o servidor, use <code>luvit app.lua</code> diretamente. Para desenvolvimento, você pode usar ferramentas como <code>nodemon</code> ou <code>entr</code> para hot reload.
-                </div>
-            </section>
-
-            <!-- Production -->
-            <section id="production" class="doc-section">
-                <h2>🚀 Deploy em Produção</h2>
-                
-                <h3>Preparando para Produção</h3>
-                <ol>
-                    <li><strong>Configure o .env</strong>
-                        <div class="code-block">
-                            <pre><code>APP_ENV=production
-APP_HOST=0.0.0.0
-APP_PORT=8080</code></pre>
-                        </div>
-                    </li>
-                    <li><strong>Execute as migrations</strong>
-                        <div class="code-block">
-                            <pre><code>luvit crescent-cli.lua migrate</code></pre>
-                        </div>
-                    </li>
-                    <li><strong>Configure o NGINX</strong> (ver seção abaixo)</li>
-                    <li><strong>Inicie o servidor</strong>
-                        <div class="code-block">
-                            <pre><code># Via systemd (recomendado)
-sudo systemctl start crescent
-
-# Ou manualmente
-luvit app.lua</code></pre>
-                        </div>
-                    </li>
-                </ol>
-
-                <h3>Systemd Service</h3>
-                <p>Use o arquivo de serviço incluído:</p>
-                <div class="code-block">
-                    <pre><code class="language-bash">sudo cp config/crescent.service /etc/systemd/system/
-sudo systemctl enable crescent
-sudo systemctl start crescent</code></pre>
-                </div>
-            </section>
-
-            <!-- NGINX -->
-            <section id="nginx" class="doc-section">
-                <h2>🌐 Configuração NGINX</h2>
-                
-                <p>Use NGINX como proxy reverso para produção.</p>
-
-                <h3>Arquivo de Configuração</h3>
-                <div class="code-block">
-                    <pre><code class="language-nginx">upstream crescent_app {
-    server 127.0.0.1:8080;
+local productTests = {
+    testCreate = function()
+        local product = Product:create({
+            name = "Test Product",
+            price = 100,
+            stock = 10
+        })
+        
+        tests.assertNotNil(product)
+        tests.assertNotNil(product.id)
+        tests.assertEquals(product.name, "Test Product")
+    end,
+    
+    testValidation = function()
+        tests.assertError(function()
+            Product:create({name = ""})  -- Empty name
+        end)
+    end,
+    
+    testRelations = function()
+        local product = Product:find(1)
+        local category = product:category()
+        
+        tests.assertNotNil(category)
+        tests.assertIsTable(category)
+    end
 }
 
+tests.runSuite("Product Model Tests", productTests)</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="próximas-seções" class="doc-section">
+                <h2>📖 Próximas Seções</h2>
+                
+<ul>
+<li><strong><a href="/docs/core-concepts">Core Concepts</a></strong> - Controllers e Services</li>
+<li><strong><a href="/docs/utilities">Utilities</a></strong> - Testes e helpers</li>
+<li><strong><a href="/docs/deployment">Deployment</a></strong> - Deploy em produção</li>
+</ul>
+
+            </section>
+
+            <section id="comandos-disponíveis" class="doc-section">
+                <h2>📋 Comandos Disponíveis</h2>
+                
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli &lt;comando&gt; [opções]</code></pre></div>
+
+<h3>Comandos Principais</h3>
+
+| Comando | Descrição |
+|---------|-----------|
+| <code>new <nome></code> | Cria um novo projeto Crescent |
+| <code>server</code> | Inicia o servidor de desenvolvimento |
+| <code>test</code> | Executa todos os testes do projeto |
+| <code>make:controller</code> | Gera um controller |
+| <code>make:service</code> | Gera um service |
+| <code>make:model</code> | Gera um model |
+| <code>make:routes</code> | Gera arquivo de rotas |
+| <code>make:module</code> | Gera módulo completo (CRUD) |
+| <code>make:migration</code> | Cria uma migration |
+| <code>migrate</code> | Executa migrations pendentes |
+| <code>migrate:rollback</code> | Desfaz última migration |
+| <code>migrate:status</code> | Mostra status das migrations |
+
+<hr>
+
+            </section>
+
+            <section id="criar-novo-projeto" class="doc-section">
+                <h2>🆕 Criar Novo Projeto</h2>
+                
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli new meu-projeto</code></pre></div>
+
+<strong>O que acontece:</strong>
+<ol>
+<li>✅ Clona o <code>crescent-starter</code> do GitHub</li>
+<li>✅ Remove histórico Git do template</li>
+<li>✅ Inicializa novo repositório Git</li>
+<li>✅ Configura estrutura completa</li>
+</ol>
+
+<strong>Próximos passos após criação:</strong>
+<div class="code-block"><pre><code class="language-bash">cd meu-projeto
+cp .env.example .env
+nano .env  # Configure MySQL
+luvit app.lua</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="servidor-de-desenvolvimento" class="doc-section">
+                <h2>🚀 Servidor de Desenvolvimento</h2>
+                
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli server</code></pre></div>
+
+<strong>Funcionalidades:</strong>
+<ul>
+<li>✅ Inicia aplicação com <code>luvit app.lua</code></li>
+<li>✅ Logs em tempo real</li>
+<li>✅ Substituição de processo (<code>exec</code>) para manter saída interativa</li>
+<li>✅ Verifica se <code>app.lua</code> existe antes de iniciar</li>
+</ul>
+
+<strong>Dica:</strong> Para hot-reload automático, use <code>entr</code>:
+
+<div class="code-block"><pre><code class="language-bash">find . -name "*.lua" | entr -r luvit crescent-cli server</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="executar-testes" class="doc-section">
+                <h2>✅ Executar Testes</h2>
+                
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli test</code></pre></div>
+
+<strong>Funcionalidades:</strong>
+<ul>
+<li>🔍 Descobre automaticamente diretórios <code>tests/</code> ou <code>test/</code></li>
+<li>🔍 Encontra todos arquivos <code><em>test</em>.lua</code> ou <code><em>tests</em>.lua</code></li>
+<li>▶️ Executa cada teste sequencialmente</li>
+<li>📊 Mostra saída completa de cada teste</li>
+<li>📈 Apresenta resumo final com estatísticas</li>
+<li>✅/❌ Feedback visual colorido com emojis</li>
+</ul>
+
+<strong>Exemplo de saída:</strong>
+<div class="code-block"><pre><code class="language-">🌙 Executando Testes Crescent
+
+ℹ Encontrados 3 arquivo(s) de teste
+
+📄 Executando: tests/test-users.lua
+────────────────────────────────────
+✅ testCreate passed
+✅ testUpdate passed
+✅ testDelete passed
+
+=== Results: 3/3 passed, 0 failed ===
+
+════════════════════════════════════
+🌙 Resumo dos Testes
+✅ Todos os testes passaram! (3/3)</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="geradores-de-código" class="doc-section">
+                <h2>🏗️ Geradores de Código</h2>
+                
+<h3>Gerar Controller</h3>
+
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli make:controller Product
+# ou especificar módulo
+luvit crescent-cli make:controller Product catalog</code></pre></div>
+
+<strong>Cria:</strong> <code>src/product/controllers/product.lua</code>
+
+<strong>Template gerado:</strong>
+<div class="code-block"><pre><code class="language-lua">-- src/product/controllers/product.lua
+local service = require("src.product.services.product")
+local ProductController = {}
+
+function ProductController:index(ctx)
+    local result = service:getAll()
+    return ctx.json(200, result)
+end
+
+function ProductController:show(ctx)
+    local id = ctx.params.id
+    local result = service:getById(id)
+    
+    if result then
+        return ctx.json(200, result)
+    end
+    return ctx.json(404, { error = "Not found" })
+end
+
+function ProductController:create(ctx)
+    local body = ctx.body or {}
+    local result = service:create(body)
+    return ctx.json(201, result)
+end
+
+function ProductController:update(ctx)
+    local id = ctx.params.id
+    local body = ctx.body or {}
+    local result = service:update(id, body)
+    
+    if result then
+        return ctx.json(200, result)
+    else
+        return ctx.json(404, { error = "Not found" })
+    end
+end
+
+function ProductController:delete(ctx)
+    local id = ctx.params.id
+    local success = service:delete(id)
+    
+    if success then
+        return ctx.no_content()
+    else
+        return ctx.json(404, { error = "Not found" })
+    end
+end
+
+return ProductController</code></pre></div>
+
+<hr>
+
+<h3>Gerar Service</h3>
+
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli make:service Product</code></pre></div>
+
+<strong>Cria:</strong> <code>src/product/services/product.lua</code>
+
+<strong>Template gerado:</strong>
+<div class="code-block"><pre><code class="language-lua">-- src/product/services/product.lua
+local ProductService = {}
+local Product = require("src.product.models.product")
+
+function ProductService:getAll()
+    return Product:all()
+end
+
+function ProductService:getById(id)
+    return Product:find(id)
+end
+
+function ProductService:create(body)
+   return Product:create(body)
+end
+
+function ProductService:update(id, body)
+    local product = Product:find(id)
+    if product then
+        product:update(body)
+        return product
+    end
+    return nil
+end
+
+function ProductService:delete(id)
+    local product = Product:find(id)
+    if product then
+        product:delete()
+        return true
+    end
+    return false
+end
+
+return ProductService</code></pre></div>
+
+<hr>
+
+<h3>Gerar Model</h3>
+
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli make:model Product</code></pre></div>
+
+<strong>Cria:</strong> <code>src/product/models/product.lua</code>
+
+<strong>Template gerado:</strong>
+<div class="code-block"><pre><code class="language-lua">-- src/product/models/product.lua
+local Model = require("crescent.database.model")
+
+local Product = Model:extend({
+    table = "product",
+    primary_key = "id",
+    timestamps = true,
+    soft_deletes = false,
+    
+    fillable = {
+        "name",
+    },
+    
+    hidden = {
+        -- "password"
+    },
+
+    guarded = {
+        -- "id", "created_at", "updated_at"
+    },
+    
+    validates = {
+        name = {required = true, min = 3, max = 255},
+    },
+    
+    relations = {
+        -- posts = {type = "hasMany", model = "Post", foreign_key = "user_id"},
+    }
+})
+
+return Product</code></pre></div>
+
+<hr>
+
+<h3>Gerar Routes</h3>
+
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli make:routes Product</code></pre></div>
+
+<strong>Cria:</strong> <code>src/product/routes/product.lua</code>
+
+<strong>Template gerado:</strong>
+<div class="code-block"><pre><code class="language-lua">-- src/product/routes/product.lua
+-- prefix definido em product/init.lua
+
+local controller = require("src.product.controllers.product")
+
+return function(app, prefix)
+    prefix = prefix or "/product"
+    
+    -- CRUD completo
+    app:get(prefix, function(ctx)
+        return controller:index(ctx)
+    end)
+    
+    app:get(prefix .. "/{id}", function(ctx)
+        return controller:show(ctx)
+    end)
+    
+    app:post(prefix, function(ctx)
+        return controller:create(ctx)
+    end)
+    
+    app:put(prefix .. "/{id}", function(ctx)
+        return controller:update(ctx)
+    end)
+    
+    app:delete(prefix .. "/{id}", function(ctx)
+        return controller:delete(ctx)
+    end)
+end</code></pre></div>
+
+<hr>
+
+<h3>Gerar Módulo Completo</h3>
+
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli make:module Product</code></pre></div>
+
+<strong>Cria tudo de uma vez:</strong>
+<ul>
+<li>✅ Controller</li>
+<li>✅ Service</li>
+<li>✅ Model</li>
+<li>✅ Routes</li>
+<li>✅ Module Init</li>
+</ul>
+
+<strong>Estrutura gerada:</strong>
+<div class="code-block"><pre><code class="language-">src/product/
+├── init.lua
+├── controllers/
+│   └── product.lua
+├── services/
+│   └── product.lua
+├── models/
+│   └── product.lua
+└── routes/
+    └── product.lua</code></pre></div>
+
+<strong>Module Init (<code>src/product/init.lua</code>):</strong>
+<div class="code-block"><pre><code class="language-lua">-- src/product/init.lua
+local Module = {}
+
+function Module.register(app)
+    local routes = require("src.product.routes.product")
+    routes(app, "/product")
+    
+    print("✓ Módulo Product carregado")
+end
+
+return Module</code></pre></div>
+
+<strong>Registrar no app.lua:</strong>
+<div class="code-block"><pre><code class="language-lua">local ProductModule = require("src.product")
+ProductModule.register(app)</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="migrations" class="doc-section">
+                <h2>🔄 Migrations</h2>
+                
+<h3>Criar Migration</h3>
+
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli make:migration create_products_table</code></pre></div>
+
+<strong>Padrões de nome reconhecidos:</strong>
+<ul>
+<li><code>create_xxx_table</code> → Cria tabela "xxx"</li>
+<li><code>add_xxx_to_yyy</code> → Adiciona coluna na tabela "yyy"</li>
+<li><code>drop_xxx_table</code> → Remove tabela "xxx"</li>
+<li><code>update_xxx_table</code> → Atualiza tabela "xxx"</li>
+</ul>
+
+<strong>Cria:</strong> <code>migrations/20260109123456_create_products_table.lua</code>
+
+<strong>Template gerado:</strong>
+<div class="code-block"><pre><code class="language-lua">-- migrations/20260109123456_create_products_table.lua
+local Migration = {}
+
+function Migration:up()
+    return [[
+        CREATE TABLE IF NOT EXISTS products (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            price DECIMAL(10,2),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ]]
+end
+
+function Migration:down()
+    return [[
+        DROP TABLE IF EXISTS products;
+    ]]
+end
+
+return Migration</code></pre></div>
+
+<hr>
+
+<h3>Executar Migrations</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Executar todas pendentes
+luvit crescent-cli migrate
+
+# Desfazer última migration
+luvit crescent-cli migrate:rollback
+
+# Ver status
+luvit crescent-cli migrate:status</code></pre></div>
+
+<strong>Exemplo de saída:</strong>
+<div class="code-block"><pre><code class="language-">🔄 Executando migrations pendentes...
+
+✓ 20260108230701_create_users_table.lua aplicada
+✓ 20260109123456_create_products_table.lua aplicada
+
+✅ 2 migrations executadas com sucesso!</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="casos-de-uso-comuns" class="doc-section">
+                <h2>🎯 Casos de Uso Comuns</h2>
+                
+<h3>1. Criar CRUD Completo</h3>
+
+<div class="code-block"><pre><code class="language-bash"># 1. Criar migration
+luvit crescent-cli make:migration create_categories_table
+
+# 2. Editar migration (adicionar campos)
+nano migrations/20260109_*.lua
+
+# 3. Executar migration
+luvit crescent-cli migrate
+
+# 4. Criar módulo completo
+luvit crescent-cli make:module Category
+
+# 5. Registrar no app.lua
+# Adicionar: CategoryModule.register(app)
+
+# 6. Iniciar servidor
+luvit crescent-cli server</code></pre></div>
+
+<h3>2. Adicionar Funcionalidade a Módulo Existente</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Adicionar novo controller
+luvit crescent-cli make:controller Admin users
+
+# Adicionar novo service
+luvit crescent-cli make:service Auth auth</code></pre></div>
+
+<h3>3. Workflow de Testes</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Criar teste
+touch tests/test-product.lua
+
+# Implementar teste usando crescent/utils/tests
+nano tests/test-product.lua
+
+# Rodar testes
+luvit crescent-cli test</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="instalação-global-do-cli" class="doc-section">
+                <h2>🔧 Instalação Global do CLI</h2>
+                
+<p>Para usar <code>crescent</code> sem <code>luvit crescent-cli</code>:</p>
+
+<div class="code-block"><pre><code class="language-bash"># No diretório do framework
+./install.sh
+
+# Agora use diretamente
+crescent make:module Product
+crescent server
+crescent test</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="dicas-avançadas" class="doc-section">
+                <h2>💡 Dicas Avançadas</h2>
+                
+<h3>Aliases Bash</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Adicione no ~/.bashrc ou ~/.zshrc
+alias cres='luvit crescent-cli'
+alias cres-serve='luvit crescent-cli server'
+alias cres-test='luvit crescent-cli test'
+
+# Uso
+cres make:module Product
+cres-serve
+cres-test</code></pre></div>
+
+<h3>Watch Mode com Entr</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Auto-restart no servidor
+find . -name "*.lua" | entr -r luvit crescent-cli server
+
+# Auto-run tests
+find tests -name "*.lua" | entr -c luvit crescent-cli test</code></pre></div>
+
+<h3>Scripts Personalizados</h3>
+
+<p>Crie scripts no <code>package.lua</code> ou arquivos shell:</p>
+
+<div class="code-block"><pre><code class="language-bash">#!/bin/bash
+# dev.sh - Script de desenvolvimento
+
+echo "🔧 Instalando dependências..."
+lit install
+
+echo "🔄 Executando migrations..."
+luvit crescent-cli migrate
+
+echo "✅ Rodando testes..."
+luvit crescent-cli test
+
+echo "🚀 Iniciando servidor..."
+luvit crescent-cli server</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="referência-rápida" class="doc-section">
+                <h2>📖 Referência Rápida</h2>
+                
+<div class="code-block"><pre><code class="language-bash"># Criar projeto
+crescent new app
+
+# Geradores
+crescent make:module User
+crescent make:controller Product
+crescent make:service Auth
+crescent make:model Category
+crescent make:routes Api
+
+# Migrations
+crescent make:migration create_posts_table
+crescent migrate
+crescent migrate:rollback
+crescent migrate:status
+
+# Desenvolvimento
+crescent server
+crescent test
+
+# Help
+crescent --help</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="troubleshooting" class="doc-section">
+                <h2>🆘 Troubleshooting</h2>
+                
+<h3>Erro: "crescent-cli.lua not found"</h3>
+
+<p>Execute o comando no diretório raiz do projeto onde está o arquivo <code>crescent-cli.lua</code>.</p>
+
+<h3>Erro: "Permission denied"</h3>
+
+<div class="code-block"><pre><code class="language-bash">chmod +x crescent-cli.lua</code></pre></div>
+
+<h3>CLI não cria arquivos</h3>
+
+<p>Verifique permissões de escrita no diretório:</p>
+
+<div class="code-block"><pre><code class="language-bash">ls -la src/</code></pre></div>
+
+<h3>Migration falha</h3>
+
+<ol>
+<li>Verifique sintaxe SQL no arquivo da migration</li>
+<li>Confirme conexão com MySQL: <code>luvit crescent/database/mysql.lua</code></li>
+<li>Veja logs de erro completos</li>
+</ol>
+
+<hr>
+
+            </section>
+
+            <section id="próximas-seções" class="doc-section">
+                <h2>📚 Próximas Seções</h2>
+                
+<ul>
+<li><strong><a href="/docs/core-concepts">Core Concepts</a></strong> - Rotas, Controllers, Services</li>
+<li><strong><a href="/docs/database">Database & ORM</a></strong> - Migrations e Models em detalhes</li>
+<li><strong><a href="/docs/utilities">Utilities</a></strong> - Ferramentas de teste e helpers</li>
+</ul>
+
+            </section>
+
+            <section id="sistema-de-testes" class="doc-section">
+                <h2>✅ Sistema de Testes</h2>
+                
+<p>O Crescent inclui uma biblioteca completa de assertions para testes automatizados.</p>
+
+<h3>Criar Arquivo de Teste</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- tests/test-users.lua
+local tests = require('crescent.utils.tests')
+
+local userTests = {
+    testCreate = function()
+        -- Seu código de teste
+        tests.assertEquals(1 + 1, 2)
+    end,
+    
+    testValidation = function()
+        tests.assertTrue(true)
+        tests.assertFalse(false)
+    end
+}
+
+tests.runSuite("User Tests", userTests)</code></pre></div>
+
+<h3>Executar Testes</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Todos os testes
+luvit crescent-cli test
+
+# Teste específico
+luvit tests/test-users.lua</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="assertions-disponíveis" class="doc-section">
+                <h2>📋 Assertions Disponíveis</h2>
+                
+<h3>Comparações Básicas</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Igualdade
+tests.assertEquals(actual, expected, "mensagem opcional")
+tests.assertNotEquals(actual, expected)
+
+-- Booleanos
+tests.assertTrue(value)
+tests.assertFalse(value)</code></pre></div>
+
+<h3>Comparações Numéricas</h3>
+
+<div class="code-block"><pre><code class="language-lua">tests.assertGreaterThan(5, 3)        -- 5 &gt; 3
+tests.assertLessThan(3, 5)           -- 3 &lt; 5
+tests.assertGreaterOrEqual(5, 5)     -- 5 &gt;= 5
+tests.assertLessOrEqual(3, 5)        -- 3 &lt;= 5
+tests.assertInRange(5, 1, 10)        -- 1 &lt;= 5 &lt;= 10</code></pre></div>
+
+<h3>Validações de Tipo</h3>
+
+<div class="code-block"><pre><code class="language-lua">tests.assertType(value, "string")
+tests.assertNil(value)
+tests.assertNotNil(value)
+tests.assertIsTable(value)
+tests.assertIsFunction(value)
+tests.assertIsString(value)
+tests.assertIsNumber(value)
+tests.assertIsBoolean(value)</code></pre></div>
+
+<h3>Comparações de Strings</h3>
+
+<div class="code-block"><pre><code class="language-lua">tests.assertContains("hello world", "world")
+tests.assertNotContains("hello", "bye")
+tests.assertStartsWith("hello world", "hello")
+tests.assertEndsWith("hello world", "world")
+tests.assertMatches("test123", "%d+")  -- Lua pattern</code></pre></div>
+
+<h3>Comparações de Tables</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Comparação profunda
+tests.assertTableEquals({a=1, b=2}, {a=1, b=2})
+
+-- Contém valor
+tests.assertTableContains({1, 2, 3}, 2)
+
+-- Vazio/não vazio
+tests.assertEmpty({})
+tests.assertNotEmpty({1})
+
+-- Tamanho
+tests.assertLength({1, 2, 3}, 3)
+tests.assertArrayLength({1, 2, 3}, 3)</code></pre></div>
+
+<h3>Exceptions/Errors</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Espera erro
+tests.assertError(function()
+    error("Ops!")
+end, "Ops!")
+
+-- Não deve dar erro
+tests.assertNoError(function()
+    return 1 + 1
+end)</code></pre></div>
+
+<h3>HTTP/API Testing</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Status code
+tests.assertStatusCode(response, 200)
+
+-- Headers
+tests.assertHeader(response, "Content-Type", "application/json")
+
+-- JSON response
+tests.assertJsonEquals('{"name":"John"}', {name="John"})
+tests.assertJsonContains('{"name":"John","age":30}', "name", "John")</code></pre></div>
+
+<h3>Identidade</h3>
+
+<div class="code-block"><pre><code class="language-lua">local obj = {}
+tests.assertSame(obj, obj)        -- Mesma referência
+tests.assertNotSame({}, {})       -- Objetos diferentes</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="exemplo-completo-de-teste" class="doc-section">
+                <h2>📝 Exemplo Completo de Teste</h2>
+                
+<div class="code-block"><pre><code class="language-lua">-- tests/test-product.lua
+local tests = require('crescent.utils.tests')
+local Product = require('src.products.models.product')
+
+local productTests = {
+    testCreate = function()
+        local product = Product:create({
+            name = "Notebook",
+            price = 2500
+        })
+        
+        tests.assertNotNil(product)
+        tests.assertIsTable(product)
+        tests.assertEquals(product.name, "Notebook")
+        tests.assertType(product.price, "number")
+        tests.assertGreaterThan(product.price, 0)
+    end,
+    
+    testValidation = function()
+        tests.assertError(function()
+            Product:create({name = ""})  -- Nome vazio
+        end, "validation failed")
+    end,
+    
+    testFind = function()
+        local product = Product:find(1)
+        
+        if product then
+            tests.assertIsTable(product)
+            tests.assertNotNil(product.id)
+            tests.assertType(product.name, "string")
+        end
+    end,
+    
+    testUpdate = function()
+        local product = Product:find(1)
+        
+        if product then
+            local oldName = product.name
+            product:update({name = "Updated Name"})
+            
+            tests.assertNotEquals(product.name, oldName)
+            tests.assertEquals(product.name, "Updated Name")
+        end
+    end,
+    
+    testAll = function()
+        local products = Product:all()
+        
+        tests.assertIsTable(products)
+        tests.assertGreaterOrEqual(#products, 0)
+    end
+}
+
+-- Executar suite
+tests.runSuite("Product Tests", productTests)</code></pre></div>
+
+<strong>Saída:</strong>
+<div class="code-block"><pre><code class="language-">=== Test Suite: Product Tests ===
+Running test: testCreate
+✅ testCreate passed
+Running test: testValidation
+✅ testValidation passed
+Running test: testFind
+✅ testFind passed
+Running test: testUpdate
+✅ testUpdate passed
+Running test: testAll
+✅ testAll passed
+
+=== Results: 5/5 passed, 0 failed ===</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="hash-de-senhas-pbkdf2" class="doc-section">
+                <h2>🔐 Hash de Senhas (PBKDF2)</h2>
+                
+<p>Utilitário seguro para hash de senhas com salt aleatório.</p>
+
+<h3>Características</h3>
+
+<ul>
+<li>✅ PBKDF2 com SHA-256</li>
+<li>✅ Salt aleatório único (16 bytes)</li>
+<li>✅ 10.000 iterações por padrão</li>
+<li>✅ Timing-safe comparison</li>
+<li>✅ Senhas iguais geram hashes diferentes</li>
+</ul>
+
+<h3>Criar Hash de Senha</h3>
+
+<div class="code-block"><pre><code class="language-lua">local hash = require('crescent.utils.hash')
+
+-- Registrar usuário
+local senha = "minhaSenhaSegura123"
+local senhaHash = hash.encrypt(senha)
+-- Resultado: "10000$a1b2c3d4e5f6...$9c8d7e6f5a4b..."
+
+-- Armazenar senhaHash no banco de dados
+user:update({password = senhaHash})</code></pre></div>
+
+<h3>Verificar Senha (Login)</h3>
+
+<div class="code-block"><pre><code class="language-lua">local hash = require('crescent.utils.hash')
+
+-- No login
+local senhaDigitada = ctx.body.password
+local senhaArmazenada = user.password  -- Hash do banco
+
+if hash.verify(senhaDigitada, senhaArmazenada) then
+    -- Login bem-sucedido
+    return ctx.json(200, {token = gerarToken(user)})
+else
+    -- Senha incorreta
+    return ctx.json(401, {error = "Credenciais inválidas"})
+end</code></pre></div>
+
+<h3>Exemplo Completo (Registro + Login)</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- src/auth/services/auth.lua
+local hash = require('crescent.utils.hash')
+local User = require('src.users.models.user')
+
+local AuthService = {}
+
+function AuthService:register(data)
+    -- Valida dados
+    if not data.email or not data.password then
+        error("Email e senha são obrigatórios")
+    end
+    
+    -- Cria hash da senha
+    local passwordHash = hash.encrypt(data.password)
+    
+    -- Cria usuário
+    local user = User:create({
+        name = data.name,
+        email = data.email,
+        password = passwordHash  -- Armazena hash, não senha
+    })
+    
+    return user
+end
+
+function AuthService:login(email, password)
+    -- Busca usuário
+    local user = User:where({email = email}):first()
+    
+    if not user then
+        return nil, "Usuário não encontrado"
+    end
+    
+    -- Verifica senha
+    if not hash.verify(password, user.password) then
+        return nil, "Senha incorreta"
+    end
+    
+    -- Remove senha do retorno
+    user.password = nil
+    
+    return user
+end
+
+return AuthService</code></pre></div>
+
+<h3>Configurar Iterações</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Mais seguro (mais lento)
+local hash50k = hash.encrypt(senha, 50000)
+
+-- Padrão (balanceado)
+local hashPadrao = hash.encrypt(senha)  -- 10.000 iterações</code></pre></div>
+
+<h3>Aliases Disponíveis</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Estas são equivalentes:
+hash.encrypt(senha)   -- ✅ Recomendado
+hash.encript(senha)   -- Alias (typo comum)
+
+hash.verify(senha, hash)   -- ✅ Recomendado  
+hash.decrypt(senha, hash)  -- Alias
+hash.decript(senha, hash)  -- Alias</code></pre></div>
+
+<h3>Hashes Simples (Checksums)</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- SHA-256 (para checksums, não senhas!)
+local checksum = hash.sha256("conteúdo do arquivo")
+
+-- MD5 (legado, não usar para senhas)
+local md5sum = hash.md5("dados")</code></pre></div>
+
+<p>⚠️ <strong>Importante:</strong> Nunca use SHA-256 ou MD5 direto para senhas! Sempre use <code>hash.encrypt()</code> que implementa PBKDF2 com salt.</p>
+
+<hr>
+
+            </section>
+
+            <section id="variáveis-de-ambiente" class="doc-section">
+                <h2>🌐 Variáveis de Ambiente</h2>
+                
+<div class="code-block"><pre><code class="language-lua">local env = require('crescent.utils.env')
+
+-- Carregar .env
+env.load('.env')
+
+-- Obter valores
+local dbHost = env.get('DB_HOST', 'localhost')  -- Com fallback
+local port = env.get('PORT')
+local isDev = env.get('ENV') == 'development'
+
+-- Verificar se existe
+if env.has('API_KEY') then
+    -- usa API_KEY
+end</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="headers-http" class="doc-section">
+                <h2>📨 Headers HTTP</h2>
+                
+<div class="code-block"><pre><code class="language-lua">local headers = require('crescent.utils.headers')
+
+-- Parse header string
+local contentType = headers.parse('Content-Type: application/json')
+
+-- Normalize header name
+local normalized = headers.normalize('content-type')  -- "Content-Type"
+
+-- Get header value
+local value = headers.get(ctx.headers, 'authorization')</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="path-utilities" class="doc-section">
+                <h2>🛤️ Path Utilities</h2>
+                
+<div class="code-block"><pre><code class="language-lua">local pathUtil = require('crescent.utils.path')
+
+-- Join paths
+local fullPath = pathUtil.join('src', 'users', 'models', 'user.lua')
+-- "src/users/models/user.lua"
+
+-- Normalize path
+local normalized = pathUtil.normalize('src//users/../models/./user.lua')
+-- "src/models/user.lua"
+
+-- Get directory
+local dir = pathUtil.dirname('src/users/models/user.lua')
+-- "src/users/models"
+
+-- Get filename
+local file = pathUtil.basename('src/users/models/user.lua')
+-- "user.lua"
+
+-- Get extension
+local ext = pathUtil.extname('user.lua')
+-- ".lua"</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="string-utilities" class="doc-section">
+                <h2>🔤 String Utilities</h2>
+                
+<div class="code-block"><pre><code class="language-lua">local stringUtil = require('crescent.utils.string')
+
+-- Trim whitespace
+local trimmed = stringUtil.trim('  hello  ')  -- "hello"
+
+-- Split string
+local parts = stringUtil.split('a,b,c', ',')  -- {"a", "b", "c"}
+
+-- Starts/ends with
+local starts = stringUtil.startsWith('hello', 'hel')  -- true
+local ends = stringUtil.endsWith('hello', 'lo')  -- true
+
+-- Case transformations
+local upper = stringUtil.upper('hello')  -- "HELLO"
+local lower = stringUtil.lower('HELLO')  -- "hello"
+local title = stringUtil.titleCase('hello world')  -- "Hello World"
+
+-- Slugify
+local slug = stringUtil.slugify('Hello World!')  -- "hello-world"</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="testando-utilities" class="doc-section">
+                <h2>🧪 Testando Utilities</h2>
+                
+<div class="code-block"><pre><code class="language-lua">-- tests/test-utilities.lua
+local tests = require('crescent.utils.tests')
+local hash = require('crescent.utils.hash')
+local stringUtil = require('crescent.utils.string')
+
+local utilTests = {
+    testHashUnique = function()
+        local senha = "test123"
+        local hash1 = hash.encrypt(senha)
+        local hash2 = hash.encrypt(senha)
+        
+        -- Hashes devem ser diferentes (salt único)
+        tests.assertNotEquals(hash1, hash2)
+        
+        -- Mas ambos devem verificar corretamente
+        tests.assertTrue(hash.verify(senha, hash1))
+        tests.assertTrue(hash.verify(senha, hash2))
+    end,
+    
+    testHashVerification = function()
+        local senha = "myPassword123"
+        local hashed = hash.encrypt(senha)
+        
+        tests.assertTrue(hash.verify(senha, hashed))
+        tests.assertFalse(hash.verify("wrongPassword", hashed))
+    end,
+    
+    testStringTrim = function()
+        tests.assertEquals(stringUtil.trim("  hello  "), "hello")
+        tests.assertEquals(stringUtil.trim("hello"), "hello")
+    end,
+    
+    testStringSplit = function()
+        local parts = stringUtil.split("a,b,c", ",")
+        tests.assertArrayLength(parts, 3)
+        tests.assertEquals(parts[1], "a")
+        tests.assertEquals(parts[3], "c")
+    end
+}
+
+tests.runSuite("Utility Tests", utilTests)</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="boas-práticas" class="doc-section">
+                <h2>💡 Boas Práticas</h2>
+                
+<h3>Testes</h3>
+
+<ol>
+<li><strong>Organize por módulo</strong>: <code>tests/test-{module}.lua</code></li>
+<li><strong>Nomenclatura clara</strong>: <code>testCreate</code>, <code>testValidation</code></li>
+<li><strong>Um assert por conceito</strong>: Testes pequenos e focados</li>
+<li><strong>Use mensagens descritivas</strong>: Facilita debug</li>
+<li><strong>Rode antes de commit</strong>: <code>git pre-commit hook</code></li>
+</ol>
+
+<h3>Hash de Senhas</h3>
+
+<ol>
+<li><strong>Nunca armazene senhas em texto plano</strong></li>
+<li><strong>Use <code>hash.encrypt()</code> sempre</strong>: PBKDF2 + salt</li>
+<li><strong>Não use SHA-256/MD5 para senhas</strong></li>
+<li><strong>Valide força da senha antes</strong>: regex, tamanho mínimo</li>
+<li><strong>Considere 2FA para produção</strong></li>
+</ol>
+
+<h3>Variáveis de Ambiente</h3>
+
+<ol>
+<li><strong>Nunca commite <code>.env</code></strong>: Use <code>.env.example</code></li>
+<li><strong>Use fallbacks</strong>: <code>env.get('PORT', 8080)</code></li>
+<li><strong>Valide valores críticos</strong>: MySQL, API keys</li>
+<li><strong>Diferentes arquivos por ambiente</strong>: <code>.env.dev</code>, <code>.env.prod</code></li>
+</ol>
+
+<hr>
+
+            </section>
+
+            <section id="próximas-seções" class="doc-section">
+                <h2>📖 Próximas Seções</h2>
+                
+<ul>
+<li><strong><a href="/docs/database">Database & ORM</a></strong> - Models, relações e migrations</li>
+<li><strong><a href="/docs/core-concepts">Core Concepts</a></strong> - Rotas, controllers e services</li>
+<li><strong><a href="/docs/deployment">Deployment</a></strong> - Deploy em produção</li>
+</ul>
+
+            </section>
+
+            <section id="pré-requisitos" class="doc-section">
+                <h2>📋 Pré-requisitos</h2>
+                
+<h3>Servidor Linux</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Ubuntu/Debian
+sudo apt update
+sudo apt install -y curl git build-essential libssl-dev
+
+# CentOS/RHEL
+sudo yum install -y curl git gcc make openssl-devel</code></pre></div>
+
+<h3>Instalar Luvit</h3>
+
+<div class="code-block"><pre><code class="language-bash">curl -L https://github.com/luvit/lit/raw/master/get-lit.sh | sh</code></pre></div>
+
+<p>Adicionar ao PATH:</p>
+
+<div class="code-block"><pre><code class="language-bash">echo 'export PATH="$HOME/.local/bin:$PATH"' &gt;&gt; ~/.bashrc
+source ~/.bashrc</code></pre></div>
+
+<h3>Instalar NGINX</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Ubuntu/Debian
+sudo apt install -y nginx
+
+# CentOS/RHEL
+sudo yum install -y nginx
+
+# Iniciar e habilitar
+sudo systemctl start nginx
+sudo systemctl enable nginx</code></pre></div>
+
+<h3>Instalar MySQL/MariaDB</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Ubuntu/Debian
+sudo apt install -y mysql-server
+
+# CentOS/RHEL
+sudo yum install -y mariadb-server
+
+# Iniciar
+sudo systemctl start mysql
+sudo systemctl enable mysql
+
+# Secure installation
+sudo mysql_secure_installation</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="configuração-do-projeto" class="doc-section">
+                <h2>🔧 Configuração do Projeto</h2>
+                
+<h3>1. Clonar Projeto</h3>
+
+<div class="code-block"><pre><code class="language-bash">cd /var/www
+sudo git clone https://github.com/seu-usuario/seu-projeto.git meu-app
+sudo chown -R $USER:$USER /var/www/meu-app
+cd /var/www/meu-app</code></pre></div>
+
+<h3>2. Instalar Dependências</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Crescent Framework
+lit install daniel-m-tfs/crescent-framework
+
+# Outras dependências (se houver)
+lit install luvit/secure-socket
+lit install luvit/json</code></pre></div>
+
+<h3>3. Configurar Ambiente</h3>
+
+<div class="code-block"><pre><code class="language-bash">cp .env.example .env
+nano .env</code></pre></div>
+
+<div class="code-block"><pre><code class="language-bash"># .env (produção)
+APP_ENV=production
+APP_PORT=8080
+APP_HOST=127.0.0.1
+
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=meu_banco_producao
+DB_USER=meu_usuario
+DB_PASSWORD=senha_forte_aqui
+
+JWT_SECRET=chave_super_secreta_aleatoria_64_caracteres_ou_mais</code></pre></div>
+
+<h3>4. Criar Banco de Dados</h3>
+
+<div class="code-block"><pre><code class="language-bash">mysql -u root -p</code></pre></div>
+
+<div class="code-block"><pre><code class="language-sql">CREATE DATABASE meu_banco_producao CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'meu_usuario'@'localhost' IDENTIFIED BY 'senha_forte_aqui';
+GRANT ALL PRIVILEGES ON meu_banco_producao.* TO 'meu_usuario'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;</code></pre></div>
+
+<h3>5. Executar Migrations</h3>
+
+<div class="code-block"><pre><code class="language-bash">luvit crescent-cli migrate</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="nginx-reverse-proxy" class="doc-section">
+                <h2>🌐 NGINX Reverse Proxy</h2>
+                
+<h3>Configuração Básica</h3>
+
+<div class="code-block"><pre><code class="language-nginx"># /etc/nginx/sites-available/meu-app
 server {
     listen 80;
-    server_name seu-dominio.com;
+    server_name meuapp.com www.meuapp.com;
 
+    # Logs
+    access_log /var/log/nginx/meu-app-access.log;
+    error_log /var/log/nginx/meu-app-error.log;
+
+    # Proxy para Luvit
     location / {
-        proxy_pass http://crescent_app;
+        proxy_pass http://127.0.0.1:8080;
         proxy_http_version 1.1;
+        
+        # Headers importantes
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+        
+        # Cache bypass
+        proxy_cache_bypass $http_upgrade;
     }
-}</code></pre>
-                </div>
 
-                <h3>Instalando e Ativando</h3>
-                <div class="code-block">
-                    <pre><code class="language-bash"># Copiar configuração
-sudo cp config/nginx.conf /etc/nginx/sites-available/crescent
+    # Arquivos estáticos (se houver)
+    location /static {
+        alias /var/www/meu-app/public;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+}</code></pre></div>
 
-# Criar link simbólico
-sudo ln -s /etc/nginx/sites-available/crescent /etc/nginx/sites-enabled/
+<h3>Habilitar Site</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Criar link simbólico
+sudo ln -s /etc/nginx/sites-available/meu-app /etc/nginx/sites-enabled/
 
 # Testar configuração
 sudo nginx -t
 
 # Recarregar NGINX
-sudo systemctl reload nginx</code></pre>
-                </div>
+sudo systemctl reload nginx</code></pre></div>
 
-                <div class="warning-box">
-                    <strong>⚠️ Atenção:</strong> Não esqueça de configurar SSL/TLS para produção usando Let's Encrypt ou similar.
-                </div>
+<hr>
+
             </section>
 
-            <!-- Final Section -->
-            <section class="doc-section">
-                <div class="cta-docs">
-                    <h2>Pronto para Começar?</h2>
-                    <p>Clone o repositório e comece a construir sua aplicação agora!</p>
-                    <div class="cta-buttons">
-                        <a href="https://github.com/daniel-m-tfs/crescent-framework" target="_blank" class="btn btn-primary btn-large">
-                            Ver no GitHub
-                        </a>
-                        <a href="index.html#getting-started" class="btn btn-secondary btn-large">
-                            Guia Rápido
-                        </a>
-                    </div>
-                </div>
+            <section id="sslhttps-com-lets-encrypt" class="doc-section">
+                <h2>🔒 SSL/HTTPS com Let's Encrypt</h2>
+                
+<h3>Instalar Certbot</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Ubuntu/Debian
+sudo apt install -y certbot python3-certbot-nginx
+
+# CentOS/RHEL
+sudo yum install -y certbot python3-certbot-nginx</code></pre></div>
+
+<h3>Obter Certificado</h3>
+
+<div class="code-block"><pre><code class="language-bash">sudo certbot --nginx -d meuapp.com -d www.meuapp.com</code></pre></div>
+
+<h3>Configuração NGINX com SSL</h3>
+
+<div class="code-block"><pre><code class="language-nginx"># /etc/nginx/sites-available/meu-app
+server {
+    listen 80;
+    server_name meuapp.com www.meuapp.com;
+    
+    # Redirecionar para HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name meuapp.com www.meuapp.com;
+
+    # SSL
+    ssl_certificate /etc/letsencrypt/live/meuapp.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/meuapp.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    # HSTS (opcional mas recomendado)
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # Logs
+    access_log /var/log/nginx/meu-app-access.log;
+    error_log /var/log/nginx/meu-app-error.log;
+
+    # Proxy para Luvit
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+        
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Arquivos estáticos
+    location /static {
+        alias /var/www/meu-app/public;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+}</code></pre></div>
+
+<h3>Renovação Automática</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Testar renovação
+sudo certbot renew --dry-run
+
+# Crontab para renovação automática
+sudo crontab -e</code></pre></div>
+
+<p>Adicionar:</p>
+<div class="code-block"><pre><code class="language-">0 0 * * * certbot renew --quiet --post-hook "systemctl reload nginx"</code></pre></div>
+
+<hr>
+
             </section>
+
+            <section id="systemd-service" class="doc-section">
+                <h2>🔧 Systemd Service</h2>
+                
+<h3>Criar Service Unit</h3>
+
+<div class="code-block"><pre><code class="language-bash">sudo nano /etc/systemd/system/meu-app.service</code></pre></div>
+
+<div class="code-block"><pre><code class="language-ini">[Unit]
+Description=Crescent Framework Application
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/meu-app
+Environment="PATH=/home/www-data/.local/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="APP_ENV=production"
+ExecStart=/home/www-data/.local/bin/luvit bootstrap.lua
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=meu-app
+
+# Segurança
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/meu-app
+
+[Install]
+WantedBy=multi-user.target</code></pre></div>
+
+<h3>Gerenciar Service</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Recarregar systemd
+sudo systemctl daemon-reload
+
+# Habilitar (iniciar no boot)
+sudo systemctl enable meu-app
+
+# Iniciar
+sudo systemctl start meu-app
+
+# Status
+sudo systemctl status meu-app
+
+# Parar
+sudo systemctl stop meu-app
+
+# Reiniciar
+sudo systemctl restart meu-app
+
+# Logs em tempo real
+sudo journalctl -u meu-app -f</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="monitoramento-e-logs" class="doc-section">
+                <h2>📊 Monitoramento e Logs</h2>
+                
+<h3>Logs Systemd</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Últimas 100 linhas
+sudo journalctl -u meu-app -n 100
+
+# Seguir em tempo real
+sudo journalctl -u meu-app -f
+
+# Filtrar por data
+sudo journalctl -u meu-app --since "2026-01-09"
+
+# Filtrar por prioridade
+sudo journalctl -u meu-app -p err</code></pre></div>
+
+<h3>Logs NGINX</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Access log
+sudo tail -f /var/log/nginx/meu-app-access.log
+
+# Error log
+sudo tail -f /var/log/nginx/meu-app-error.log
+
+# Analisar códigos de status
+awk '{print $9}' /var/log/nginx/meu-app-access.log | sort | uniq -c | sort -rn
+
+# Top 10 IPs
+awk '{print $1}' /var/log/nginx/meu-app-access.log | sort | uniq -c | sort -rn | head -10</code></pre></div>
+
+<h3>Logs da Aplicação</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- Implementar logger
+local Logger = {}
+
+function Logger:log(level, message, data)
+    local timestamp = os.date("%Y-%m-%d %H:%M:%S")
+    local logEntry = string.format(
+        "[%s] [%s] %s",
+        timestamp,
+        level,
+        message
+    )
+    
+    if data then
+        logEntry = logEntry .. " " .. require('json').encode(data)
+    end
+    
+    print(logEntry)  -- systemd captura isso
+end
+
+function Logger:info(message, data)
+    self:log("INFO", message, data)
+end
+
+function Logger:error(message, data)
+    self:log("ERROR", message, data)
+end
+
+return Logger</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="performance" class="doc-section">
+                <h2>⚡ Performance</h2>
+                
+<h3>NGINX Optimizations</h3>
+
+<div class="code-block"><pre><code class="language-nginx"># /etc/nginx/nginx.conf
+worker_processes auto;
+worker_rlimit_nofile 65535;
+
+events {
+    worker_connections 4096;
+    use epoll;
+    multi_accept on;
+}
+
+http {
+    # Básico
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+    
+    # Buffer
+    client_body_buffer_size 128k;
+    client_max_body_size 10M;
+    client_header_buffer_size 1k;
+    large_client_header_buffers 4 8k;
+    
+    # Gzip
+    gzip on;
+    gzip_vary on;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css text/xml text/javascript 
+               application/json application/javascript application/xml+rss;
+    gzip_disable "msie6";
+    
+    # Cache estático
+    open_file_cache max=10000 inactive=30s;
+    open_file_cache_valid 60s;
+    open_file_cache_min_uses 2;
+    open_file_cache_errors on;
+    
+    # Rate limiting
+    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+    limit_req_zone $binary_remote_addr zone=auth:10m rate=3r/s;
+}</code></pre></div>
+
+<h3>MySQL Optimization</h3>
+
+<div class="code-block"><pre><code class="language-bash">sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf</code></pre></div>
+
+<div class="code-block"><pre><code class="language-ini">[mysqld]
+# InnoDB
+innodb_buffer_pool_size = 1G
+innodb_log_file_size = 256M
+innodb_flush_log_at_trx_commit = 2
+innodb_flush_method = O_DIRECT
+
+# Query cache
+query_cache_size = 64M
+query_cache_type = 1
+
+# Connections
+max_connections = 200
+
+# Logs (desabilitar em produção para performance)
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql/slow.log
+long_query_time = 2</code></pre></div>
+
+<p>Aplicar:</p>
+<div class="code-block"><pre><code class="language-bash">sudo systemctl restart mysql</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="segurança" class="doc-section">
+                <h2>🔐 Segurança</h2>
+                
+<h3>Firewall (UFW)</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Habilitar UFW
+sudo ufw enable
+
+# Permitir SSH
+sudo ufw allow 22/tcp
+
+# Permitir HTTP/HTTPS
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+# Verificar status
+sudo ufw status</code></pre></div>
+
+<h3>Fail2Ban</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Instalar
+sudo apt install -y fail2ban
+
+# Configurar
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+sudo nano /etc/fail2ban/jail.local</code></pre></div>
+
+<div class="code-block"><pre><code class="language-ini">[DEFAULT]
+bantime = 3600
+findtime = 600
+maxretry = 5
+
+[sshd]
+enabled = true
+
+[nginx-http-auth]
+enabled = true
+
+[nginx-limit-req]
+enabled = true</code></pre></div>
+
+<div class="code-block"><pre><code class="language-bash"># Iniciar
+sudo systemctl enable fail2ban
+sudo systemctl start fail2ban
+
+# Status
+sudo fail2ban-client status</code></pre></div>
+
+<h3>Hardening MySQL</h3>
+
+<div class="code-block"><pre><code class="language-sql">-- Remover usuários anônimos
+DELETE FROM mysql.user WHERE User='';
+
+-- Remover banco de teste
+DROP DATABASE IF EXISTS test;
+
+-- Permitir root apenas localmente
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+
+FLUSH PRIVILEGES;</code></pre></div>
+
+<h3>Variáveis de Ambiente Seguras</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Nunca commite .env no Git!
+# Usar variáveis do sistema
+
+sudo nano /etc/systemd/system/meu-app.service</code></pre></div>
+
+<div class="code-block"><pre><code class="language-ini">[Service]
+Environment="DB_PASSWORD=senha_segura_aqui"
+Environment="JWT_SECRET=token_secreto_aqui"</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="deploy-automatizado" class="doc-section">
+                <h2>🔄 Deploy Automatizado</h2>
+                
+<h3>Script de Deploy</h3>
+
+<div class="code-block"><pre><code class="language-bash">#!/bin/bash
+# deploy.sh
+
+set -e  # Exit on error
+
+APP_DIR="/var/www/meu-app"
+BACKUP_DIR="/var/backups/meu-app"
+
+echo "🚀 Starting deployment..."
+
+# 1. Backup atual
+echo "📦 Creating backup..."
+mkdir -p $BACKUP_DIR
+tar -czf $BACKUP_DIR/backup-$(date +%Y%m%d-%H%M%S).tar.gz $APP_DIR
+
+# 2. Pull código
+echo "📥 Pulling latest code..."
+cd $APP_DIR
+git pull origin main
+
+# 3. Instalar dependências
+echo "📚 Installing dependencies..."
+lit install
+
+# 4. Migrations
+echo "🗄️ Running migrations..."
+luvit crescent-cli migrate
+
+# 5. Reiniciar serviço
+echo "🔄 Restarting service..."
+sudo systemctl restart meu-app
+
+# 6. Verificar status
+echo "✅ Checking status..."
+sleep 2
+sudo systemctl status meu-app --no-pager
+
+# 7. Reload NGINX
+echo "🌐 Reloading NGINX..."
+sudo nginx -t &amp;&amp; sudo systemctl reload nginx
+
+echo "✨ Deployment complete!"</code></pre></div>
+
+<p>Tornar executável:</p>
+<div class="code-block"><pre><code class="language-bash">chmod +x deploy.sh</code></pre></div>
+
+<h3>GitHub Actions</h3>
+
+<div class="code-block"><pre><code class="language-yaml"># .github/workflows/deploy.yml
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /var/www/meu-app
+          ./deploy.sh</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="health-checks" class="doc-section">
+                <h2>🩺 Health Checks</h2>
+                
+<h3>Endpoint de Status</h3>
+
+<div class="code-block"><pre><code class="language-lua">-- src/health/routes/health.lua
+return function(router)
+    router:get("/health", function(ctx)
+        -- Verificar banco
+        local db = require('crescent.database.mysql')
+        local dbOk = pcall(function()
+            db:query("SELECT 1")
+        end)
+        
+        return ctx.json(200, {
+            status = "ok",
+            timestamp = os.date("%Y-%m-%d %H:%M:%S"),
+            uptime = os.clock(),
+            database = dbOk and "connected" or "disconnected"
+        })
+    end)
+end</code></pre></div>
+
+<h3>Monitoramento Externo</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Criar script de verificação
+nano /usr/local/bin/check-app.sh</code></pre></div>
+
+<div class="code-block"><pre><code class="language-bash">#!/bin/bash
+
+URL="https://meuapp.com/health"
+RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" $URL)
+
+if [ $RESPONSE -eq 200 ]; then
+    echo "✅ App is healthy"
+    exit 0
+else
+    echo "❌ App is down (HTTP $RESPONSE)"
+    # Reiniciar serviço
+    sudo systemctl restart meu-app
+    exit 1
+fi</code></pre></div>
+
+<div class="code-block"><pre><code class="language-bash">chmod +x /usr/local/bin/check-app.sh
+
+# Cron a cada 5 minutos
+crontab -e</code></pre></div>
+
+<div class="code-block"><pre><code class="language-">*/5 * * * * /usr/local/bin/check-app.sh &gt;&gt; /var/log/app-health.log 2&gt;&amp;1</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="troubleshooting" class="doc-section">
+                <h2>🐛 Troubleshooting</h2>
+                
+<h3>App não inicia</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Verificar logs
+sudo journalctl -u meu-app -n 100
+
+# Verificar sintaxe Lua
+luvit -e "require('bootstrap')"
+
+# Verificar permissões
+ls -la /var/www/meu-app
+sudo chown -R www-data:www-data /var/www/meu-app</code></pre></div>
+
+<h3>Erro 502 Bad Gateway</h3>
+
+<div class="code-block"><pre><code class="language-bash"># App está rodando?
+sudo systemctl status meu-app
+
+# Porta correta?
+netstat -tulpn | grep 8080
+
+# Testar localmente
+curl http://localhost:8080</code></pre></div>
+
+<h3>Banco de dados não conecta</h3>
+
+<div class="code-block"><pre><code class="language-bash"># MySQL está rodando?
+sudo systemctl status mysql
+
+# Testar conexão
+mysql -h localhost -u meu_usuario -p meu_banco_producao
+
+# Verificar .env
+cat .env | grep DB_</code></pre></div>
+
+<h3>Logs grandes</h3>
+
+<div class="code-block"><pre><code class="language-bash"># Limitar tamanho do journal
+sudo journalctl --vacuum-time=7d
+sudo journalctl --vacuum-size=500M
+
+# Rotação de logs NGINX
+sudo nano /etc/logrotate.d/nginx</code></pre></div>
+
+<div class="code-block"><pre><code class="language-">/var/log/nginx/*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0640 www-data adm
+    sharedscripts
+    postrotate
+        systemctl reload nginx &gt; /dev/null
+    endscript
+}</code></pre></div>
+
+<hr>
+
+            </section>
+
+            <section id="próximas-seções" class="doc-section">
+                <h2>📖 Próximas Seções</h2>
+                
+<ul>
+<li><strong><a href="/docs/getting-started">Getting Started</a></strong> - Instalação e início</li>
+<li><strong><a href="/docs/core-concepts">Core Concepts</a></strong> - Routes, Controllers, Services</li>
+<li><strong><a href="/docs/database">Database</a></strong> - ORM e Migrations</li>
+<li><strong><a href="/docs/cli">CLI</a></strong> - Comandos disponíveis</li>
+</ul>
+
+            </section>
+
         </main>
     </div>
 
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Crescent Framework</h3>
+                    <p>Framework web Lua moderno e performático</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="docs.html">Documentação</a></li>
+                        <li><a href="https://github.com/daniel-m-tfs/crescent-framework">GitHub</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Comunidade</h3>
+                    <ul>
+                        <li><a href="https://github.com/daniel-m-tfs/crescent-framework/issues">Issues</a></li>
+                        <li><a href="https://github.com/daniel-m-tfs/crescent-framework/discussions">Discussões</a></li>
+                    </ul>
+                </div>
+            </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 Crescent Framework. MIT License.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Prism.js for syntax highlighting -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-lua.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nginx.min.js"></script>
-    
-    <!-- Mobile Menu Toggle -->
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuToggle = document.querySelector('.mobile-menu-toggle');
-            const navLinks = document.querySelector('.nav-links');
-            
-            if (menuToggle && navLinks) {
-                menuToggle.addEventListener('click', function() {
-                    navLinks.classList.toggle('active');
-                });
-                
-                // Fecha o menu ao clicar em um link
-                navLinks.querySelectorAll('a').forEach(link => {
-                    link.addEventListener('click', function() {
-                        navLinks.classList.remove('active');
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
                     });
-                });
-                
-                // Fecha o menu ao clicar fora
-                document.addEventListener('click', function(event) {
-                    if (!event.target.closest('.nav-content')) {
-                        navLinks.classList.remove('active');
-                    }
-                });
-            }
+                }
+            });
+        });
+
+        // Active link highlighting
+        const sections = document.querySelectorAll('.doc-section');
+        const navLinks = document.querySelectorAll('.docs-nav a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
         });
     </script>
-    
-    <script src="docs.js"></script>
 </body>
 </html>
-
