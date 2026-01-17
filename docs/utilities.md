@@ -354,6 +354,472 @@ local md5sum = hash.md5("dados")
 
 ---
 
+## 🔐 JWT (JSON Web Tokens)
+
+O Crescent fornece suporte completo para autenticação JWT sem dependências externas, usando apenas funções nativas do OpenResty.
+
+### Configurar JWT Secret
+
+Adicione no seu `.env`:
+
+```bash
+JWT_SECRET=sua_chave_secreta_super_segura_com_64_ou_mais_caracteres
+```
+
+### Gerar Token
+
+```lua
+local jwt = require('crescent.utils.jwt')
+
+-- Payload do token
+local payload = {
+    user_id = 1,
+    username = "joao",
+    email = "joao@example.com",
+    roles = {"user", "admin"}
+}
+
+-- Gerar token (expira em 15 minutos por padrão)
+local token = jwt.sign(payload, os.getenv('JWT_SECRET'), {
+    expiresIn = 900  -- 15 minutos em segundos
+})
+
+-- Retornar para o cliente
+return ctx.json(200, {
+    token = token,
+    type = "Bearer"
+})
+```
+
+### Verificar Token
+
+```lua
+local jwt = require('crescent.utils.jwt')
+
+-- Obter token do header Authorization
+local token = ctx.getBearer()  -- Remove "Bearer " automaticamente
+
+-- Verificar e decodificar
+local ok, payload_or_error = jwt.verify(token, os.getenv('JWT_SECRET'))
+
+if ok then
+    -- Token válido
+    local user_id = payload_or_error.user_id
+    local username = payload_or_error.username
+    -- ... usar dados
+else
+    -- Token inválido
+    return ctx.error(401, payload_or_error)
+end
+```
+
+### Opções Avançadas
+
+```lua
+local jwt = require('crescent.utils.jwt')
+
+-- Token com claims adicionais
+local token = jwt.sign(payload, secret, {
+    expiresIn = 3600,           -- Expira em 1 hora
+    notBefore = 0,              -- Válido imediatamente
+    issuer = "crescent-app",    -- Quem emitiu
+    audience = "api-users"      -- Para quem é destinado
+})
+
+-- Verificar com validação de claims
+local ok, payload = jwt.verify(token, secret, {
+    issuer = "crescent-app",    -- Valida issuer
+    audience = "api-users"      -- Valida audience
+})
+```
+
+### Access Token e Refresh Token
+
+```lua
+local jwt = require('crescent.utils.jwt')
+
+local payload = {
+    user_id = 1,
+    username = "joao"
+}
+
+-- Access token (curta duração - 15 min)
+local access_token = jwt.create_access_token(
+    payload, 
+    os.getenv('JWT_SECRET'),
+    900  -- 15 minutos (opcional, padrão já é 15min)
+)
+
+-- Refresh token (longa duração - 30 dias)
+local refresh_token = jwt.create_refresh_token(
+    payload,
+    os.getenv('JWT_SECRET'),
+    2592000  -- 30 dias (opcional, padrão já é 30 dias)
+)
+
+return ctx.json(200, {
+    access_token = access_token,
+    refresh_token = refresh_token,
+    token_type = "Bearer",
+    expires_in = 900
+})
+```
+
+### Decodificar Sem Verificar
+
+```lua
+local jwt = require('crescent.utils.jwt')
+
+-- Apenas para debug/inspeção - NÃO use para autenticação!
+local header, payload = jwt.decode(token)
+
+print("Algorithm:", header.alg)  -- "HS256"
+print("User ID:", payload.user_id)
+-- ⚠️ Assinatura NÃO foi verificada!
+```
+
+### Middleware de Autenticação JWT
+
+```lua
+local auth = require('crescent.middleware.auth')
+
+-- Middleware JWT básico
+app:use('/api/protected', auth.jwt())
+
+-- Com opções customizadas
+app:use('/api/admin', auth.jwt({
+    secret = os.getenv('JWT_SECRET'),
+    issuer = "crescent-app",
+    audience = "admin-panel",
+    getUserFromPayload = function(payload, ctx)
+        -- Buscar usuário completo do banco
+        return User:find(payload.user_id)
+    end
+}))
+
+-- Usar dados do usuário na rota
+app:get('/api/profile', function(ctx)
+    -- ctx.state.user foi populado pelo middleware
+    local user = ctx.state.user
+    return ctx.json(200, {
+        id = user.id,
+        name = user.name,
+        email = user.email
+    })
+end)
+```
+
+### Helpers do Middleware Auth
+
+```lua
+local auth = require('crescent.middleware.auth')
+
+-- Gerar token manualmente
+local token = auth.generate_token({
+    user_id = 1,
+    username = "joao"
+}, {
+    secret = os.getenv('JWT_SECRET'),
+    expiresIn = 3600
+})
+
+-- Gerar par de tokens (access + refresh)
+local tokens = auth.generate_token_pair({
+    user_id = 1,
+    username = "joao"
+}, {
+    secret = os.getenv('JWT_SECRET'),
+    access_expires_in = 900,      -- 15 min
+    refresh_expires_in = 2592000  -- 30 dias
+})
+
+-- tokens = {
+--     access_token = "eyJ...",
+--     refresh_token = "eyJ...",
+--     token_type = "Bearer",
+--     expires_in = 900
+-- }
+
+-- Verificar token fora do middleware
+local ok, payload = auth.verify_token(token, {
+    secret = os.getenv('JWT_SECRET')
+})
+
+-- Decodificar sem verificar (debug)
+local header, payload = auth.decode_token(token)
+```
+
+### Exemplo Completo: Sistema de Auth
+
+```lua
+-- src/auth/services/auth.lua
+local jwt = require('crescent.utils.jwt')
+local hash = require('crescent.utils.hash')
+local User = require('src.users.models.user')
+
+local AuthService = {}
+
+-- Registro de usuário
+function AuthService.register(data)
+    -- Validar dados
+    if not data.email or not data.password then
+        error("Email e senha são obrigatórios")
+    end
+    
+    -- Hash da senha
+    local passwordHash = hash.encrypt(data.password)
+    
+    -- Criar usuário
+    local user = User:create({
+        name = data.name,
+        email = data.email,
+        password = passwordHash
+    })
+    
+    -- Gerar tokens
+    local tokens = AuthService.generateTokens(user)
+    
+    return {
+        user = {
+            id = user.id,
+            name = user.name,
+            email = user.email
+        },
+        tokens = tokens
+    }
+end
+
+-- Login de usuário
+function AuthService.login(email, password)
+    -- Buscar usuário
+    local user = User:where({email = email}):first()
+    
+    if not user then
+        error("Credenciais inválidas")
+    end
+    
+    -- Verificar senha
+    if not hash.verify(password, user.password) then
+        error("Credenciais inválidas")
+    end
+    
+    -- Gerar tokens
+    local tokens = AuthService.generateTokens(user)
+    
+    return {
+        user = {
+            id = user.id,
+            name = user.name,
+            email = user.email
+        },
+        tokens = tokens
+    }
+end
+
+-- Refresh token
+function AuthService.refresh(refresh_token)
+    local secret = os.getenv('JWT_SECRET')
+    
+    -- Verificar refresh token
+    local ok, payload = jwt.verify(refresh_token, secret)
+    
+    if not ok then
+        error("Token inválido ou expirado")
+    end
+    
+    -- Buscar usuário
+    local user = User:find(payload.user_id)
+    
+    if not user then
+        error("Usuário não encontrado")
+    end
+    
+    -- Gerar novo access token
+    local access_token = jwt.create_access_token({
+        user_id = user.id,
+        username = user.name,
+        email = user.email
+    }, secret)
+    
+    return {
+        access_token = access_token,
+        token_type = "Bearer",
+        expires_in = 900
+    }
+end
+
+-- Helper para gerar tokens
+function AuthService.generateTokens(user)
+    local secret = os.getenv('JWT_SECRET')
+    
+    local payload = {
+        user_id = user.id,
+        username = user.name,
+        email = user.email
+    }
+    
+    local access_token = jwt.create_access_token(payload, secret)
+    local refresh_token = jwt.create_refresh_token(payload, secret)
+    
+    return {
+        access_token = access_token,
+        refresh_token = refresh_token,
+        token_type = "Bearer",
+        expires_in = 900
+    }
+end
+
+return AuthService
+```
+
+### Rotas de Autenticação
+
+```lua
+-- src/auth/routes/auth.lua
+local AuthService = require('src.auth.services.auth')
+
+return function(app)
+    -- Registro
+    app:post('/auth/register', function(ctx)
+        local data = ctx.body
+        
+        local ok, result = pcall(function()
+            return AuthService.register(data)
+        end)
+        
+        if not ok then
+            return ctx.json(400, {error = result})
+        end
+        
+        return ctx.json(201, result)
+    end)
+    
+    -- Login
+    app:post('/auth/login', function(ctx)
+        local data = ctx.body
+        
+        local ok, result = pcall(function()
+            return AuthService.login(data.email, data.password)
+        end)
+        
+        if not ok then
+            return ctx.json(401, {error = result})
+        end
+        
+        return ctx.json(200, result)
+    end)
+    
+    -- Refresh token
+    app:post('/auth/refresh', function(ctx)
+        local refresh_token = ctx.body.refresh_token
+        
+        if not refresh_token then
+            return ctx.json(400, {error = "Refresh token é obrigatório"})
+        end
+        
+        local ok, result = pcall(function()
+            return AuthService.refresh(refresh_token)
+        end)
+        
+        if not ok then
+            return ctx.json(401, {error = result})
+        end
+        
+        return ctx.json(200, result)
+    end)
+    
+    -- Profile (protegida)
+    local auth = require('crescent.middleware.auth')
+    
+    app:get('/auth/profile', auth.jwt(), function(ctx)
+        local user = ctx.state.user
+        return ctx.json(200, {
+            id = user.id,
+            name = user.name,
+            email = user.email
+        })
+    end)
+    
+    -- Logout (opcional - invalidar no cliente)
+    app:post('/auth/logout', auth.jwt(), function(ctx)
+        -- Em produção, considere blacklist de tokens
+        return ctx.json(200, {message = "Logout realizado"})
+    end)
+end
+```
+
+### Claims Padrão JWT
+
+| Claim | Descrição | Exemplo |
+|-------|-----------|---------|
+| `iat` | Issued At - quando foi criado | `1705484400` |
+| `exp` | Expiration - quando expira | `1705488000` |
+| `nbf` | Not Before - válido a partir de | `1705484400` |
+| `iss` | Issuer - quem emitiu | `"crescent-app"` |
+| `aud` | Audience - para quem é destinado | `"api-users"` |
+
+### Boas Práticas JWT
+
+✅ **Recomendado:**
+
+- Use secrets longos e aleatórios (64+ caracteres)
+- Access tokens curtos (15 min)
+- Refresh tokens longos (30 dias)
+- Armazene tokens com segurança no cliente (HttpOnly cookies)
+- Valide claims como `issuer` e `audience`
+- Implemente refresh token rotation
+
+❌ **Evite:**
+
+- Armazenar dados sensíveis no payload (é decodificável!)
+- Tokens muito longos (> 7 dias para access)
+- Reutilizar JWT secret entre ambientes
+- Esquecer de validar expiração
+- Confiar apenas no token sem validar usuário no banco
+
+### Testar JWT
+
+```lua
+-- tests/test-jwt.lua
+local tests = require('crescent.utils.tests')
+local jwt = require('crescent.utils.jwt')
+
+local secret = "test_secret_key"
+
+local jwtTests = {
+    testSignAndVerify = function()
+        local payload = {user_id = 1}
+        local token = jwt.sign(payload, secret)
+        
+        local ok, decoded = jwt.verify(token, secret)
+        tests.assertTrue(ok)
+        tests.assertEquals(decoded.user_id, 1)
+    end,
+    
+    testInvalidSignature = function()
+        local payload = {user_id = 1}
+        local token = jwt.sign(payload, secret)
+        
+        local ok, error = jwt.verify(token, "wrong_secret")
+        tests.assertFalse(ok)
+        tests.assertNotNil(error)
+    end,
+    
+    testExpiration = function()
+        local payload = {user_id = 1}
+        local token = jwt.sign(payload, secret, {expiresIn = 1})
+        
+        local ok = jwt.verify(token, secret)
+        tests.assertTrue(ok)
+        -- Token expira após 1 segundo
+    end
+}
+
+tests.runSuite("JWT Tests", jwtTests)
+```
+
+---
+
 ## 🌐 Variáveis de Ambiente
 
 ```lua
