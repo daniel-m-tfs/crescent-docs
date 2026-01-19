@@ -960,6 +960,176 @@ tests.runSuite("Utility Tests", utilTests)
 
 ---
 
+## 🎨 Templates e Views (etlua)
+
+O Crescent inclui suporte a templates usando **etlua** (Embedded Lua), permitindo criar aplicações MVC.
+
+### Sintaxe Básica
+
+```html
+<!-- Variáveis -->
+<h1>Olá, <%= name %>!</h1>
+
+<!-- Condicionais -->
+<% if user.admin then %>
+    <p>Você é admin</p>
+<% end %>
+
+<!-- Loops -->
+<ul>
+<% for i, item in ipairs(items) do %>
+    <li><%= item.name %></li>
+<% end %>
+</ul>
+```
+
+### Renderizar Views no Controller
+
+```lua
+local function show_profile(ctx)
+    local user = User:find(ctx.params.id)
+    
+    -- Renderiza view com dados
+    return ctx.view("views/profile.etlua", {
+        name = user.name,
+        email = user.email,
+        created_at = user.created_at
+    })
+end
+```
+
+### Renderizar Template Direto
+
+```lua
+local etlua = require("crescent.utils.etlua")
+
+-- String
+local html = etlua.render("Olá, <%= name %>!", { name = "João" })
+
+-- Arquivo
+local html, err = etlua.render_file("views/home.etlua", {
+    title = "Home",
+    users = users_list
+})
+
+if not html then
+    print("Erro: " .. err)
+end
+```
+
+### Tags Disponíveis
+
+- `<% código %>` - Executa código Lua (sem output)
+- `<%= variável %>` - Exibe valor (com escape HTML automático)
+- `<%- variável %>` - Exibe valor (SEM escape HTML)
+- `<% código -%>` - Remove quebra de linha após a tag
+
+### Exemplo Completo
+
+**Controller (src/users/controllers/users.lua):**
+```lua
+local User = require("src.users.models.users")
+
+local function list(ctx)
+    local users = User:all()
+    
+    return ctx.view("views/users/list.etlua", {
+        users = users,
+        total = #users
+    })
+end
+
+local function show(ctx)
+    local user = User:find(ctx.params.id)
+    
+    if not user then
+        return ctx.error(404, "Usuário não encontrado")
+    end
+    
+    return ctx.view("views/users/show.etlua", {
+        name = user.name,
+        email = user.email,
+        role = user.role
+    })
+end
+
+return {
+    list = list,
+    show = show
+}
+```
+
+**View (views/users/list.etlua):**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Usuários</title>
+</head>
+<body>
+    <h1>Usuários (<%= total %>)</h1>
+    
+    <% if total > 0 then %>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for i, user in ipairs(users) do %>
+                <tr>
+                    <td><%= user.id %></td>
+                    <td><%= user.name %></td>
+                    <td><%= user.email %></td>
+                </tr>
+                <% end %>
+            </tbody>
+        </table>
+    <% else %>
+        <p>Nenhum usuário encontrado.</p>
+    <% end %>
+</body>
+</html>
+```
+
+### Passando Funções para Views
+
+```lua
+return ctx.view("views/dashboard.etlua", {
+    users = users,
+    format_date = function(timestamp)
+        return os.date("%d/%m/%Y", timestamp)
+    end
+})
+```
+
+Usando na view:
+```html
+<p>Data: <%= format_date(os.time()) %></p>
+```
+
+### Tratamento de Erros
+
+```lua
+local etlua = require("crescent.utils.etlua")
+
+local html, err = etlua.render_file("views/my_view.etlua", data)
+
+if not html then
+    print("Erro ao renderizar: " .. err)
+    return ctx.html(500, "<h1>Erro ao carregar página</h1>")
+end
+
+return ctx.html(200, html)
+```
+
+📖 **Documentação completa:** [VIEWS.md](https://github.com/daniel-m-tfs/crescent-framework/blob/main/VIEWS.md)
+
+---
+
 ## 💡 Boas Práticas
 
 ### Testes

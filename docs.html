@@ -187,6 +187,7 @@
                         <li><a href="#controllers">🎮 Controllers</a></li>
                         <li><a href="#services">⚙️ Services</a></li>
                         <li><a href="#models-básico">💾 Models (Básico)</a></li>
+                        <li><a href="#views">🖼️ Views</a></li>
                         <li><a href="#middleware">🔒 Middleware</a></li>
                         <li><a href="#módulos">🏗️ Módulos</a></li>
                         <li><a href="#fluxo-de-requisição">📊 Fluxo de Requisição</a></li>
@@ -303,7 +304,6 @@
                     <li><strong>🛠️ CLI Poderoso</strong>: Geração automática de código (como Artisan do Laravel)</li>
                     <li><strong>🔐 Segurança</strong>: Middleware de segurança, validações e hash de senhas PBKDF2</li>
                     <li><strong>✅ Testes</strong>: Biblioteca completa de assertions para testes automatizados</li>
-                    <li><strong>📦 Pronto para Produção</strong>: Configuração NGINX e systemd incluídas</li>
                 </ul>
 
                 <hr>
@@ -1244,6 +1244,51 @@ user:delete()</code></pre>
 
                 <hr>
 
+            </section>
+
+            <section id="views">
+                <h2>🖼️ Views</h2>
+
+                <p>Views são templates que geram HTML dinâmico para respostas.</p>
+                <p>O Crescent utiliza o motor de templates <a href="https://github.com/leafo/etlua">Etlua</a>, que permite incorporar lógica Lua diretamente nos templates para gerar HTML dinâmico.</p>
+                <h3>Definindo uma View</h3>
+                <div class="code-block">
+                    <pre><code class="language-lua">-- src/users/views/profile.etlua
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Perfil de &lt;%= user.name %&gt;&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Bem-vindo, &lt;%= user.name %&gt;!&lt;/h1&gt;
+    &lt;p&gt;Seu email é: &lt;%= user.email %&gt;&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+                <h3>Renderizando uma View no Controller</h3>
+                <div class="code-block">
+                    <pre><code class="language-lua">-- src/users/controllers/users.lua
+
+local UsersController = {}
+function UsersController:profile(ctx)
+    local user = { name = "João Silva", email = "joao@example.com" }
+    return ctx.view("src/users/views/profile.etlua", { user = user })
+   
+end
+
+return UsersController</code></pre>
+                </div>
+                <h3>Definindo a Rota para a View</h3>
+                <div class="code-block">
+                    <pre><code class="language-lua">-- src/users/routes/users.lua
+local controller = require("src.users.controllers.users")
+return function(app, prefix)
+    prefix = prefix or "/users"
+    app:get(prefix .. "/profile", function(ctx)
+        return controller:profile(ctx)
+    end)
+end</code></pre>
+                </div>
+                <hr>
             </section>
 
             <section id="middleware" class="doc-section">
