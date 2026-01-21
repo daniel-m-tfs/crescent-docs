@@ -3554,7 +3554,7 @@ local response, err = api:post("/users", { name = "Maria" })</code></pre>
                 <hr>
             </section>
 
-            <section id="email" class="doc-section">
+            <section id="jwt-json-web-tokens" class="doc-section">
                 <h2>🔑 JWT (JSON Web Tokens)</h2>
 
                 <p>O Crescent fornece suporte completo para autenticação JWT sem dependências externas, usando apenas funções nativas do OpenResty.</p>
@@ -3754,31 +3754,59 @@ local header, payload = auth.decode_token(token)</code></pre>
 
                 <div class="code-block">
                     <pre><code class="language-lua">-- src/auth/services/auth.lua
-local jwt = require('crescent.utils.jwt')
-local hash = require('crescent.utils.hash')
-local User = require('src.users.models.user')
+-- Service para lógica de negócio de Auth
 
 local AuthService = {}
+local auth = require('crescent.middleware.auth')
+local hash = require("crescent.utils.hash")
+local User = require("src.users.models.users")
 
--- Registro de usuário
-function AuthService.register(data)
-    -- Validar dados
-    if not data.email or not data.password then
-        error("Email e senha são obrigatórios")
+function AuthService:login(body)
+    
+    -- Buscar usuário
+    local user = User:where({email = body.email}):first()
+    
+    if not user then
+        return { error = "Credenciais inválidas", code = 401 }
     end
     
-    -- Hash da senha
+    -- Verificar senha
+    if not hash.verify(body.password, user.password) then
+        return { error = "Credenciais inválidas", code = 401 }
+    end
+    
+    -- Gerar tokens
+    local tokens = auth.generate_token_pair(user)
+    
+    return {
+        user = {
+            id = user.id,
+            name = user.name,
+            email = user.email
+        },
+        tokens = tokens
+    }
+end
+
+function AuthService:register(data)
+    
+    if User:where({email = data.email}):exists() then
+        return { error = "Email já está em uso", code = 400 }
+    end
+
+    if not data.email or not data.password then
+        return { error = "Email e senha são obrigatórios", code = 400 }
+    end
+    
     local passwordHash = hash.encrypt(data.password)
     
-    -- Criar usuário
     local user = User:create({
         name = data.name,
         email = data.email,
         password = passwordHash
     })
     
-    -- Gerar tokens
-    local tokens = AuthService.generateTokens(user)
+    local tokens = auth.generate_token_pair(user)
     
     return {
         user = {
@@ -3790,57 +3818,28 @@ function AuthService.register(data)
     }
 end
 
--- Login de usuário
-function AuthService.login(email, password)
-    -- Buscar usuário
-    local user = User:where({email = email}):first()
-    
-    if not user then
-        error("Credenciais inválidas")
-    end
-    
-    -- Verificar senha
-    if not hash.verify(password, user.password) then
-        error("Credenciais inválidas")
-    end
-    
-    -- Gerar tokens
-    local tokens = AuthService.generateTokens(user)
-    
-    return {
-        user = {
-            id = user.id,
-            name = user.name,
-            email = user.email
-        },
-        tokens = tokens
-    }
-end
+function AuthService:refresh_token(refresh_token)
 
--- Refresh token
-function AuthService.refresh(refresh_token)
-    local secret = os.getenv('JWT_SECRET')
-    
     -- Verificar refresh token
-    local ok, payload = jwt.verify(refresh_token, secret)
+    local ok, payload = auth.verify_token(refresh_token)
     
     if not ok then
-        error("Token inválido ou expirado")
+        return { error = "Token inválido ou expirado", code = 401 }
     end
     
     -- Buscar usuário
     local user = User:find(payload.user_id)
     
     if not user then
-        error("Usuário não encontrado")
+        return { error = "Usuário não encontrado", code = 404 }
     end
     
     -- Gerar novo access token
-    local access_token = jwt.create_access_token({
+    local access_token = auth.generate_access_token({
         user_id = user.id,
         username = user.name,
         email = user.email
-    }, secret)
+    })
     
     return {
         access_token = access_token,
@@ -3849,26 +3848,6 @@ function AuthService.refresh(refresh_token)
     }
 end
 
--- Helper para gerar tokens
-function AuthService.generateTokens(user)
-    local secret = os.getenv('JWT_SECRET')
-    
-    local payload = {
-        user_id = user.id,
-        username = user.name,
-        email = user.email
-    }
-    
-    local access_token = jwt.create_access_token(payload, secret)
-    local refresh_token = jwt.create_refresh_token(payload, secret)
-    
-    return {
-        access_token = access_token,
-        refresh_token = refresh_token,
-        token_type = "Bearer",
-        expires_in = 900
-    }
-end
 
 return AuthService</code></pre>
                 </div>
