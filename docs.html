@@ -236,6 +236,7 @@
                         <li><a href="#assertions-disponíveis">📋 Assertions Disponíveis</a></li>
                         <li><a href="#exemplo-completo-de-teste">📝 Exemplo Completo de Teste</a></li>
                         <li><a href="#hash-de-senhas-pbkdf2">🔐 Hash de Senhas (PBKDF2)</a></li>
+                        <li><a href="#apis-externas">🌐 APIs Externas</a></li>
                         <li><a href="#jwt-json-web-tokens">🔑 JWT (JSON Web Tokens)</a></li>
                         <li><a href="#variáveis-de-ambiente">🌐 Variáveis de Ambiente</a></li>
                         <li><a href="#headers-http">📨 Headers HTTP</a></li>
@@ -3502,6 +3503,54 @@ local md5sum = hash.md5("dados")</code></pre>
 
                 <hr>
 
+            </section>
+
+            <section id="apis-externas">
+                <h2>🌐 APIs Externas</h2>
+
+                <p>O Crescent inclui um módulo para fazer requisições HTTP de forma simples e eficiente, similar ao axios do Node.js.</p>
+
+                <h3>Exemplo de Uso</h3>
+                <div class="code-block">
+                    <pre><code class="language-lua">local http = require("crescent.utils.http")
+
+-- Uso simples (similar ao axios)
+local response, err = http.get("https://api.example.com/users")
+if response then
+    print(response.data)
+end
+
+-- POST com dados JSON
+local response, err = http.post("https://api.example.com/users", {
+    name = "João",
+    email = "joao@example.com"
+})
+
+-- Com headers personalizados
+local response, err = http.get("https://api.example.com/users", {
+    headers = {
+        ["Authorization"] = "Bearer token123"
+    },
+    params = {
+        page = 1,
+        limit = 10
+    }
+})
+
+-- Criar instância com configuração base
+local api = http.create({
+    baseURL = "https://api.example.com",
+    headers = {
+        ["Authorization"] = "Bearer token123",
+        ["Accept"] = "application/json"
+    }
+})
+
+-- Usar a instância
+local response, err = api:get("/users")
+local response, err = api:post("/users", { name = "Maria" })</code></pre>
+                </div>
+                <hr>
             </section>
 
             <section id="jwt-json-web-tokens" class="doc-section">
