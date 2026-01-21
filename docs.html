@@ -238,6 +238,7 @@
                         <li><a href="#hash-de-senhas-pbkdf2">🔐 Hash de Senhas (PBKDF2)</a></li>
                         <li><a href="#apis-externas">🌐 APIs Externas</a></li>
                         <li><a href="#jwt-json-web-tokens">🔑 JWT (JSON Web Tokens)</a></li>
+                        <li><a href="#email">📧 Email</a></li>
                         <li><a href="#variáveis-de-ambiente">🌐 Variáveis de Ambiente</a></li>
                         <li><a href="#headers-http">📨 Headers HTTP</a></li>
                         <li><a href="#path-utilities">🛤️ Path Utilities</a></li>
@@ -3553,7 +3554,7 @@ local response, err = api:post("/users", { name = "Maria" })</code></pre>
                 <hr>
             </section>
 
-            <section id="jwt-json-web-tokens" class="doc-section">
+            <section id="email" class="doc-section">
                 <h2>🔑 JWT (JSON Web Tokens)</h2>
 
                 <p>O Crescent fornece suporte completo para autenticação JWT sem dependências externas, usando apenas funções nativas do OpenResty.</p>
@@ -4010,6 +4011,68 @@ end</code></pre>
                         <li>Esquecer de validar expiração</li>
                         <li>Confiar apenas no token sem validar usuário no banco</li>
                     </ul>
+                </div>
+
+                <hr>
+
+            </section>
+
+            <section id="email" class="doc-section">
+                <h2>📧 Envio de Emails</h2>
+                <p>Utilize a biblioteca de email para enviar mensagens via SMTP com suporte a HTML, texto simples e múltiplos destinatários.</p>
+
+                <div class="code-block>">
+                    <pre><code class="language-lua">local mail = require("crescent.utils.mail")
+
+-- 1. Email de texto simples
+local result, err = mail.send_text(
+    "destino@example.com",
+    "Bem-vindo!",
+    "Olá, bem-vindo ao nosso sistema!"
+)
+
+-- 2. Email HTML com fallback para texto
+local result, err = mail.send_html(
+    "destino@example.com",
+    "Confirmação de Cadastro",
+    "<h1>Bem-vindo!</h1><p>Seu cadastro foi confirmado.</p>",
+    "Bem-vindo! Seu cadastro foi confirmado."
+)
+
+-- 3. Múltiplos destinatários com CC e BCC
+local result, err = mail.send({
+    to = { "user1@example.com", "user2@example.com" },
+    cc = "gerente@example.com",
+    bcc = "admin@example.com",
+    subject = "Relatório Mensal",
+    html = "<h1>Relatório</h1>",
+    text = "Relatório",
+    reply_to = "suporte@example.com"
+})
+
+-- 4. Com template HTML
+local result, err = mail.send_template(
+    "user@example.com",
+    "Recuperação de Senha",
+    "views/emails/reset_password.etlua",
+    { user_name = "João", reset_link = "https://..." }
+)
+
+-- 5. Instância customizada
+local custom_mail = mail.create({
+    server = "smtp.mailgun.org",
+    port = 587,
+    user = "postmaster@mg.example.com",
+    password = "sua_chave_api",
+    from = "noreply@example.com",
+    from_name = "Sistema de Notificações"
+})
+
+custom_mail:send_text("destino@example.com", "Teste", "Mensagem")
+
+-- 6. Verificar conexão SMTP
+local ok, msg = mail.verify()
+print(ok and "✓ SMTP OK" or "✗ Erro: " .. msg)</code></pre>
                 </div>
 
                 <hr>
