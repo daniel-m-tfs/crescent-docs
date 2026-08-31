@@ -1,175 +1,78 @@
-# 📚 Sistema de Documentação do Crescent Framework# 🌙 Crescent Framework - Documentation
+# 📚 Sistema de Documentação do Crescent Framework
 
+Este repositório contém o site de documentação e o site institucional do Crescent Framework.
 
+**Site publicado:** https://crescent.tyne.com.br
 
-Este diretório contém o sistema de documentação modular do Crescent Framework.Official documentation website for Crescent Framework.
-
-
-
-## 📁 Estrutura**Live Site:** https://crescent.tyne.com.br
-
-
-
-```## 📁 Structure
-
-crescent-docs/
-
-├── docs/                          # 📝 Arquivos Markdown fonte```
-
-│   ├── getting-started.md         # 🚀 Instalação e primeiros passossite/
-
-│   ├── core-concepts.md           # 🎯 Rotas, Controllers, Services, Models├── index.html       # Homepage
-
-│   ├── database.md                # 🗄️ ORM, Migrations, Query Builder├── docs.html        # Documentation
-
-│   ├── cli.md                     # 🛠️ Comandos do CLI├── styles.css       # Global styles
-
-│   ├── utilities.md               # 🧰 Testes, Hash, Helpers├── docs.css         # Docs styles
-
-│   └── deployment.md              # 🚀 Deploy, NGINX, SSL, Systemd├── sitemap.xml      # Sitemap
-
-│└── robots.txt       # SEO
-
-├── docs.html                      # 🌐 HTML gerado (PUBLICAR ESTE)```
-
-├── docs-backup.html               # 💾 Backup do HTML anterior
-
-├── convert-docs.py                # 🔧 Script de conversão MD → HTML## 🚀 Development
-
-├── styles.css                     # 🎨 Estilos gerais
-
-└── docs.css                       # 🎨 Estilos específicos da documentaçãoJust open `index.html` in a browser or use a local server:
+## 📁 Estrutura
 
 ```
+crescent-docs/
+├── docs/                    # 📝 Arquivos Markdown fonte (edite estes)
+│   ├── getting-started.md   # 🚀 Instalação e primeiros passos
+│   ├── core-concepts.md     # 🎯 Rotas, Controllers, Services, Models
+│   ├── database.md          # 🗄️ ORM, Migrations, Query Builder
+│   ├── cli.md                # 🛠️ Comandos do CLI
+│   ├── utilities.md         # 🧰 Testes, Hash, Helpers
+│   └── deployment.md        # 🚀 Deploy, NGINX, SSL, Systemd
+├── index.html                # Homepage
+├── docs.html                 # 🌐 Página de documentação publicada
+├── styles.css                # Estilos globais (site institucional)
+├── docs.css                  # Estilos específicos da documentação
+├── menu.css / menu.js        # Menu de navegação do topo
+├── script.js / docs.js       # Comportamento do site (scroll, copy button, etc)
+├── sitemap.xml / robots.txt  # SEO
+```
+
+## ⚠️ Estado atual: `docs.html` é editado à mão
+
+Hoje `docs/*.md` e `docs.html` são mantidos **manualmente em paralelo** — não
+existe nenhum script conectando os dois. Um script de conversão
+(`convert-docs.py`) chegou a existir, mas foi removido do repositório; esta
+seção do README será atualizada assim que o gerador for reconstruído.
+
+Isso já causou divergência real entre os dois: várias seções de `docs.html`
+ficaram desatualizadas em relação ao `docs/*.md` correspondente. Ao editar
+documentação:
+
+1. Edite o `.md` correspondente em `docs/`.
+2. Replique a mudança manualmente em `docs.html` (mesmo `id` de seção, mesmo
+   conteúdo, HTML com entidades escapadas em vez de Markdown).
+3. Confira visualmente abrindo `docs.html` num navegador antes de publicar.
+
+## 🚀 Rodando localmente
 
 ```bash
-
-## 🔄 Workflow de Atualização# Python
-
+# Python
 python3 -m http.server 8000
 
-### 1. Editar Documentação
-
 # Node.js
+npx http-server
 
-Edite os arquivos `.md` na pasta `docs/`:npx http-server
-
-
-
-```bash# PHP
-
-# Editar seção de ORMphp -S localhost:8000
-
-nano docs/database.md```
-
-
-
-# Adicionar novo comando CLI## 🎨 Features
-
-nano docs/cli.md
-
-```- Netflix-style hero with animations
-
-- Fully responsive design
-
-### 2. Regenerar HTML- Mobile hamburger menu
-
-- Syntax highlighting with Prism.js
-
-Execute o script de conversão:- SEO optimized
-
-- Open Graph meta tags
-
-```bash
-
-python3 convert-docs.py## 📝 Content
-
+# PHP
+php -S localhost:8000
 ```
 
-To update documentation, edit `docs.html`.
+Depois abra `http://localhost:8000/index.html` ou `http://localhost:8000/docs.html`.
 
-O script irá:
+## 🎨 Features do site
 
-- ✅ Ler todos os 6 arquivos Markdown## 🤝 Contributing
+- Hero animado, design responsivo, menu hambúrguer mobile
+- Syntax highlighting com Prism.js
+- Meta tags de SEO / Open Graph / Twitter Card
+- Botão de copiar código, destaque de navegação por scroll (`docs.js`)
 
-- ✅ Converter para HTML com syntax highlighting
+## 🤝 Contribuindo
 
-- ✅ Gerar navegação automática com linksFound a typo or want to improve the docs? PRs welcome!
+Encontrou um erro ou quer melhorar a documentação? PRs são bem-vindos —
+lembre de manter `docs/*.md` e `docs.html` em sincronia (ver seção acima)
+até o gerador automatizado existir de novo.
 
-- ✅ Adicionar estilos para code blocks e boxes
+## 🔗 Links
 
-- ✅ Criar `docs.html` completo## 🔗 Links
-
-
-
-### 3. Verificar Resultado- **Framework:** https://github.com/daniel-m-tfs/crescent-framework
-
+- **Framework:** https://github.com/daniel-m-tfs/crescent-framework
 - **Starter:** https://github.com/daniel-m-tfs/crescent-starter
-
-Abra `docs.html` no navegador para verificar:- **LuaRocks:** https://luarocks.org/modules/crescent
-
-
-```bash
-open docs.html  # macOS
-xdg-open docs.html  # Linux
-```
-
-### 4. Publicar
-
-Faça commit e push:
-
-```bash
-git add docs/ docs.html convert-docs.py
-git commit -m "docs: atualizar documentação do ORM"
-git push origin main
-```
-
-## 📊 Estatísticas Atuais
-
-**Conteúdo processado:**
-- 📁 6 arquivos Markdown modulares
-- 📄 68 seções individuais
-- 📏 ~4177 linhas de HTML gerado
-- 🔗 68 links de navegação automáticos
-
-## 🎨 Elementos de Markdown Suportados
-
-### Code Blocks
-````markdown
-```lua
-local Router = require('crescent.core.router')
-```
-````
-
-### Listas
-```markdown
-- Item não ordenado
-1. Item ordenado
-```
-
-### Links
-```markdown
-[Texto](https://url.com)
-[Seção](#secao-id)
-```
-
-### Formatação
-```markdown
-**Negrito**
-*Itálico*
-`código inline`
-```
-
-## 🔧 Como Funciona
-
-O script `convert-docs.py` faz:
-
-1. **Lê** todos os arquivos `.md` da pasta `docs/`
-2. **Converte** Markdown para HTML válido
-3. **Extrai** seções (H2) para criar âncoras de navegação
-4. **Gera** menu lateral automático com links
-5. **Injeta** CSS inline para boxes e estilos
-6. **Cria** arquivo `docs.html` completo e auto-contido
+- **LuaRocks:** https://luarocks.org/modules/crescent
 
 ## 📝 Licença
 

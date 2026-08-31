@@ -85,24 +85,37 @@ luvit crescent-cli test
 - 📈 Apresenta resumo final com estatísticas
 - ✅/❌ Feedback visual colorido com emojis
 
-**Exemplo de saída:**
+**Exemplo de saída (real, capturada rodando `runSuite` e o comando `test`):**
 ```
 🌙 Executando Testes Crescent
 
-ℹ Encontrados 3 arquivo(s) de teste
+ℹ Encontrados 1 arquivo(s) de teste
 
-📄 Executando: tests/test-users.lua
-────────────────────────────────────
+📄 Executando: tests/test-product.lua
+────────────────────────────────────────────────────────────
+
+=== Test Suite: Product Model Tests ===
+Running test: testCreate
 ✅ testCreate passed
+Running test: testUpdate
 ✅ testUpdate passed
+Running test: testDelete
 ✅ testDelete passed
 
 === Results: 3/3 passed, 0 failed ===
 
-════════════════════════════════════
+════════════════════════════════════════════════════════════
 🌙 Resumo dos Testes
-✅ Todos os testes passaram! (3/3)
+
+Total de arquivos executados: 1
+
+✅ Todos os testes passaram! (1/1)
 ```
+
+> Cada suíte (`tests.runSuite`) sempre imprime `=== Test Suite: <nome> ===`
+> e uma linha `Running test: <nome>` antes de cada resultado — é assim que
+> `crescent/utils/tests.lua` funciona por baixo, independente de rodar via
+> `luvit crescent-cli test` ou chamando o arquivo de teste direto.
 
 ---
 
@@ -121,6 +134,8 @@ luvit crescent-cli make:controller Product catalog
 **Template gerado:**
 ```lua
 -- src/product/controllers/product.lua
+-- Controller para Product
+
 local service = require("src.product.services.product")
 local ProductController = {}
 
@@ -184,6 +199,8 @@ luvit crescent-cli make:service Product
 **Template gerado:**
 ```lua
 -- src/product/services/product.lua
+-- Service para lógica de negócio de Product
+
 local ProductService = {}
 local Product = require("src.product.models.product")
 
@@ -233,6 +250,8 @@ luvit crescent-cli make:model Product
 **Template gerado:**
 ```lua
 -- src/product/models/product.lua
+-- Model para Product usando Active Record ORM
+
 local Model = require("crescent.database.model")
 
 local Product = Model:extend({
@@ -242,28 +261,50 @@ local Product = Model:extend({
     soft_deletes = false,
     
     fillable = {
+        -- Adicione aqui os campos que podem ser preenchidos em massa
         "name",
     },
     
     hidden = {
+        -- Campos que não devem aparecer em JSON/serialização
         -- "password"
     },
 
     guarded = {
+        -- Campos protegidos contra mass assignment
         -- "id", "created_at", "updated_at"
     },
     
     validates = {
+        -- Adicione validações aqui
         name = {required = true, min = 3, max = 255},
     },
     
     relations = {
+        -- Defina relações aqui
         -- posts = {type = "hasMany", model = "Post", foreign_key = "user_id"},
+        -- profile = {type = "hasOne", model = "Profile", foreign_key = "user_id"},
     }
 })
 
+-- Métodos personalizados do model
+-- function Product:customMethod()
+--     -- Seu código aqui
+-- end
+
 return Product
 ```
+
+> ⚠️ O template gerado usa `validates = {min = 3, max = 255}` e
+> `relations = { posts = {type = "hasMany", ...} }` como exemplo/lembrete
+> nos comentários, mas essas chaves **não são reconhecidas** pela
+> implementação real de `Model:validate()` (que só suporta `required`,
+> `min_length`, `max_length`, `email`, `unique`) nem pelo mecanismo real de
+> relações (que espera uma função, não uma tabela declarativa — veja
+> **[Database & ORM → Relações](/docs/database#relações)**). Isso é um
+> defeito do próprio gerador (`cli/templates.lua`), não só da doc — se for
+> usar validação ou relações, troque pelo formato real documentado em
+> [Database & ORM](/docs/database).
 
 ---
 
@@ -369,30 +410,46 @@ luvit crescent-cli make:migration create_products_table
 ```
 
 **Padrões de nome reconhecidos:**
-- `create_xxx_table` → Cria tabela "xxx"
-- `add_xxx_to_yyy` → Adiciona coluna na tabela "yyy"
-- `drop_xxx_table` → Remove tabela "xxx"
-- `update_xxx_table` → Atualiza tabela "xxx"
+
+O nome da migration só decide qual **nome de tabela** é extraído — o SQL
+gerado é sempre o mesmo (`CREATE TABLE IF NOT EXISTS <tabela> (...)` no
+`up()`, `DROP TABLE IF EXISTS <tabela>` no `down()`), não importa qual dos
+4 padrões você usa:
+
+- `create_xxx_table` → tabela extraída: "xxx"
+- `add_xxx_to_yyy` → tabela extraída: "yyy"
+- `drop_xxx_table` → tabela extraída: "xxx"
+- `update_xxx_table` → tabela extraída: "xxx"
+
+Se o nome não bater com nenhum desses padrões, a tabela extraída é
+`"example"`. O gerador **não** cria colunas específicas nem gera
+`ALTER TABLE`/`ADD COLUMN` — sempre produz a mesma tabela genérica
+(`id`, `name`, `created_at`, `updated_at`); editar `up()`/`down()` à mão
+pra adicionar colunas/índices reais é o fluxo esperado (veja exemplos em
+[Database & ORM → Migrations](/docs/database#migrations)).
 
 **Cria:** `migrations/20260109123456_create_products_table.lua`
 
-**Template gerado:**
+**Template gerado (sempre igual, independente do nome da migration):**
 ```lua
 -- migrations/20260109123456_create_products_table.lua
+-- Migration: create_products_table
+
 local Migration = {}
 
+-- Executa a migration (criar tabelas, adicionar colunas, etc)
 function Migration:up()
     return [[
         CREATE TABLE IF NOT EXISTS products (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
-            price DECIMAL(10,2),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ]]
 end
 
+-- Desfaz a migration (remover tabelas, colunas, etc)
 function Migration:down()
     return [[
         DROP TABLE IF EXISTS products;
@@ -417,14 +474,16 @@ luvit crescent-cli migrate:rollback
 luvit crescent-cli migrate:status
 ```
 
-**Exemplo de saída:**
+**Exemplo de saída (real, formato de `crescent/database/migrate.lua`):**
 ```
-🔄 Executando migrations pendentes...
+🌙 Executando Migrations
 
-✓ 20260108230701_create_users_table.lua aplicada
-✓ 20260109123456_create_products_table.lua aplicada
+→ Executando: 20260108230701_create_users_table
+  Executada com sucesso!
+→ Executando: 20260109123456_create_products_table
+  Executada com sucesso!
 
-✅ 2 migrations executadas com sucesso!
+Total: 2 migration(s) executada(s)
 ```
 
 ---

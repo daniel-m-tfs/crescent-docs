@@ -187,6 +187,13 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
+> O Crescent Framework já vem com um `config/nginx.conf` de referência bem
+> mais completo que o exemplo básico acima — com rate limiting por zona
+> (`limit_req_zone`), cache de assets estáticos, headers de segurança e
+> bloqueio de scanners comuns (`/wp-admin`, `/phpmyadmin`, etc). Vale usar
+> ele como ponto de partida em vez do exemplo mínimo acima; a seção SSL
+> abaixo já reflete a versão com SSL desse arquivo.
+
 ---
 
 ## 🔒 SSL/HTTPS com Let's Encrypt
@@ -209,12 +216,26 @@ sudo certbot --nginx -d meuapp.com -d www.meuapp.com
 
 ### Configuração NGINX com SSL
 
+Esta é a versão adaptada do `config/nginx.conf` que já vem no Crescent
+Framework — troque `yourdomain.com` pelo seu domínio real:
+
 ```nginx
 # /etc/nginx/sites-available/meu-app
+
+upstream crescent_backend {
+    server 127.0.0.1:8080;
+    keepalive 64;
+}
+
+# Rate limiting zones
+limit_req_zone $binary_remote_addr zone=general_limit:10m rate=10r/s;
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=20r/s;
+limit_req_zone $binary_remote_addr zone=auth_limit:10m rate=5r/s;
+
 server {
     listen 80;
     server_name meuapp.com www.meuapp.com;
-    
+
     # Redirecionar para HTTPS
     return 301 https://$server_name$request_uri;
 }
@@ -227,43 +248,89 @@ server {
     ssl_certificate /etc/letsencrypt/live/meuapp.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/meuapp.com/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers HIGH:!aNULL:!MD5;
-    ssl_prefer_server_ciphers on;
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
+    ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:50m;
+    ssl_session_timeout 1d;
 
-    # HSTS (opcional mas recomendado)
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    # Headers de segurança
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
     # Logs
     access_log /var/log/nginx/meu-app-access.log;
     error_log /var/log/nginx/meu-app-error.log;
 
-    # Proxy para Luvit
+    client_max_body_size 10M;
+
+    # Rotas normais
     location / {
-        proxy_pass http://127.0.0.1:8080;
+        limit_req zone=general_limit burst=20 nodelay;
+        limit_req_status 429;
+
+        proxy_pass http://crescent_backend;
         proxy_http_version 1.1;
-        
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
+
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+        proxy_set_header Connection "";
+
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
-        
-        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Rotas de API — limite mais permissivo
+    location /api/ {
+        limit_req zone=api_limit burst=30 nodelay;
+        limit_req_status 429;
+
+        proxy_pass http://crescent_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Connection "";
+    }
+
+    # Rotas de auth (login/register) — limite restritivo
+    location ~ ^/(login|register|auth)/ {
+        limit_req zone=auth_limit burst=5 nodelay;
+        limit_req_status 429;
+
+        proxy_pass http://crescent_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # /health sem rate limit (usado pelo monitoramento externo, ver seção abaixo)
+    location /health {
+        access_log off;
+        proxy_pass http://crescent_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header Connection "";
     }
 
     # Arquivos estáticos
-    location /static {
+    location /static/ {
         alias /var/www/meu-app/public;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
+
+    # Bloqueia acesso a arquivos ocultos, backups e scanners comuns
+    location ~ /\. { deny all; access_log off; log_not_found off; }
+    location ~ ~$ { deny all; access_log off; log_not_found off; }
+    location ~ /(wp-admin|wp-login|phpmyadmin|admin) { deny all; access_log off; log_not_found off; }
 }
 ```
 
@@ -305,12 +372,24 @@ Group=www-data
 WorkingDirectory=/var/www/meu-app
 Environment="PATH=/home/www-data/.local/bin:/usr/local/bin:/usr/bin:/bin"
 Environment="APP_ENV=production"
-ExecStart=/home/www-data/.local/bin/luvit bootstrap.lua
+
+# app.lua é o entrypoint real (faz require("./bootstrap") e chama
+# app:listen()); bootstrap.lua sozinho só ajusta package.path e não sobe
+# servidor nenhum — apontar o ExecStart pra ele faz o serviço encerrar
+# imediatamente e ficar em loop de restart.
+ExecStart=/home/www-data/.local/bin/luvit app.lua
+
 Restart=always
 RestartSec=10
+StartLimitIntervalSec=60
+StartLimitBurst=3
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=meu-app
+
+# Recursos (opcional)
+MemoryLimit=512M
+CPUQuota=50%
 
 # Segurança
 NoNewPrivileges=true
@@ -322,6 +401,12 @@ ReadWritePaths=/var/www/meu-app
 [Install]
 WantedBy=multi-user.target
 ```
+
+> Isso corresponde ao `config/crescent.service` que já vem no Crescent
+> Framework, com duas correções: o `ExecStart` de lá aponta pra um
+> `example.lua` que não existe no repo (deveria ser `app.lua`, igual acima),
+> e ele define tanto `APP_ENV` quanto `NODE_ENV` (resíduo de outro stack) —
+> o framework só lê `APP_ENV`.
 
 ### Gerenciar Service
 
@@ -675,20 +760,33 @@ jobs:
 
 ### Endpoint de Status
 
+Em `app.lua`, guarde o horário de início antes de `app:listen()`:
+
+```lua
+-- app.lua
+_G.APP_START_TIME = os.time()
+```
+
+O arquivo de rotas segue a mesma convenção usada por `make:routes`/`make:module`
+(`function(app, prefix)`, não um objeto "router" separado):
+
 ```lua
 -- src/health/routes/health.lua
-return function(router)
-    router:get("/health", function(ctx)
+return function(app, prefix)
+    app:get(prefix or "/health", function(ctx)
         -- Verificar banco
         local db = require('crescent.database.mysql')
         local dbOk = pcall(function()
             db:query("SELECT 1")
         end)
-        
+
         return ctx.json(200, {
             status = "ok",
             timestamp = os.date("%Y-%m-%d %H:%M:%S"),
-            uptime = os.clock(),
+            -- os.clock() mede CPU consumida pelo processo, não tempo de
+            -- parede — para uptime real, compare contra o horário salvo
+            -- na subida do servidor
+            uptime_seconds = os.time() - (_G.APP_START_TIME or os.time()),
             database = dbOk and "connected" or "disconnected"
         })
     end)

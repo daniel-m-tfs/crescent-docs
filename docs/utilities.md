@@ -35,7 +35,7 @@ tests.runSuite("User Tests", userTests)
 # Todos os testes
 luvit crescent-cli test
 
-# Teste específico
+# Um arquivo específico
 luvit tests/test-users.lua
 ```
 
@@ -166,9 +166,12 @@ local productTests = {
     end,
     
     testValidation = function()
-        tests.assertError(function()
-            Product:create({name = ""})  -- Nome vazio
-        end, "validation failed")
+        -- Product:create() não lança erro em validação inválida —
+        -- devolve nil + uma tabela de erros (retorno múltiplo)
+        local product, errors = Product:create({name = ""})
+
+        tests.assertNil(product)
+        tests.assertNotNil(errors)
     end,
     
     testFind = function()
@@ -297,8 +300,8 @@ function AuthService:register(data)
 end
 
 function AuthService:login(email, password)
-    -- Busca usuário
-    local user = User:where({email = email}):first()
+    -- Busca usuário (where() é posicional: coluna, [operador,] valor)
+    local user = User:where("email", email):first()
     
     if not user then
         return nil, "Usuário não encontrado"
@@ -328,18 +331,6 @@ local hash50k = hash.encrypt(senha, 50000)
 local hashPadrao = hash.encrypt(senha)  -- 10.000 iterações
 ```
 
-### Aliases Disponíveis
-
-```lua
--- Estas são equivalentes:
-hash.encrypt(senha)   -- ✅ Recomendado
-hash.encript(senha)   -- Alias (typo comum)
-
-hash.verify(senha, hash)   -- ✅ Recomendado  
-hash.decrypt(senha, hash)  -- Alias
-hash.decript(senha, hash)  -- Alias
-```
-
 ### Hashes Simples (Checksums)
 
 ```lua
@@ -352,11 +343,83 @@ local md5sum = hash.md5("dados")
 
 ⚠️ **Importante:** Nunca use SHA-256 ou MD5 direto para senhas! Sempre use `hash.encrypt()` que implementa PBKDF2 com salt.
 
+> `hash.encrypt()`/`hash.verify()` são os únicos nomes válidos hoje — os
+> aliases antigos (`encript`, `decrypt`, `decript`) foram removidos.
+
+---
+
+## 🌐 APIs Externas
+
+`crescent.utils.http` é um cliente HTTP estilo axios para consumir APIs
+externas, construído sobre `socket.http`/`ssl.https`/`ltn12`/`cjson`
+(dependências LuaRocks: `luasocket`, `luasec`, `lua-cjson`).
+
+### Uso Básico (instância padrão)
+
+```lua
+local http = require('crescent.utils.http')
+
+-- GET
+local result, err = http.get("https://api.exemplo.com/users/1")
+if result then
+    print(result.status)   -- 200
+    print(result.data)     -- corpo já decodificado como tabela se for JSON
+else
+    print(err.message)     -- "Request failed with status 404"
+end
+
+-- POST com corpo JSON (Content-Type: application/json é setado automaticamente)
+local result, err = http.post("https://api.exemplo.com/users", {
+    name = "João",
+    email = "joao@example.com"
+})
+
+-- PUT / PATCH / DELETE / HEAD / OPTIONS
+http.put(url, data)
+http.patch(url, data)
+http.delete(url)
+http.head(url)
+http.options(url)
+
+-- Requisição genérica
+local result, err = http.request({
+    url = "https://api.exemplo.com/search",
+    method = "GET",
+    params = { q = "crescent" },   -- vira ?q=crescent na URL
+    headers = { ["x-api-key"] = "..." }
+})
+```
+
+Retorno: em sucesso, `(result, nil)` — `result` tem `data` (corpo, já
+decodificado se for JSON válido), `status`, `statusText`, `headers`,
+`config`, `request`. Em falha, `(nil, result)` — o mesmo formato, mais
+`result.error = true` e `result.message`.
+
+### Instância customizada (baseURL, headers e timeout fixos)
+
+```lua
+local http = require('crescent.utils.http')
+
+local api = http.create({
+    baseURL = "https://api.exemplo.com",
+    timeout = 10,
+    headers = { ["Authorization"] = "Bearer " .. token }
+})
+
+local result, err = api:get("/users/1")  -- vira https://api.exemplo.com/users/1
+local result, err = api:post("/users", { name = "João" })
+```
+
 ---
 
 ## 🔐 JWT (JSON Web Tokens)
 
-O Crescent fornece suporte completo para autenticação JWT sem dependências externas, usando apenas funções nativas do OpenResty.
+O Crescent fornece suporte a autenticação JWT no runtime **Luvit** (não
+OpenResty/nginx — são runtimes Lua diferentes). `crescent.utils.jwt` tenta
+usar `openssl.hmac.digest` para o HMAC-SHA256 quando disponível (o módulo
+`openssl` já vem embutido no binário do Luvit — confirme com `luvit -v`) e
+cai para uma implementação SHA-256 pure-Lua automaticamente caso contrário,
+então funciona sem dependências extras de qualquer forma.
 
 ### Configurar JWT Secret
 
@@ -480,14 +543,20 @@ print("User ID:", payload.user_id)
 
 ### Middleware de Autenticação JWT
 
+Middlewares no Crescent são sempre **globais** (`app:use(middleware)`, sem
+segundo argumento de path) — não existe middleware escopado por rota. Para
+proteger só parte das rotas, registre o middleware depois das rotas
+públicas e antes das rotas protegidas, ou monte um sub-app/roteador
+separado por módulo.
+
 ```lua
 local auth = require('crescent.middleware.auth')
 
--- Middleware JWT básico
-app:use('/api/protected', auth.jwt())
+-- Middleware JWT básico (protege tudo que for registrado depois dele)
+app:use(auth.jwt())
 
 -- Com opções customizadas
-app:use('/api/admin', auth.jwt({
+app:use(auth.jwt({
     secret = os.getenv('JWT_SECRET'),
     issuer = "crescent-app",
     audience = "admin-panel",
@@ -591,8 +660,8 @@ end
 
 -- Login de usuário
 function AuthService.login(email, password)
-    -- Buscar usuário
-    local user = User:where({email = email}):first()
+    -- Buscar usuário (where() é posicional)
+    local user = User:where("email", email):first()
     
     if not user then
         error("Credenciais inválidas")
@@ -677,6 +746,7 @@ return AuthService
 ```lua
 -- src/auth/routes/auth.lua
 local AuthService = require('src.auth.services.auth')
+local auth = require('crescent.middleware.auth')
 
 return function(app)
     -- Registro
@@ -727,25 +797,13 @@ return function(app)
         
         return ctx.json(200, result)
     end)
-    
-    -- Profile (protegida)
-    local auth = require('crescent.middleware.auth')
-    
-    app:get('/auth/profile', auth.jwt(), function(ctx)
-        local user = ctx.state.user
-        return ctx.json(200, {
-            id = user.id,
-            name = user.name,
-            email = user.email
-        })
-    end)
-    
-    -- Logout (opcional - invalidar no cliente)
-    app:post('/auth/logout', auth.jwt(), function(ctx)
-        -- Em produção, considere blacklist de tokens
-        return ctx.json(200, {message = "Logout realizado"})
-    end)
 end
+
+-- Rotas protegidas (registre o middleware antes de montar essas rotas
+-- no app.lua, já que app:use() é sempre global):
+--
+--   app:use(auth.jwt())
+--   app:get('/auth/profile', function(ctx) ... end)
 ```
 
 ### Claims Padrão JWT
@@ -820,95 +878,213 @@ tests.runSuite("JWT Tests", jwtTests)
 
 ---
 
+## 📧 Email
+
+`crescent.utils.mail` envia email via SMTP, construído sobre
+`socket.smtp`/`ltn12`/`mime` (dependência LuaRocks: `luasocket`). As
+credenciais padrão vêm do `.env` (`SMTP_SERVER`, `SMTP_PORT`, `SMTP_USER`,
+`SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_FROM_NAME`).
+
+```bash
+# .env
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=seu_email@gmail.com
+SMTP_PASSWORD=sua_senha_de_app
+SMTP_FROM=seu_email@gmail.com
+SMTP_FROM_NAME="Minha Aplicação"
+```
+
+### Enviar Email
+
+```lua
+local mail = require('crescent.utils.mail')
+
+-- Texto simples
+local result, err = mail.send_text(
+    "destinatario@example.com",
+    "Bem-vindo!",
+    "Obrigado por se cadastrar."
+)
+
+-- HTML (com fallback em texto opcional)
+local result, err = mail.send_html(
+    "destinatario@example.com",
+    "Bem-vindo!",
+    "<h1>Bem-vindo!</h1><p>Seu cadastro foi confirmado.</p>",
+    "Bem-vindo! Seu cadastro foi confirmado."
+)
+
+-- Opções completas (to/cc/bcc aceitam string, array de strings, ou
+-- array de {email=..., name=...})
+local result, err = mail.send({
+    to = { { email = "user@example.com", name = "Usuário" } },
+    cc = "outro@example.com",
+    subject = "Relatório mensal",
+    html = "<h1>Relatório</h1>",
+    reply_to = "suporte@example.com"
+})
+
+if not result then
+    print("Falha ao enviar:", err)
+end
+```
+
+### Template (etlua)
+
+```lua
+local mail = require('crescent.utils.mail')
+
+-- Renderiza o .etlua com etlua.render, envia como HTML e gera
+-- automaticamente uma versão em texto puro (strip de tags)
+local result, err = mail.send_template(
+    "destinatario@example.com",
+    "Recuperação de senha",
+    "views/emails/reset-password.etlua",
+    { reset_link = "https://app.com/reset?token=abc123" }
+)
+```
+
+### Instância customizada e verificação de conexão
+
+```lua
+local mail = require('crescent.utils.mail')
+
+local custom_mailer = mail.create({
+    server = "smtp.outro-provedor.com",
+    port = 465,
+    user = "outro@example.com",
+    password = "..."
+})
+
+-- Testa conectividade TCP com o servidor SMTP (não envia email)
+local ok, msg = mail.verify()
+```
+
+---
+
 ## 🌐 Variáveis de Ambiente
 
 ```lua
 local env = require('crescent.utils.env')
 
--- Carregar .env
+-- Carregar .env (usado automaticamente por env.get() na primeira chamada)
 env.load('.env')
 
--- Obter valores
-local dbHost = env.get('DB_HOST', 'localhost')  -- Com fallback
-local port = env.get('PORT')
-local isDev = env.get('ENV') == 'development'
+-- Obter valores, com fallback opcional
+local dbHost = env.get('DB_HOST', 'localhost')
+local port = env.get('APP_PORT')
+local isDev = env.get('APP_ENV') == 'development'
 
--- Verificar se existe
-if env.has('API_KEY') then
-    -- usa API_KEY
-end
+-- Limpar cache (útil em testes que trocam variáveis em runtime)
+env.clear_cache()
 ```
+
+> Não existe `env.has(...)` — para checar presença, compare com `nil`:
+> `if env.get('API_KEY') then ... end`.
 
 ---
 
 ## 📨 Headers HTTP
 
+`crescent.utils.headers` normaliza headers de requisição (não é um parser
+de headers de resposta genérico).
+
 ```lua
 local headers = require('crescent.utils.headers')
 
--- Parse header string
-local contentType = headers.parse('Content-Type: application/json')
+-- normalize(req) recebe o OBJETO de requisição inteiro (req.rawHeaders /
+-- req.headers), não um nome de header — devolve uma tabela com todos os
+-- headers em lowercase: { authorization = "...", ["content-type"] = "..." }
+local normalized = headers.normalize(req)
 
--- Normalize header name
-local normalized = headers.normalize('content-type')  -- "Content-Type"
+-- Extrai o token de um header "Authorization: Bearer <token>" já normalizado
+local token = headers.get_bearer(normalized)
+```
 
--- Get header value
-local value = headers.get(ctx.headers, 'authorization')
+> ⚠️ **`headers.is_safe_value()` está quebrado hoje** (mesma causa de
+> `stringUtil.is_safe()`/`sanitize()`, ver seção "String Utilities" abaixo):
+> o pattern `[\r\n\0]` inclui um byte nulo dentro de uma character class, o
+> que lança `malformed pattern (missing ']')` em qualquer chamada neste
+> Luvit/LuaJIT, independente do conteúdo testado. Bug de código, reportado
+> aqui, não corrigido.
+
+Na prática, você raramente chama `headers.normalize()` direto — o
+`crescent.core.context` já expõe o resultado normalizado em `ctx.headers`,
+e `ctx.getHeader(name)` / `ctx.getBearer()` fazem a leitura pra você:
+
+```lua
+local auth_header = ctx.getHeader("authorization")
+local token = ctx.getBearer()
 ```
 
 ---
 
 ## 🛤️ Path Utilities
 
+`crescent.utils.path` foi feito para paths de **rota HTTP**, não para
+manipulação de paths de arquivo do sistema operacional (não existe
+`dirname`/`basename`/`extname`).
+
 ```lua
 local pathUtil = require('crescent.utils.path')
 
--- Join paths
-local fullPath = pathUtil.join('src', 'users', 'models', 'user.lua')
--- "src/users/models/user.lua"
+-- Junta dois segmentos de path (só 2 argumentos)
+local fullPath = pathUtil.join('/api', 'users')
+-- "/api/users"
 
--- Normalize path
-local normalized = pathUtil.normalize('src//users/../models/./user.lua')
--- "src/models/user.lua"
+-- Normaliza: colapsa "//" repetidos e garante "/" inicial
+-- (NÃO resolve ".."/"." — isso é tratado por is_safe, não normalize)
+local normalized = pathUtil.normalize('api//users')
+-- "/api/users"
 
--- Get directory
-local dir = pathUtil.dirname('src/users/models/user.lua')
--- "src/users/models"
+-- Valida se o path é seguro (sem ".." nem null byte) — usado
+-- internamente pelo middleware de arquivos estáticos contra path traversal
+local safe = pathUtil.is_safe('/../../etc/passwd')  -- false
+local safe2 = pathUtil.is_safe('/css/app.css')       -- true
 
--- Get filename
-local file = pathUtil.basename('src/users/models/user.lua')
--- "user.lua"
-
--- Get extension
-local ext = pathUtil.extname('user.lua')
--- ".lua"
+-- Compila um template de rota "/user/{id}" em pattern Lua + nomes de
+-- parâmetros — usado internamente pelo roteador
+local pattern, names = pathUtil.compile('/user/{id}')
+-- pattern: "^/user/?([^/]*)$"; names: {"id"}
 ```
 
 ---
 
 ## 🔤 String Utilities
 
+`crescent.utils.string` foca em segurança (sanitização/validação), não em
+manipulação geral de strings — não existem `split`/`startsWith`/
+`endsWith`/`upper`/`lower`/`titleCase`/`slugify`.
+
 ```lua
 local stringUtil = require('crescent.utils.string')
 
--- Trim whitespace
+-- Remove espaços do início/fim
 local trimmed = stringUtil.trim('  hello  ')  -- "hello"
 
--- Split string
-local parts = stringUtil.split('a,b,c', ',')  -- {"a", "b", "c"}
+-- Escapa metacaracteres de pattern Lua (evita injeção de pattern em
+-- gsub/match/find quando o texto vem de input externo)
+local safe_pattern = stringUtil.escape_lua_pattern('1.99 (promo)')
+-- "1%.99 %(promo%)"
 
--- Starts/ends with
-local starts = stringUtil.startsWith('hello', 'hel')  -- true
-local ends = stringUtil.endsWith('hello', 'lo')  -- true
-
--- Case transformations
-local upper = stringUtil.upper('hello')  -- "HELLO"
-local lower = stringUtil.lower('HELLO')  -- "hello"
-local title = stringUtil.titleCase('hello world')  -- "Hello World"
-
--- Slugify
-local slug = stringUtil.slugify('Hello World!')  -- "hello-world"
+-- Limita o tamanho (proteção contra payloads gigantes / DoS)
+local limited = stringUtil.limit(long_string, 8192)  -- default 8192
 ```
+
+Para split/case/slugify, use as primitivas nativas do Lua (`string.gmatch`,
+`string.upper`/`lower`, `string.gsub`) diretamente — não há um wrapper do
+Crescent pra isso hoje.
+
+> ⚠️ **`is_safe()` e `sanitize()` estão quebrados hoje.** Ambos usam o
+> pattern `[\0-\8\11-\12\14-\31\127]` (byte nulo como início de um range de
+> character class) — testado neste Luvit/LuaJIT, isso lança
+> `malformed pattern (missing ']')` em **qualquer** chamada, mesmo com
+> entrada sem byte nulo (o erro é no parsing do pattern, não no conteúdo).
+> É um bug no código-fonte (`crescent/utils/string.lua`), não um erro de
+> documentação — reportado, não corrigido aqui. Enquanto não for corrigido,
+> não use `is_safe()`/`sanitize()`; `escape_lua_pattern()` e `limit()`
+> continuam funcionando normalmente.
 
 ---
 
@@ -947,12 +1123,17 @@ local utilTests = {
         tests.assertEquals(stringUtil.trim("hello"), "hello")
     end,
     
-    testStringSplit = function()
-        local parts = stringUtil.split("a,b,c", ",")
-        tests.assertArrayLength(parts, 3)
-        tests.assertEquals(parts[1], "a")
-        tests.assertEquals(parts[3], "c")
+    testStringEscapePattern = function()
+        tests.assertEquals(stringUtil.escape_lua_pattern("1.99"), "1%.99")
+    end,
+
+    testStringLimit = function()
+        tests.assertEquals(#stringUtil.limit(string.rep("a", 20), 5), 5)
+        tests.assertEquals(stringUtil.limit("hello", 8192), "hello")
     end
+    -- stringUtil.is_safe()/sanitize() não entram aqui: estão quebrados
+    -- hoje (ver seção "String Utilities" acima), passariam pra sempre
+    -- lançar erro em vez de rodar a asserção
 }
 
 tests.runSuite("Utility Tests", utilTests)
@@ -1126,8 +1307,6 @@ end
 return ctx.html(200, html)
 ```
 
-📖 **Documentação completa:** [VIEWS.md](https://github.com/daniel-m-tfs/crescent-framework/blob/main/VIEWS.md)
-
 ---
 
 ## 💡 Boas Práticas
@@ -1151,7 +1330,7 @@ return ctx.html(200, html)
 ### Variáveis de Ambiente
 
 1. **Nunca commite `.env`**: Use `.env.example`
-2. **Use fallbacks**: `env.get('PORT', 8080)`
+2. **Use fallbacks**: `env.get('APP_PORT', 8080)`
 3. **Valide valores críticos**: MySQL, API keys
 4. **Diferentes arquivos por ambiente**: `.env.dev`, `.env.prod`
 

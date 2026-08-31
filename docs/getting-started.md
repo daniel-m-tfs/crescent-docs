@@ -19,11 +19,6 @@ Crescent é um framework web completo que combina a performance do Lua/LuaJIT co
 
 ## 📦 Instalação Rápida
 
-### Método 1: Download Direto (Recomendado)
-
-Baixe o template starter pronto para uso:
-
-
 ### Método 1: Via Lit Package Manager
 
 ```bash
@@ -43,8 +38,10 @@ luvit app.lua
 ### Método 2: CLI (Criar Novo Projeto)
 
 ```bash
-# Se você tem o CLI instalado globalmente
-crescent new meu-projeto
+# Rodando de dentro do diretório do Crescent Framework
+# (a instalação global do CLI ainda não funciona de qualquer diretório —
+# ver Troubleshooting)
+luvit crescent-cli.lua new meu-projeto
 cd meu-projeto
 cp .env.example .env
 nano .env
@@ -77,13 +74,19 @@ curl -L https://github.com/luvit/lit/raw/master/get-lit.sh | sh
 O Crescent Framework automaticamente inclui:
 
 - `luvit/luvit@2.18.1` - Runtime base
-- `creationix/mysql` - Driver MySQL (instalar separadamente)
+- `openssl` (via `lua-openssl`, já embutido no binário do Luvit — confirme
+  com `luvit -v`) - usado por `crescent.utils.hash` (PBKDF2) e, quando
+  disponível, por `crescent.utils.jwt` para HMAC-SHA256
 
-Para instalar o driver MySQL:
+O driver MySQL não é um pacote Lit — é um módulo LuaRocks, instale separadamente:
 
 ```bash
-lit install creationix/mysql
+luarocks install luasql-mysql
 ```
+
+Sem ele, o framework roda em modo mock (avisa no console e não conecta a um
+MySQL real), então dá pra seguir o resto do tutorial sem instalar nada
+ainda.
 
 ---
 
@@ -160,7 +163,11 @@ crescent-starter/
 
 ```bash
 # Ambiente
-ENV=development
+APP_ENV=development
+
+# Servidor
+APP_HOST=0.0.0.0
+APP_PORT=8080
 
 # Banco de Dados
 DB_HOST=localhost
@@ -168,10 +175,6 @@ DB_PORT=3306
 DB_NAME=meu_banco
 DB_USER=root
 DB_PASSWORD=senha_segura
-
-# Servidor
-PORT=8080
-HOST=0.0.0.0
 ```
 
 ### 2. Testar Conexão MySQL
@@ -180,7 +183,7 @@ HOST=0.0.0.0
 -- teste-conexao.lua
 local MySQL = require('crescent.database.mysql')
 
-MySQL:test()
+MySQL.test()
 ```
 
 ```bash
@@ -279,8 +282,8 @@ curl -X DELETE http://localhost:8080/product/1
 # Rodar todos os testes
 luvit crescent-cli test
 
-# Rodar teste específico
-luvit tests/test-users.lua
+# Rodar um arquivo de teste específico (substitua pelo nome real do seu teste)
+luvit tests/test-product.lua
 ```
 
 ---
@@ -347,8 +350,17 @@ lit install
 lsof -ti:8080 | xargs kill -9
 
 # Ou mude a porta no .env
-PORT=3000
+APP_PORT=3000
 ```
+
+### CLI global (`crescent`) não encontrado ou dá erro de módulo
+
+A instalação global do CLI (comando `crescent`, via `install.sh`) hoje só
+funciona corretamente quando rodada de dentro do diretório do Crescent
+Framework — `crescent-cli.lua` resolve `require("crescent.utils....")`
+relativo ao diretório atual, e não ajusta `package.path` como o
+`bootstrap.lua` de um projeto faz. Rodando de outro diretório, use o caminho
+completo: `luvit /caminho/para/Crescent\ Framework/crescent-cli.lua <comando>`.
 
 ---
 

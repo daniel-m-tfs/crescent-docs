@@ -229,7 +229,7 @@ function Controller:example(ctx)
     return ctx.text(200, "Hello")
     return ctx.html(200, "<h1>Hello</h1>")
     return ctx.no_content()  -- 204
-    return ctx.redirect(302, "/new-url")
+    return ctx.redirect("/new-url", 302)  -- (location, status) — nessa ordem
 end
 ```
 
@@ -343,6 +343,7 @@ return UsersService
 -- src/orders/services/orders.lua
 local OrdersService = {}
 local Order = require("src.orders.models.order")
+local OrderItem = require("src.orders.models.order_item")
 local Product = require("src.products.models.product")
 local User = require("src.users.models.user")
 
@@ -386,10 +387,18 @@ function OrdersService:createOrder(userId, items)
         status = "pending"
     })
     
-    -- Adicionar itens ao pedido
+    -- Adicionar itens ao pedido (order_items é uma tabela separada — o Model
+    -- não tem um `addItem`/`items` prontos, então isso é feito na mão aqui;
+    -- se quiser algo reutilizável, defina um método customizado na classe
+    -- Order, como `function Order:isLowStock()` é mostrado em database.md)
     for _, item in ipairs(validatedItems) do
-        order:addItem(item)
-        
+        OrderItem:create({
+            order_id = order.id,
+            product_id = item.product_id,
+            quantity = item.quantity,
+            price = item.price
+        })
+
         -- Atualizar estoque
         local product = Product:find(item.product_id)
         product:update({
@@ -412,8 +421,8 @@ function OrdersService:cancelOrder(orderId)
     end
     
     -- Devolver produtos ao estoque
-    local items = order:items()
-    
+    local items = OrderItem:where("order_id", order.id):get()
+
     for _, item in ipairs(items) do
         local product = Product:find(item.product_id)
         product:update({
@@ -473,6 +482,12 @@ function OrdersService:processPayment(orderId, paymentData)
 end
 ```
 
+> ⚠️ **Isso não é uma transação atômica de verdade hoje.** `crescent/database/mysql.lua`
+> pega uma conexão do pool a cada chamada de `query()` e devolve ao final dela — não
+> há garantia de que `START TRANSACTION`, as queries do meio e o `COMMIT`/`ROLLBACK`
+> rodem na mesma conexão. Trate como limitação conhecida (ver [Database & ORM](/docs/database))
+> até o driver expor uma conexão dedicada por transação.
+
 ---
 
 ## 💾 Models (Básico)
@@ -501,9 +516,9 @@ local User = Model:extend({
     },
     
     validates = {
-        name = { required = true, min = 3, max = 100 },
+        name = { required = true, min_length = 3, max_length = 100 },
         email = { required = true, email = true, unique = true },
-        password = { required = true, min = 6 }
+        password = { required = true, min_length = 6 }
     }
 })
 
@@ -523,7 +538,7 @@ local user = User:create({
 -- READ
 local user = User:find(1)
 local users = User:all()
-local user = User:where({email = "john@example.com"}):first()
+local user = User:where("email", "john@example.com"):first()
 
 -- UPDATE
 user:update({name = "Jane Doe"})
@@ -539,99 +554,83 @@ Para mais detalhes sobre Models, veja [Database & ORM](/docs/database).
 ## 🔒 Middleware
 
 Middleware processa requisições antes que cheguem aos controllers.
+`crescent/middleware/{auth,logger,cors,security,static}.lua` já trazem
+implementações prontas — normalmente você só precisa registrá-las com
+`app:use(...)`, sem reescrever nada.
 
-### Middleware de Autenticação
+> ⚠️ **Middleware no Crescent é sempre global.** `app:use(middleware)`
+> registra a função pra rodar em **toda** requisição — não existe
+> `app:get(path, middleware, handler)` nem middleware escopado por
+> grupo de rotas (`Server:group(prefix, fn)` só agrupa prefixo de path,
+> não aplica middleware). Se precisar proteger só algumas rotas, ou você
+> escreve um middleware que confere `ctx.path` e deixa passar
+> (`return next()`) pras rotas públicas, ou faz a checagem manualmente
+> dentro do handler daquela rota específica.
 
-```lua
--- crescent/middleware/auth.lua
-local Auth = {}
-
-function Auth.middleware(ctx, next)
-    local token = ctx.headers['authorization']
-    
-    if not token then
-        return ctx.json(401, { error = "No token provided" })
-    end
-    
-    -- Validar token
-    local user = validateToken(token)
-    
-    if not user then
-        return ctx.json(401, { error = "Invalid token" })
-    end
-    
-    -- Adicionar usuário ao contexto
-    ctx.user = user
-    
-    -- Continuar para próximo middleware/controller
-    return next()
-end
-
-return Auth
-```
-
-### Aplicar Middleware
+### Middleware de Autenticação (JWT pronto)
 
 ```lua
 -- app.lua
 local auth = require('crescent.middleware.auth')
 
--- Global (todas as rotas)
-app:use(auth.middleware)
+-- Protege TODAS as rotas registradas depois desta linha
+app:use(auth.jwt({ secret = env.get("JWT_SECRET") }))
+```
 
--- Específico para rota
-app:get('/protected', auth.middleware, function(ctx)
-    return ctx.json(200, { user = ctx.user })
+`auth.jwt(options)` verifica o header `Authorization: Bearer <token>`,
+valida o JWT e guarda o payload em `ctx.state.jwt_payload` /
+`ctx.state.user` (não `ctx.user`). `auth.protected(options)` é um atalho
+pra `auth.jwt(options)`. Ver `crescent/middleware/auth.lua` pra `bearer`,
+`basic` e `api_key`, e [Utilities](/docs/utilities) para a API completa.
+
+### Protegendo só algumas rotas
+
+Como middleware é sempre global, pra proteger só um prefixo de rotas
+escreva um middleware que decide com base em `ctx.path`:
+
+```lua
+local jwt_middleware = auth.jwt({ secret = env.get("JWT_SECRET") })
+
+app:use(function(ctx, next)
+    if ctx.path:match("^/admin") then
+        return jwt_middleware(ctx, next)
+    end
+    return next()
 end)
 ```
 
 ### Middleware de Logging
 
 ```lua
--- crescent/middleware/logger.lua
-local Logger = {}
+-- app.lua
+local logger = require('crescent.middleware.logger')
 
-function Logger.middleware(ctx, next)
-    local start = os.clock()
-    
-    -- Log request
-    print(string.format("[%s] %s %s", os.date(), ctx.method, ctx.path))
-    
-    -- Executar próximo
-    local response = next()
-    
-    -- Log response time
-    local duration = (os.clock() - start) * 1000
-    print(string.format("  → %d (%dms)", response.status or 200, duration))
-    
-    return response
-end
-
-return Logger
+app:use(logger.basic())     -- uma linha por requisição
+-- ou
+app:use(logger.detailed())  -- log completo (headers, query, params)
 ```
 
 ### Middleware CORS
 
 ```lua
--- crescent/middleware/cors.lua
-local CORS = {}
+-- app.lua
+local cors = require('crescent.middleware.cors')
 
-function CORS.middleware(ctx, next)
-    -- Adicionar headers CORS
-    ctx.headers['Access-Control-Allow-Origin'] = '*'
-    ctx.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    ctx.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-    
-    -- Handle preflight
-    if ctx.method == 'OPTIONS' then
-        return ctx.no_content()
-    end
-    
-    return next()
-end
+app:use(cors.create({
+    origin = "*",
+    methods = "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+    headers = "Content-Type, Authorization",
+    credentials = false
+}))
 
-return CORS
+-- ou o preset permissivo de desenvolvimento
+app:use(cors.default())
 ```
+
+Headers de resposta (CORS ou qualquer outro) sempre passam por
+`ctx.res:setHeader(nome, valor)` — `ctx.headers` é só a tabela de headers
+**da requisição** (somente leitura, na prática) e escrever nela não afeta
+a resposta enviada.
 
 ### Ordem dos Middlewares
 
@@ -640,14 +639,17 @@ return CORS
 local cors = require('crescent.middleware.cors')
 local logger = require('crescent.middleware.logger')
 local auth = require('crescent.middleware.auth')
+local env = require('crescent.utils.env')
 
--- Ordem importa!
-app:use(cors.middleware)      -- 1. CORS primeiro
-app:use(logger.middleware)    -- 2. Logging
-app:use(auth.middleware)      -- 3. Auth por último
+-- Ordem importa! Cada app:use() roda antes das rotas, na ordem registrada
+app:use(cors.default())                                     -- 1. CORS primeiro
+app:use(logger.basic())                                     -- 2. Logging
+app:use(auth.jwt({ secret = env.get("JWT_SECRET") }))        -- 3. Auth por último
 
 -- Rotas
-app:get('/api/users', usersController.index)
+app:get('/api/users', function(ctx)
+    return usersController:index(ctx)
+end)
 ```
 
 ---
