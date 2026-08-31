@@ -277,13 +277,13 @@ local Product = Model:extend({
     
     validates = {
         -- Adicione validações aqui
-        name = {required = true, min = 3, max = 255},
+        name = {required = true, min_length = 3, max_length = 255},
     },
-    
+
     relations = {
-        -- Defina relações aqui
-        -- posts = {type = "hasMany", model = "Post", foreign_key = "user_id"},
-        -- profile = {type = "hasOne", model = "Profile", foreign_key = "user_id"},
+        -- Defina relações aqui (cada uma é uma função que recebe a instância)
+        -- posts = function(self) return self:hasMany(require("src.posts.models.post"), "user_id") end,
+        -- profile = function(self) return self:belongsTo(require("src.profile.models.profile"), "user_id") end,
     }
 })
 
@@ -295,16 +295,8 @@ local Product = Model:extend({
 return Product
 ```
 
-> ⚠️ O template gerado usa `validates = {min = 3, max = 255}` e
-> `relations = { posts = {type = "hasMany", ...} }` como exemplo/lembrete
-> nos comentários, mas essas chaves **não são reconhecidas** pela
-> implementação real de `Model:validate()` (que só suporta `required`,
-> `min_length`, `max_length`, `email`, `unique`) nem pelo mecanismo real de
-> relações (que espera uma função, não uma tabela declarativa — veja
-> **[Database & ORM → Relações](/docs/database#relações)**). Isso é um
-> defeito do próprio gerador (`cli/templates.lua`), não só da doc — se for
-> usar validação ou relações, troque pelo formato real documentado em
-> [Database & ORM](/docs/database).
+> Veja **[Database & ORM → Relações](/docs/database#relações)** para mais
+> detalhes de como `relations` funciona na prática.
 
 ---
 
