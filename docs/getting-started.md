@@ -221,15 +221,15 @@ Isso cria:
 ```lua
 -- app.lua
 local Crescent = require('crescent')
-local app = Crescent.create()
+local app = Crescent.new()
 
 -- Registra módulo Product
 local ProductModule = require("src.product")
 ProductModule.register(app)
 
-app:listen(8080, function()
-    print("✓ Servidor rodando em http://localhost:8080")
-end)
+-- app:listen(port, host) não recebe callback; "listening" já é
+-- impresso pelo próprio framework
+app:listen(8080)
 ```
 
 ---

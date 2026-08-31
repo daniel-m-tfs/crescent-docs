@@ -13,7 +13,7 @@ Rotas definem os endpoints da sua API e conectam URLs aos controllers.
 ```lua
 -- app.lua
 local Crescent = require('crescent')
-local app = Crescent.create()
+local app = Crescent.new()
 
 -- GET
 app:get('/hello', function(ctx)
@@ -693,7 +693,7 @@ return Module
 ```lua
 -- app.lua
 local Crescent = require('crescent')
-local app = Crescent.create()
+local app = Crescent.new()
 
 -- Registrar módulos
 local UsersModule = require("src.users")

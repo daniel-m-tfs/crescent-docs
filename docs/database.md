@@ -1,6 +1,6 @@
 # 🗄️ Database & ORM
 
-Sistema completo de ORM ActiveRecord, migrations e query builder.
+Sistema de ORM ActiveRecord, migrations e query builder.
 
 ---
 
@@ -20,7 +20,7 @@ DB_PASSWORD=senha123
 
 ```lua
 local MySQL = require('crescent.database.mysql')
-MySQL:test()
+MySQL.test()
 ```
 
 ---
@@ -36,16 +36,16 @@ local Model = require("crescent.database.model")
 local Product = Model:extend({
     -- Nome da tabela
     table = "products",
-    
+
     -- Chave primária (padrão: "id")
     primary_key = "id",
-    
+
     -- Timestamps automáticos (created_at, updated_at)
     timestamps = true,
-    
-    -- Soft deletes (deleted_at)
+
+    -- Soft delete: em vez de DELETE, escreve deleted_at e faz UPDATE
     soft_deletes = false,
-    
+
     -- Campos que podem ser preenchidos em massa
     fillable = {
         "name",
@@ -54,54 +54,40 @@ local Product = Model:extend({
         "stock",
         "category_id"
     },
-    
-    -- Campos escondidos em JSON (não serializar)
+
+    -- Campos escondidos em toArray()/toJSON() (não serializar)
     hidden = {
         "deleted_at"
     },
-    
-    -- Campos protegidos (nunca preenchidos em massa)
+
+    -- Campos protegidos (nunca preenchidos em massa; tem prioridade sobre fillable)
     guarded = {
         "id",
         "created_at",
         "updated_at"
     },
-    
-    -- Validações
+
+    -- Validações (regras suportadas: required, min_length, max_length, email, unique)
     validates = {
-        name = {
-            required = true,
-            min = 3,
-            max = 255,
-            unique = true
-        },
-        price = {
-            required = true,
-            numeric = true,
-            min = 0
-        },
-        stock = {
-            numeric = true,
-            min = 0
-        },
-        category_id = {
-            exists = {table = "categories", column = "id"}
-        }
+        name = { required = true, min_length = 3, max_length = 255 },
+        price = { required = true }
     },
-    
-    -- Relações
+
+    -- Relações: cada chave é uma função que recebe a instância e devolve
+    -- o resultado de hasMany/hasOne/belongsTo (ver seção "Relações" abaixo)
     relations = {
-        category = {
-            type = "belongsTo",
-            model = "Category",
-            foreign_key = "category_id"
-        },
-        orders = {
-            type = "hasMany",
-            model = "OrderItem",
-            foreign_key = "product_id"
-        }
-    }
+        category = function(self)
+            local Category = require("src.categories.models.category")
+            return self:belongsTo(Category, "category_id")
+        end
+    },
+
+    -- Hooks ficam direto na raiz da config (não dentro de um bloco "hooks")
+    before_save = function(self)
+        if self.name and not self.slug then
+            self.slug = self.name:lower():gsub("%s+", "-")
+        end
+    end
 })
 
 -- Métodos personalizados
@@ -117,6 +103,10 @@ end
 return Product
 ```
 
+> `validates`, `relations` e os hooks (`before_create`, `after_create`, `before_save`,
+> `after_save`, `before_update`, `after_update`, `before_delete`, `after_delete`) são
+> todos opcionais.
+
 ---
 
 ## 📝 CRUD Operations
@@ -126,12 +116,17 @@ return Product
 ```lua
 local Product = require('src.products.models.product')
 
--- Método 1: create()
-local product = Product:create({
+-- Método 1: create() — valida, roda hooks, insere e devolve a instância
+local product, errors = Product:create({
     name = "Notebook Dell",
     price = 2500,
     stock = 10
 })
+
+if not product then
+    -- validação falhou (ou o insert falhou) — não lança erro, devolve nil + errors
+    print(errors)
+end
 
 -- Método 2: new() + save()
 local product = Product:new({
@@ -144,26 +139,31 @@ product:save()
 ### READ
 
 ```lua
--- Buscar por ID
+-- Buscar por ID (devolve instância do Model ou nil)
 local product = Product:find(1)
 
--- Todos os registros
+-- Buscar por ID ou lançar erro
+local product = Product:findOrFail(1)
+
+-- Todos os registros (array de instâncias do Model)
 local products = Product:all()
 
--- Com condições
-local products = Product:where({category_id = 5}):get()
+-- Primeiro resultado (instância do Model)
+local product = Product:first()
 
--- Primeiro resultado
-local product = Product:where({name = "Notebook"}):first()
+-- Com condições — where(coluna, operador, valor) ou where(coluna, valor) (operador = "=")
+-- IMPORTANTE: Product:where(...) devolve um QueryBuilder, não instâncias do Model —
+-- :get()/:first() aqui devolvem tabelas cruas do banco, sem os métodos do Model
+local rows = Product:where("category_id", 5):get()
+local row = Product:where("name", "Notebook"):first()
 
--- Ordenar
-local products = Product:orderBy('price', 'DESC'):get()
+-- Ordenar, limitar (métodos do QueryBuilder — encadeiam depois de where()/query())
+local products = Product:where("stock", ">", 0):orderBy("price", "DESC"):get()
+local products = Product:query():limit(10):get()
 
--- Limitar
-local products = Product:limit(10):get()
-
--- Paginação
-local products = Product:paginate(10, 1)  -- 10 por página, página 1
+-- Paginação manual (paginate só existe no QueryBuilder, não no Model)
+local page, per_page = 1, 10
+local products = Product:query():paginate(page, per_page):get()
 ```
 
 ### UPDATE
@@ -181,167 +181,151 @@ local product = Product:find(1)
 product.price = 2300
 product:save()
 
--- Método 3: Update direto
-Product:where({id = 1}):update({price = 2300})
+-- Método 3: Update direto via QueryBuilder (não roda hooks nem timestamps do Model)
+Product:where("id", 1):update({price = 2300})
 ```
 
 ### DELETE
 
 ```lua
--- Soft delete (se soft_deletes = true)
+-- Se soft_deletes = true, isto grava deleted_at e faz UPDATE em vez de DELETE
 local product = Product:find(1)
 product:delete()
 
--- Hard delete (força remoção permanente)
-product:forceDelete()
-
--- Delete direto por condição
-Product:where({stock = 0}):delete()
+-- Delete direto por condição via QueryBuilder (ignora soft_deletes e hooks)
+Product:where("stock", 0):delete()
 ```
 
 ---
 
 ## 🔍 Query Builder
 
+Os métodos abaixo existem no `QueryBuilder` (`crescent/database/query_builder.lua`).
+No `Model`, só `query()`, `find()`, `findOrFail()`, `first()`, `all()`, `where()` e
+`raw()` existem como atalhos estáticos — para qualquer outro método (`join`,
+`orderBy`, `limit`, `whereIn`, `paginate`, `count`, ...) comece a cadeia com
+`Product:query()` ou `Product:where(...)`.
+
 ### Condições WHERE
 
 ```lua
 -- Igualdade simples
-Product:where({category_id = 5}):get()
+Product:where("category_id", 5):get()
 
--- Múltiplas condições (AND)
-Product:where({
-    category_id = 5,
-    stock = {">", 10}
-}):get()
+-- Operador explícito
+Product:where("price", ">", 1000):get()
+Product:where("stock", "<=", 5):get()
 
--- Operadores
-Product:where({price = {">", 1000}}):get()
-Product:where({stock = {"<=", 5}}):get()
-Product:where({name = {"LIKE", "%Dell%"}}):get()
+-- Múltiplas condições (AND, encadeando where)
+Product:where("category_id", 5):where("stock", ">", 10):get()
 
 -- WHERE IN
-Product:whereIn('category_id', {1, 2, 3}):get()
-
--- WHERE BETWEEN
-Product:whereBetween('price', 1000, 5000):get()
+Product:query():whereIn("category_id", {1, 2, 3}):get()
 
 -- WHERE NULL
-Product:whereNull('deleted_at'):get()
-Product:whereNotNull('discount'):get()
+Product:query():whereNull("deleted_at"):get()
+Product:query():whereNotNull("discount"):get()
 ```
+
+> Não existe `whereBetween`. Para isso, use duas condições
+> (`:where("price", ">=", 1000):where("price", "<=", 5000)`) ou uma `raw()` query.
 
 ### OR Conditions
 
 ```lua
-Product:where({category_id = 5})
-       :orWhere({category_id = 10})
+Product:where("category_id", 5)
+       :orWhere("category_id", 10)
        :get()
 ```
 
 ### Ordenação
 
 ```lua
--- ASC
-Product:orderBy('name'):get()
-Product:orderBy('name', 'ASC'):get()
+-- ASC (padrão)
+Product:query():orderBy("name"):get()
 
 -- DESC
-Product:orderBy('price', 'DESC'):get()
+Product:query():orderBy("price", "DESC"):get()
 
 -- Múltiplas ordenações
-Product:orderBy('category_id')
-       :orderBy('price', 'DESC')
+Product:query()
+       :orderBy("category_id")
+       :orderBy("price", "DESC")
        :get()
 ```
+
+> A direção é sempre normalizada para `ASC` ou `DESC` — qualquer outro valor vira `ASC`.
 
 ### Limit e Offset
 
 ```lua
 -- LIMIT
-Product:limit(10):get()
+Product:query():limit(10):get()
 
 -- OFFSET
-Product:offset(20):limit(10):get()
+Product:query():offset(20):limit(10):get()
 
--- Paginação
-Product:paginate(20, 2)  -- 20 por página, página 2
+-- Paginação (limit/offset prontos; ainda precisa de :get())
+Product:query():paginate(2, 20):get() -- página 2, 20 por página
 ```
+
+> `paginate(page, per_page)` só ajusta `limit`/`offset` — não devolve total de
+> registros nem número de páginas. Se precisar dessa metadata, calcule com uma
+> query `:count()` separada (veja "Paginação" em Boas Práticas).
 
 ### Select
 
 ```lua
 -- Selecionar campos específicos
-Product:select('id', 'name', 'price'):get()
+Product:query():select("id", "name", "price"):get()
 
 -- Com alias
-Product:select('id', 'name', 'price as valor'):get()
+Product:query():select("id", "name", "price as valor"):get()
 ```
 
 ### Joins
 
 ```lua
--- INNER JOIN
-Product:join('categories', 'products.category_id', 'categories.id')
-       :select('products.*', 'categories.name as category_name')
+-- INNER JOIN (operador "=" é o padrão se omitido)
+Product:query()
+       :join("categories", "products.category_id", "categories.id")
+       :select("products.*", "categories.name as category_name")
        :get()
 
 -- LEFT JOIN
-Product:leftJoin('categories', 'products.category_id', 'categories.id'):get()
-```
-
-### Agrupamento
-
-```lua
--- GROUP BY
-Product:select('category_id', 'COUNT(*) as total')
-       :groupBy('category_id')
-       :get()
-
--- HAVING
-Product:select('category_id', 'AVG(price) as avg_price')
-       :groupBy('category_id')
-       :having('avg_price', '>', 1000)
-       :get()
+Product:query():leftJoin("categories", "products.category_id", "categories.id"):get()
 ```
 
 ### Agregações
 
 ```lua
 -- COUNT
-local total = Product:count()
-local inStock = Product:where({stock = {">", 0}}):count()
-
--- SUM
-local totalValue = Product:sum('price')
-
--- AVG
-local avgPrice = Product:avg('price')
-
--- MIN / MAX
-local minPrice = Product:min('price')
-local maxPrice = Product:max('price')
+local total = Product:query():count()
+local inStock = Product:where("stock", ">", 0):count()
 ```
+
+> Só `count()` existe hoje — não há `sum`/`avg`/`min`/`max`/`groupBy`/`having`
+> prontos no QueryBuilder. Para esses casos, use `raw()`.
 
 ### Raw Queries
 
 ```lua
--- SELECT raw
+-- SELECT raw (sempre use bindings com ? — nunca concatene valor de usuário na string)
 local products = Product:raw([[
-    SELECT * FROM products 
+    SELECT * FROM products
     WHERE price > ? AND stock > ?
 ]], {1000, 0})
 
 -- INSERT raw
 Product:raw([[
-    INSERT INTO products (name, price) 
+    INSERT INTO products (name, price)
     VALUES (?, ?)
 ]], {"Teclado", 150})
 
 -- Com bindings para segurança (evita SQL injection)
 local search = ctx.query.search
 local products = Product:raw([[
-    SELECT * FROM products 
+    SELECT * FROM products
     WHERE name LIKE ?
 ]], {"%" .. search .. "%"})
 ```
@@ -352,81 +336,53 @@ local products = Product:raw([[
 
 ### Validações Disponíveis
 
+Só estas 5 regras existem em `Model:validate()` hoje:
+
 ```lua
 validates = {
     -- Obrigatório
     name = { required = true },
-    
-    -- Tamanho string
-    name = { min = 3, max = 255 },
-    
-    -- Numérico
-    price = { numeric = true },
-    
-    -- Range numérico
-    stock = { min = 0, max = 9999 },
-    
-    -- Email
+
+    -- Tamanho mínimo/máximo de string
+    name = { min_length = 3, max_length = 255 },
+
+    -- Email (regex simples)
     email = { email = true },
-    
-    -- Único na tabela
-    email = { unique = true },
-    
-    -- Existe em outra tabela
-    category_id = {
-        exists = {
-            table = "categories",
-            column = "id"
-        }
-    },
-    
-    -- Regex customizado
-    phone = { pattern = "^%d%d%d%-%d%d%d%d$" },
-    
-    -- Valores permitidos
-    status = { in_array = {"pending", "paid", "shipped"} }
+
+    -- Único na tabela (ignora o próprio registro ao atualizar)
+    email = { unique = true }
 }
 ```
 
-### Validação Manual
-
-```lua
--- No Model
-function Product:validate()
-    local errors = {}
-    
-    if not self.name or #self.name < 3 then
-        table.insert(errors, "Name must be at least 3 characters")
-    end
-    
-    if self.price and self.price < 0 then
-        table.insert(errors, "Price cannot be negative")
-    end
-    
-    if #errors > 0 then
-        error(table.concat(errors, ", "))
-    end
-    
-    return true
-end
-```
+> Não há `numeric`, range numérico, `exists` (checagem de FK), `pattern`
+> (regex customizado) ou `in_array` embutidos. Para essas validações, valide
+> manualmente no Service (próxima seção) — é o padrão recomendado hoje.
 
 ### Validação no Service
 
 ```lua
 -- src/products/services/products.lua
 function ProductService:create(data)
-    -- Validação customizada
+    -- Validação customizada (o que o Model:validate() não cobre)
     if not data.price or data.price <= 0 then
         error("Invalid price")
     end
-    
+
     if data.stock and data.stock < 0 then
         error("Stock cannot be negative")
     end
-    
-    -- ORM faz validações do Model automaticamente
-    return Product:create(data)
+
+    -- Product:create() já roda as validações do Model (required/min_length/etc)
+    local product, errors = Product:create(data)
+    if not product then
+        error(table.concat((function()
+            local msgs = {}
+            for _, msg in pairs(errors) do table.insert(msgs, msg) end
+            return msgs
+        end)(), ", "))
+    end
+
+    return product
 end
 ```
 
@@ -434,122 +390,59 @@ end
 
 ## 🔗 Relações
 
-### BelongsTo (N:1)
+Diferente de outros ORMs, relações no Crescent **não são declarativas** — cada
+relação é uma função Lua que você chama explicitamente ou registra em
+`relations` para carregar sob demanda via `instance:get("nome")`.
+
+Três helpers de instância fazem o trabalho pesado:
+
+| Método | Uso | Retorno |
+|---|---|---|
+| `self:belongsTo(RelatedModel, foreign_key, owner_key?)` | N:1 | instância do `RelatedModel` (ou `nil`) |
+| `self:hasMany(RelatedModel, foreign_key, local_key?)` | 1:N | `QueryBuilder` (chame `:get()`) |
+| `self:hasOne(RelatedModel, foreign_key, local_key?)` | 1:1 | linha crua da tabela (não é instância do Model) |
+
+### Uso direto (sem configurar `relations`)
 
 ```lua
--- Product pertence a Category
-local Product = Model:extend({
-    table = "products",
-    
-    relations = {
-        category = {
-            type = "belongsTo",
-            model = "Category",
-            foreign_key = "category_id"
-        }
-    }
-})
+local Category = require("src.categories.models.category")
+local Product = require("src.products.models.product")
 
--- Uso
 local product = Product:find(1)
-local category = product:category()  -- Busca a categoria
-
+local category = product:belongsTo(Category, "category_id")
 print(category.name)
-```
 
-### HasMany (1:N)
-
-```lua
--- Category tem muitos Products
-local Category = Model:extend({
-    table = "categories",
-    
-    relations = {
-        products = {
-            type = "hasMany",
-            model = "Product",
-            foreign_key = "category_id"
-        }
-    }
-})
-
--- Uso
-local category = Category:find(1)
-local products = category:products()  -- Array de produtos
-
-for _, product in ipairs(products) do
-    print(product.name)
+local category2 = Category:find(1)
+local products = category2:hasMany(Product, "category_id"):get()
+for _, row in ipairs(products) do
+    print(row.name)
 end
 ```
 
-### HasOne (1:1)
+### Registrando em `relations` (carregamento preguiçoso e cacheado)
 
 ```lua
--- User tem um Profile
-local User = Model:extend({
-    table = "users",
-    
-    relations = {
-        profile = {
-            type = "hasOne",
-            model = "Profile",
-            foreign_key = "user_id"
-        }
-    }
-})
-
--- Uso
-local user = User:find(1)
-local profile = user:profile()
-
-print(profile.bio)
-```
-
-### BelongsToMany (N:N)
-
-```lua
--- Product pertence a muitos Tags (via pivot)
 local Product = Model:extend({
     table = "products",
-    
     relations = {
-        tags = {
-            type = "belongsToMany",
-            model = "Tag",
-            pivot_table = "product_tags",
-            foreign_key = "product_id",
-            related_key = "tag_id"
-        }
+        category = function(self)
+            local Category = require("src.categories.models.category")
+            return self:belongsTo(Category, "category_id")
+        end
     }
 })
 
--- Uso
 local product = Product:find(1)
-local tags = product:tags()
-
-for _, tag in ipairs(tags) do
-    print(tag.name)
-end
+local category = product:get("category") -- NÃO product:category() nem product.category
 ```
 
-### Eager Loading
+> `instance:get("category")` chama a função uma única vez e guarda o
+> resultado em cache na própria instância; chamadas seguintes reaproveitam o
+> valor.
 
-```lua
--- N+1 Problem (ruim)
-local products = Product:all()
-for _, product in ipairs(products) do
-    local category = product:category()  -- Query por produto!
-end
-
--- Eager Loading (bom)
-local products = Product:with('category'):get()
-for _, product in ipairs(products) do
-    print(product.category.name)  -- Já carregado!
-end
-
--- Múltiplas relações
-local products = Product:with('category', 'tags'):get()
-```
+> Não há `belongsToMany` (N:N com tabela pivot) nem eager loading (`:with(...)`)
+> hoje. Relações N:N precisam ser resolvidas manualmente com `raw()` ou um
+> `join()`. Para evitar N+1 em listagens, veja "N+1 Problem" em Boas Práticas.
 
 ---
 
@@ -560,6 +453,9 @@ local products = Product:with('category', 'tags'):get()
 ```bash
 luvit crescent-cli make:migration create_products_table
 ```
+
+Isso gera um arquivo em `migrations/` com uma tabela mínima (`id`, `name`,
+`created_at`, `updated_at`) — edite o SQL gerado para o schema real.
 
 ### Migration de Criação
 
@@ -578,12 +474,12 @@ function Migration:up()
             category_id INT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            
+
             INDEX idx_category (category_id),
             INDEX idx_price (price),
-            
-            FOREIGN KEY (category_id) 
-                REFERENCES categories(id) 
+
+            FOREIGN KEY (category_id)
+                REFERENCES categories(id)
                 ON DELETE SET NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ]]
@@ -598,34 +494,10 @@ end
 return Migration
 ```
 
-### Migration de Alteração
-
-```lua
--- migrations/20260109134500_add_discount_to_products.lua
-local Migration = {}
-
-function Migration:up()
-    return [[
-        ALTER TABLE products
-        ADD COLUMN discount DECIMAL(5, 2) DEFAULT 0,
-        ADD COLUMN is_featured BOOLEAN DEFAULT FALSE;
-        
-        CREATE INDEX idx_featured ON products(is_featured);
-    ]]
-end
-
-function Migration:down()
-    return [[
-        ALTER TABLE products
-        DROP COLUMN discount,
-        DROP COLUMN is_featured;
-        
-        DROP INDEX idx_featured ON products;
-    ]]
-end
-
-return Migration
-```
+> Cada migration roda com uma única chamada `MySQL:query(sql)` por cima do
+> driver — evite depender de múltiplas instruções separadas por `;` num só
+> `up()`/`down()` funcionando como transação; prefira uma instrução DDL por
+> migration quando possível.
 
 ### Executar Migrations
 
@@ -644,80 +516,45 @@ luvit crescent-cli migrate:status
 
 ## 🪝 Hooks (Lifecycle Events)
 
-### Hooks Disponíveis
+Os hooks ficam **direto na raiz** da config passada para `Model:extend()` —
+não existe um bloco `hooks = {...}` agrupando eles.
 
 ```lua
 local Product = Model:extend({
     table = "products",
-    
-    hooks = {
-        before_save = function(self)
-            -- Antes de salvar (CREATE ou UPDATE)
-            print("Saving product:", self.name)
-        end,
-        
-        after_save = function(self)
-            -- Depois de salvar
-            print("Product saved:", self.id)
-        end,
-        
-        before_create = function(self)
-            -- Antes de criar
-            self.slug = slugify(self.name)
-        end,
-        
-        after_create = function(self)
-            -- Depois de criar
-            print("New product created!")
-        end,
-        
-        before_update = function(self)
-            -- Antes de atualizar
-        end,
-        
-        after_update = function(self)
-            -- Depois de atualizar
-        end,
-        
-        before_delete = function(self)
-            -- Antes de deletar
-        end,
-        
-        after_delete = function(self)
-            -- Depois de deletar
-        end
-    }
-})
-```
 
-### Exemplo Prático
+    before_save = function(self)
+        -- Antes de salvar (CREATE ou UPDATE)
+        print("Saving product:", self.name)
+    end,
 
-```lua
-local Product = Model:extend({
-    table = "products",
-    
-    hooks = {
-        before_save = function(self)
-            -- Gerar slug automaticamente
-            if self.name and not self.slug then
-                self.slug = self.name:lower():gsub("%s+", "-")
-            end
-        end,
-        
-        before_delete = function(self)
-            -- Verificar se pode deletar
-            local orderCount = OrderItem:where({product_id = self.id}):count()
-            
-            if orderCount > 0 then
-                error("Cannot delete product with existing orders")
-            end
-        end,
-        
-        after_create = function(self)
-            -- Notificar sistema
-            EventBus:emit('product.created', self)
+    after_save = function(self)
+        -- Depois de salvar
+        print("Product saved:", self.id)
+    end,
+
+    before_create = function(self)
+        -- Antes de criar
+        self.slug = self.name:lower():gsub("%s+", "-")
+    end,
+
+    after_create = function(self)
+        -- Depois de criar
+        print("New product created!")
+    end,
+
+    before_update = function(self) end,
+    after_update = function(self) end,
+
+    before_delete = function(self)
+        -- Antes de deletar (soft ou hard)
+        local orderCount = OrderItem:where("product_id", self.id):count()
+        if orderCount > 0 then
+            error("Cannot delete product with existing orders")
         end
-    }
+    end,
+
+    after_delete = function(self) end
 })
 ```
 
@@ -741,70 +578,63 @@ CREATE INDEX idx_category_price ON products(category_id, price);
 
 ### Transações
 
-```lua
-local db = require('crescent.database.mysql')
-
-function OrderService:processOrder(orderData)
-    db:query("START TRANSACTION")
-    
-    local success, err = pcall(function()
-        -- Criar pedido
-        local order = Order:create(orderData)
-        
-        -- Atualizar estoque
-        for _, item in ipairs(orderData.items) do
-            local product = Product:find(item.product_id)
-            product:update({
-                stock = product.stock - item.quantity
-            })
-        end
-        
-        -- Criar pagamento
-        Payment:create({order_id = order.id, ...})
-    end)
-    
-    if success then
-        db:query("COMMIT")
-        return true
-    else
-        db:query("ROLLBACK")
-        error(err)
-    end
-end
-```
+O `mysql.lua` atual pega uma conexão do pool por chamada e a devolve ao fim
+dela — chamadas separadas (`db:query("START TRANSACTION")`, depois outras
+queries, depois `db:query("COMMIT")`) **não têm garantia de rodar na mesma
+conexão**, então isso não funciona como uma transação atômica de verdade.
+Não há suporte a transações no ORM hoje; trate isso como uma limitação
+conhecida (e evite depender de rollback automático) até que o driver exponha
+uma conexão dedicada por transação.
 
 ### N+1 Problem
 
 ```lua
--- ❌ Ruim (N+1 queries)
+-- ❌ Ruim (N+1 queries: 1 pra listar produtos + 1 por produto)
 local products = Product:all()
 for _, product in ipairs(products) do
-    local category = product:category()  -- +1 query por produto
+    local category = product:belongsTo(Category, "category_id")
 end
 
--- ✅ Bom (2 queries)
-local products = Product:with('category'):get()
+-- ✅ Melhor: uma query pros produtos + uma query batelada pras categorias
+local products = Product:all()
+local category_ids = {}
 for _, product in ipairs(products) do
-    print(product.category.name)  -- Já carregado
+    table.insert(category_ids, product.category_id)
+end
+
+local categories_by_id = {}
+for _, row in ipairs(Category:query():whereIn("id", category_ids):get()) do
+    categories_by_id[row.id] = row
+end
+
+for _, product in ipairs(products) do
+    local category = categories_by_id[product.category_id]
 end
 ```
 
+> Não há eager loading (`:with(...)`) embutido — o padrão acima (buscar IDs e
+> fazer um `whereIn` batelado) é a forma recomendada de evitar N+1 hoje.
+
 ### Paginação
+
+`paginate()` só ajusta `limit`/`offset`; total de registros e número de
+páginas precisam ser calculados à parte:
 
 ```lua
 -- No controller
 function ProductController:index(ctx)
     local page = tonumber(ctx.query.page) or 1
-    local perPage = tonumber(ctx.query.per_page) or 20
-    
-    local result = Product:paginate(perPage, page)
-    
+    local per_page = tonumber(ctx.query.per_page) or 20
+
+    local total = Product:query():count()
+    local data = Product:query():paginate(page, per_page):get()
+
     return ctx.json(200, {
-        data = result.data,
-        current_page = result.current_page,
-        total = result.total,
-        per_page = result.per_page,
-        last_page = result.last_page
+        data = data,
+        current_page = page,
+        per_page = per_page,
+        total = total,
+        last_page = math.ceil(total / per_page)
     })
 end
 ```
@@ -825,22 +655,25 @@ local productTests = {
             price = 100,
             stock = 10
         })
-        
+
         tests.assertNotNil(product)
         tests.assertNotNil(product.id)
         tests.assertEquals(product.name, "Test Product")
     end,
-    
+
     testValidation = function()
-        tests.assertError(function()
-            Product:create({name = ""})  -- Empty name
-        end)
+        -- Product:create() não lança erro em falha de validação —
+        -- devolve nil + uma tabela de erros
+        local product, errors = Product:create({name = ""})
+        tests.assertNil(product)
+        tests.assertNotNil(errors)
     end,
-    
+
     testRelations = function()
+        local Category = require('src.categories.models.category')
         local product = Product:find(1)
-        local category = product:category()
-        
+        local category = product:belongsTo(Category, "category_id")
+
         tests.assertNotNil(category)
         tests.assertIsTable(category)
     end
