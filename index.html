@@ -11,39 +11,35 @@
     <link rel="apple-touch-icon" href="./crescent-logo-semfundo.png">
 
     <!-- SEO Meta Tags -->
-    <title>Crescent Framework - Framework Web Lua Moderno e Rápido | Lua Web Framework</title>
+    <title>Crescent Framework — Framework Web Lua com LuaJIT</title>
     <meta name="description"
-        content="Crescent Framework: framework web em Lua de alta performance com LuaJIT, ORM ActiveRecord, CLI poderoso e arquitetura modular. O melhor framework para desenvolvimento web com Lua.">
-    <meta name="keywords"
-        content="framework web lua, lua web framework, lua web, crescent framework, crescent lua, luvit, luajit framework, lua orm, lua rest api, lua backend, framework lua moderno, lua mysql, lua nginx">
+        content="Framework web em Lua com LuaJIT: ORM ActiveRecord, CLI de geração de código e arquitetura modular inspirada em NestJS e Laravel. Grátis e open source.">
     <meta name="author" content="Crescent Framework Team">
     <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#0a0f1e">
     <link rel="canonical" href="https://crescent.tyne.com.br/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://crescent.tyne.com.br/">
-    <meta property="og:title" content="Crescent Framework - Framework Web Lua Moderno">
+    <meta property="og:site_name" content="Crescent Framework">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:title" content="Crescent Framework — Framework Web Lua com LuaJIT">
     <meta property="og:description"
-        content="Framework web em Lua de alta performance com LuaJIT, ORM ActiveRecord e CLI poderoso. Construa APIs REST rápidas e escaláveis.">
-    <meta property="og:image" content="https://crescent.tyne.com.br/crescent-logo-semfundo.png">
+        content="ORM ActiveRecord, CLI de geração de código e arquitetura modular para construir APIs em Lua com Luvit e MySQL.">
+    <meta property="og:image" content="https://crescent.tyne.com.br/og-image.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Crescent Framework Logo">
+    <meta property="og:image:alt" content="Crescent Framework">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://crescent.tyne.com.br/">
-    <meta property="twitter:title" content="Crescent Framework - Framework Web Lua">
+    <meta property="twitter:title" content="Crescent Framework — Framework Web Lua com LuaJIT">
     <meta property="twitter:description"
-        content="Framework web em Lua de alta performance com LuaJIT, ORM ActiveRecord e CLI poderoso.">
-    <meta property="twitter:image" content="https://crescent.tyne.com.br/crescent-logo-semfundo.png">
-    <meta property="twitter:image:alt" content="Crescent Framework Logo">
-
-    <!-- Additional SEO -->
-    <meta name="language" content="Portuguese, English">
-    <meta name="revisit-after" content="7 days">
-    <meta name="rating" content="general">
+        content="ORM ActiveRecord, CLI de geração de código e arquitetura modular para construir APIs em Lua com Luvit e MySQL.">
+    <meta property="twitter:image" content="https://crescent.tyne.com.br/og-image.png">
+    <meta property="twitter:image:alt" content="Crescent Framework">
 
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -63,14 +59,14 @@
       "name": "Crescent Framework",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Linux, macOS",
-      "description": "Framework web em Lua de alta performance com LuaJIT, ORM ActiveRecord, sistema de migrations e CLI poderoso para desenvolvimento ágil.",
+      "description": "Framework web em Lua com LuaJIT: ORM ActiveRecord, CLI de geração de código e arquitetura modular inspirada em NestJS e Laravel.",
+      "image": "https://crescent.tyne.com.br/og-image.png",
       "offers": {
         "@type": "Offer",
         "price": "0",
         "priceCurrency": "USD"
       },
       "programmingLanguage": "Lua",
-      "keywords": "framework web lua, lua web framework, lua web, crescent lua, luvit, luajit",
       "url": "https://crescent.tyne.com.br",
       "codeRepository": "https://github.com/daniel-m-tfs/crescent-framework"
     }
@@ -112,25 +108,12 @@
 
     <!-- Hero Section -->
     <section id="home" class="hero">
-        <!-- Animated Stars Background -->
-        <div class="stars-container">
-            <div class="stars"></div>
-            <div class="stars2"></div>
-            <div class="stars3"></div>
-            <div class="shooting-stars"></div>
-        </div>
-
         <div class="container hero-container">
-            <div class="hero-logo">
-                <img src="./crescent-logo-semfundo.png" alt="Crescent Framework" class="hero-logo-img">
-                <div class="logo-glow"></div>
-            </div>
-
             <div class="hero-content">
-                <div class="badge">🌙 Em desenvolvimento ativo</div>
+                <div class="badge">Em desenvolvimento ativo</div>
                 <h1 class="hero-title">
-                    Framework Web Moderno<br>
-                    <span class="gradient-text">Rápido, Leve e Poderoso</span>
+                    Framework web moderno<br>
+                    <span class="accent-text">rápido, leve e poderoso</span>
                 </h1>
                 <p class="hero-description">
                     Construa APIs e aplicações web de alto desempenho com Lua, Luvit e MySQL.
@@ -146,7 +129,7 @@
 luvit crescent-cli make:module User
 luvit app.lua
 
-# Sua API está no ar! 🚀</code></pre>
+# Sua API está no ar</code></pre>
                 </div>
             </div>
         </div>
@@ -396,9 +379,7 @@ luvit app.lua
                             <code>cd my-app
 luvit app.lua</code>
                         </div>
-                        <p style="margin-top: 0.5rem; color: var(--success); font-size: 0.9rem; font-weight: 600;">
-                            🚀 Servidor rodando em http://localhost:8080
-                        </p>
+                        <p class="note note-success">Servidor rodando em http://localhost:8080</p>
                     </div>
                 </div>
 
@@ -409,22 +390,18 @@ luvit app.lua</code>
                         <div class="code-block">
                             <code>luvit crescent-cli.lua make:module Product</code>
                         </div>
-                        <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">
-                            Gera automaticamente: Controller, Service, Model e Routes
-                        </p>
+                        <p class="note note-muted">Gera automaticamente: Controller, Service, Model e Routes</p>
                     </div>
                 </div>
             </div>
 
-            <div
-                style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%); padding: 2rem; border-radius: 1rem; margin-top: 3rem; border: 1px solid rgba(99, 102, 241, 0.2);">
-                <h3 style="margin-bottom: 1rem; color: var(--text);">💡 Exemplo Rápido</h3>
-                <p style="margin-bottom: 1rem; color: var(--text-secondary);">Teste sua instalação com este endpoint
-                    simples:</p>
+            <div class="callout-box">
+                <h3>Exemplo rápido</h3>
+                <p>Teste sua instalação com este endpoint simples:</p>
                 <div class="code-block">
                     <code>curl http://localhost:8080/users</code>
                 </div>
-                <p style="margin-top: 0.75rem; color: var(--text-secondary); font-size: 0.9rem;">
+                <p class="note note-muted">
                     Você verá a resposta JSON com a lista de usuários (ou erro 404 se não configurou o banco ainda)
                 </p>
             </div>
@@ -445,21 +422,36 @@ luvit app.lua</code>
     <section class="status">
         <div class="container">
             <div class="status-content">
-                <div class="status-badge">⚠️ Em Desenvolvimento</div>
-                <h2>Framework em Evolução Ativa</h2>
+                <div class="status-badge">Em desenvolvimento</div>
+                <h2>Framework em evolução ativa</h2>
                 <p>O Crescent Framework está em desenvolvimento ativo. Novas features e melhorias são adicionadas
-                    constantemente. Feedback e contribuições são muito bem-vindos!</p>
+                    constantemente. Feedback e contribuições são muito bem-vindos.</p>
                 <div class="status-links">
                     <a href="https://github.com/daniel-m-tfs/crescent-framework/issues" target="_blank"
                         class="status-link">
-                        <span>🐛</span> Reportar Bug
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="8" y="6" width="8" height="14" rx="4" />
+                            <path d="M19 7l-3 2M5 7l3 2M19 19l-3-2M5 19l3-2M12 6V3M9 3h6M3 13h5M16 13h5" />
+                        </svg>
+                        Reportar Bug
                     </a>
                     <a href="https://github.com/daniel-m-tfs/crescent-framework/pulls" target="_blank"
                         class="status-link">
-                        <span>💡</span> Sugerir Feature
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9" />
+                            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                        </svg>
+                        Sugerir Feature
                     </a>
                     <a href="https://github.com/daniel-m-tfs/crescent-framework" target="_blank" class="status-link">
-                        <span>⭐</span> Star no GitHub
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                        Star no GitHub
                     </a>
                 </div>
             </div>
@@ -471,8 +463,11 @@ luvit app.lua</code>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <img src="./crescent-logo-semfundo.png" alt="Crescent Framework" class="footer-logo">
-                    <p>Framework Web Moderno em Lua</p>
+                    <div class="footer-brand-mark">
+                        <img src="./crescent-logo-semfundo.png" alt="Crescent Framework" class="footer-logo">
+                        Crescent
+                    </div>
+                    <p>Framework web moderno em Lua</p>
                 </div>
                 <div class="footer-links">
                     <div class="footer-column">
