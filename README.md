@@ -15,8 +15,10 @@ crescent-docs/
 │   ├── cli.md                # 🛠️ Comandos do CLI
 │   ├── utilities.md         # 🧰 Testes, Hash, Helpers
 │   └── deployment.md        # 🚀 Deploy, NGINX, SSL, Systemd
+├── convert-docs.py           # 🔧 Gera docs.html a partir de docs/*.md
+├── docs-template.html        # 🧩 "Chrome" estático (head/SEO/navbar/footer/scripts)
 ├── index.html                # Homepage
-├── docs.html                 # 🌐 Página de documentação publicada
+├── docs.html                 # 🌐 GERADO — não edite direto, rode convert-docs.py
 ├── styles.css                # Estilos globais (site institucional)
 ├── docs.css                  # Estilos específicos da documentação
 ├── menu.css / menu.js        # Menu de navegação do topo
@@ -24,21 +26,30 @@ crescent-docs/
 ├── sitemap.xml / robots.txt  # SEO
 ```
 
-## ⚠️ Estado atual: `docs.html` é editado à mão
+## 🔧 `docs.html` é gerado — nunca edite direto
 
-Hoje `docs/*.md` e `docs.html` são mantidos **manualmente em paralelo** — não
-existe nenhum script conectando os dois. Um script de conversão
-(`convert-docs.py`) chegou a existir, mas foi removido do repositório; esta
-seção do README será atualizada assim que o gerador for reconstruído.
+`docs/*.md` é a única fonte de verdade. `docs.html` é gerado por
+`convert-docs.py` (Python 3, só biblioteca padrão, sem instalar nada) a
+partir do `docs-template.html` (que tem o `<head>`/SEO/navbar/footer/scripts
+estáticos, preservados intactos) + o conteúdo renderizado de cada `.md`.
 
-Isso já causou divergência real entre os dois: várias seções de `docs.html`
-ficaram desatualizadas em relação ao `docs/*.md` correspondente. Ao editar
-documentação:
+Editar documentação:
 
 1. Edite o `.md` correspondente em `docs/`.
-2. Replique a mudança manualmente em `docs.html` (mesmo `id` de seção, mesmo
-   conteúdo, HTML com entidades escapadas em vez de Markdown).
-3. Confira visualmente abrindo `docs.html` num navegador antes de publicar.
+2. Rode `python3 convert-docs.py` na raiz do repo — regenera `docs.html`
+   inteiro (sidebar de navegação + todas as seções).
+3. Confira o resultado abrindo `docs.html` num navegador antes de publicar.
+
+O gerador cobre: headers (`#`-`####`), blocos de código com syntax
+highlighting (Prism.js), tabelas GFM, listas ordenadas/não-ordenadas,
+negrito/itálico/código inline, links (inclusive `/docs/arquivo` → âncora
+interna da seção certa, já que tudo vira uma página única), `---` como
+separador de seção, e blockquotes (`>`) como caixas `.note-box`. IDs de
+seção são desambiguados automaticamente quando o mesmo título (ex. "Boas
+Práticas") aparece em mais de um `.md`.
+
+Nunca edite `docs.html` manualmente — a próxima execução de
+`convert-docs.py` sobrescreve qualquer mudança feita direto nele.
 
 ## 🚀 Rodando localmente
 
@@ -65,8 +76,8 @@ Depois abra `http://localhost:8000/index.html` ou `http://localhost:8000/docs.ht
 ## 🤝 Contribuindo
 
 Encontrou um erro ou quer melhorar a documentação? PRs são bem-vindos —
-lembre de manter `docs/*.md` e `docs.html` em sincronia (ver seção acima)
-até o gerador automatizado existir de novo.
+edite só os arquivos em `docs/` e rode `python3 convert-docs.py` antes de
+commitar (ver seção acima). Não edite `docs.html` direto.
 
 ## 🔗 Links
 
