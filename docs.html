@@ -1189,7 +1189,7 @@ return Model:extend({
 })</code></pre>
 </div>
 
-<p><code>bin/crescent make:model User users</code> gera esse arquivo. As regras de <code>validates</code> são as mesmas de <a href="#validação">Validação</a>, mais <code>unique = true</code> (consulta o banco; mantenha também um índice <code>UNIQUE</code>).</p>
+<p><code>bin/crescent make:model User users</code> gera um esqueleto em <code>src/users/models/user.lua</code>. As regras de <code>validates</code> são as mesmas de <a href="#validação">Validação</a>, mais <code>unique = true</code> (consulta o banco; mantenha também um índice <code>UNIQUE</code>).</p>
 
 <h3>CRUD</h3>
 
@@ -2441,7 +2441,7 @@ docker run -d -p 8080:8080 \
 
 <ul>
     <li>Parte de <code>openresty/openresty:*-alpine-fat</code> e instala as dependências Lua em uma camada própria.</li>
-    <li>Roda como o usuário sem privilégios <code>crescent</code>; só <code>logs/</code> e <code>tmp/</code> são graváveis.</li>
+    <li>Roda como o usuário sem privilégios <code>crescent</code>; só <code>logs/</code> e <code>tmp/</code> são graváveis. Se a aplicação salva uploads, monte um volume gravável para o <code>upload_root</code>.</li>
     <li>Usa <code>conf/nginx.docker.conf</code>: cache de código ligado, <code>worker_processes auto</code>, app construído no <code>init_by_lua</code> e logs em stdout/stderr.</li>
     <li>Tem <code>HEALTHCHECK</code> em <code>/health</code>.</li>
     <li>Com <code>RUN_MIGRATIONS=true</code>, o entrypoint roda <code>bin/crescent db:migrate</code> antes de subir (até 10 tentativas, a cada 3 s, enquanto o banco não responde). O padrão da imagem é <code>false</code>.</li>

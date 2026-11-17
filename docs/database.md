@@ -53,7 +53,7 @@ return Model:extend({
 })
 ```
 
-`bin/crescent make:model User users` gera esse arquivo. As regras de `validates` são as mesmas de [Validação](#validação), mais `unique = true` (consulta o banco; mantenha também um índice `UNIQUE`).
+`bin/crescent make:model User users` gera um esqueleto em `src/users/models/user.lua`. As regras de `validates` são as mesmas de [Validação](#validação), mais `unique = true` (consulta o banco; mantenha também um índice `UNIQUE`).
 
 ### CRUD
 
