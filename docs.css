@@ -597,3 +597,27 @@ html {
     background: var(--primary);
     color: white;
 }
+
+/* "Comece agora" callout (moonlight palette, matches the home page) */
+.start-box {
+    margin-bottom: 2rem;
+    padding: 1.75rem 2rem;
+    border: 1px solid rgba(170, 195, 240, 0.22);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(157, 188, 242, 0.08), rgba(157, 188, 242, 0.02));
+}
+.start-box h3 { margin: 0 0 0.5rem; color: #e8edf6; }
+.start-box p { margin: 0 0 1rem; color: #a6b1c6; }
+.start-box-link {
+    display: inline-block;
+    padding: 0.65rem 1.25rem;
+    border-radius: 999px;
+    background: #cfe0ff;
+    color: #04060b;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+.start-box-link:hover { transform: translateY(-1px); }
+.start-box-link:focus-visible { outline: 2px solid #cfe0ff; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .start-box-link { transition: none; } }
