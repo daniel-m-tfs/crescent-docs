@@ -1,372 +1,150 @@
-# 🚀 Começando
+# Começando
 
-## O que é Crescent?
+## O que é o Crescent
 
-Crescent é um framework web completo que combina a performance do Lua/LuaJIT com uma arquitetura moderna e modular inspirada em frameworks como NestJS e Laravel. Foi projetado para criar APIs REST e aplicações web de alto desempenho com código limpo e organizado.
+Crescent é um framework web em Lua que roda sobre o **OpenResty** (Nginx + LuaJIT) e usa **MySQL**. O Nginx cuida do HTTP (TLS, workers, keep-alive, limites, arquivos estáticos); o Crescent cuida de rotas, middleware, validação, ORM, migrations, templates, segurança e CLI.
 
-### 🌟 Principais Características
+Esta documentação é da versão **2.0**. Vindo do Crescent 1.x (Luvit)? Veja [Migrando do 1.x](/docs/migration-1x).
 
-- **⚡ Performance**: Built on LuaJIT + libuv (Luvit) for blazing fast execution
-- **🎯 Modular**: Organize código em módulos independentes e reutilizáveis
-- **🗄️ ORM ActiveRecord**: Interaja com banco de dados MySQL de forma elegante
-- **🔄 Migrations**: Sistema completo de versionamento de schema
-- **🛠️ CLI Poderoso**: Geração automática de código (como Artisan do Laravel)
-- **🔐 Segurança**: Middleware de segurança, validações e hash de senhas PBKDF2
-- **✅ Testes**: Biblioteca completa de assertions para testes automatizados
-- **📦 Pronto para Produção**: Configuração NGINX e systemd incluídas
+### Requisitos
 
----
+| Com Docker | Sem Docker |
+| --- | --- |
+| Docker com Compose | OpenResty (inclui `resty`, `lua-resty-mysql`, `lua-resty-openssl`) |
+| — | LuaRocks (para instalar `etlua`, `lua-resty-http`, `lua-resty-mail`) |
+| — | MySQL 8 ou MariaDB |
 
-## 📦 Instalação Rápida
+## Criando um projeto
 
-### Método 1: Via Lit Package Manager
+O jeito mais rápido é partir do template [crescent-starter](https://github.com/daniel-m-tfs/crescent-starter): ele já traz um hello world, Docker, MySQL e a CLI.
 
 ```bash
-# Instale o framework via Lit
-lit install daniel-m-tfs/crescent-framework
+git clone https://github.com/daniel-m-tfs/crescent-starter.git meu-app
+cd meu-app
+```
 
-# Clone o starter template
-git clone https://github.com/daniel-m-tfs/crescent-starter.git meu-projeto
-cd meu-projeto
+Se você tem o repositório do framework, `bin/crescent new meu-app` gera o mesmo projeto.
 
-# Configure e inicie
+### Com Docker (recomendado)
+
+```bash
 cp .env.example .env
-nano .env
-luvit app.lua
+docker compose up --build
 ```
 
-### Método 2: CLI (Criar Novo Projeto)
+Pronto:
+
+- [http://127.0.0.1:8080](http://127.0.0.1:8080) — página hello world
+- `/api/hello?name=Ada` — exemplo JSON com validação
+- `/health` e `/ready` — liveness e readiness (verifica o banco)
+
+O código fica montado no container com recarga automática (edite e recarregue a página) e as migrations pendentes rodam ao subir. Rode a CLI dentro do container:
 
 ```bash
-# Rodando de dentro do diretório do Crescent Framework
-# (a instalação global do CLI ainda não funciona de qualquer diretório —
-# ver Troubleshooting)
-luvit crescent-cli.lua new meu-projeto
-cd meu-projeto
-cp .env.example .env
-nano .env
-luvit app.lua
+docker compose exec app bin/crescent routes
 ```
 
----
-
-## 📚 Dependências
-
-### Requisitos do Sistema
-
-- **Luvit 2.18+**: Runtime Lua assíncrono
-- **Lit 3.8+**: Gerenciador de pacotes
-- **MySQL 5.7+** ou **MariaDB 10+**: Banco de dados
-- **Linux/macOS**: Sistema operacional (Windows via WSL)
-
-### Instalando Luvit e Lit
+### Sem Docker
 
 ```bash
-# macOS via Homebrew
-brew install luvit
-
-# Linux - Download manual
-curl -L https://github.com/luvit/lit/raw/master/get-lit.sh | sh
+./deps.sh                      # instala as dependências Lua em ./lua_modules
+cp .env.example .env           # ajuste DB_* para o seu MySQL
+./bin/crescent server start    # http://127.0.0.1:8080
+curl http://127.0.0.1:8080/health
 ```
 
-### Dependências do Framework
+No Linux, aponte o `deps.sh` para o LuaJIT do OpenResty: `OPENRESTY_LUAJIT=/usr/local/openresty/luajit ./deps.sh` (o padrão é o caminho do Homebrew no macOS).
 
-O Crescent Framework automaticamente inclui:
+`./bin/crescent server stop` para o servidor. Em desenvolvimento o `nginx.conf` usa `lua_code_cache off`, então alterações no código valem na próxima requisição.
 
-- `luvit/luvit@2.18.1` - Runtime base
-- `openssl` (via `lua-openssl`, já embutido no binário do Luvit — confirme
-  com `luvit -v`) - usado por `crescent.utils.hash` (PBKDF2) e, quando
-  disponível, por `crescent.utils.jwt` para HMAC-SHA256
+> **Atenção:** o servidor lê o `.env`, mas a CLI (que roda no `resty`) **não**. Antes de `db:*` e `routes`, exporte as variáveis no shell: `set -a; . ./.env; set +a`. No Docker isso já é feito pelo `env_file`.
 
-O driver MySQL não é um pacote Lit — é um módulo LuaRocks, instale separadamente:
-
-```bash
-luarocks install luasql-mysql
-```
-
-Sem ele, o framework roda em modo mock (avisa no console e não conecta a um
-MySQL real), então dá pra seguir o resto do tutorial sem instalar nada
-ainda.
-
----
-
-## 📁 Estrutura do Projeto
+## Estrutura do projeto
 
 ```
-crescent-starter/
-├── app.lua                    # 🚀 Arquivo principal da aplicação
-├── bootstrap.lua              # 🔧 Bootstrap do framework
-├── crescent-cli.lua          # 🛠️ CLI para geração de código
-├── .env                      # 🔐 Variáveis de ambiente (não versionar!)
-├── .env.example              # 📝 Template de variáveis
-├── config/
-│   ├── development.lua       # ⚙️ Config de desenvolvimento
-│   ├── production.lua        # ⚙️ Config de produção
-│   ├── nginx.conf            # 🌐 Configuração NGINX
-│   └── crescent.service      # 🔄 Systemd service
-├── crescent/                 # 📦 Core do framework
-│   ├── init.lua
-│   ├── server.lua
-│   ├── core/
-│   │   ├── context.lua       # Contexto HTTP (req/res)
-│   │   ├── request.lua       # Request object
-│   │   ├── response.lua      # Response object
-│   │   └── router.lua        # Sistema de rotas
-│   ├── database/
-│   │   ├── model.lua         # ORM ActiveRecord
-│   │   ├── query_builder.lua # Query Builder
-│   │   ├── mysql.lua         # Driver MySQL
-│   │   └── migrate.lua       # Sistema de migrations
-│   ├── middleware/
-│   │   ├── auth.lua          # Autenticação
-│   │   ├── cors.lua          # CORS
-│   │   ├── logger.lua        # Logging
-│   │   └── security.lua      # Segurança
-│   └── utils/
-│       ├── env.lua           # Variáveis de ambiente
-│       ├── hash.lua          # 🔐 Hash de senhas PBKDF2
-│       ├── tests.lua         # ✅ Biblioteca de testes
-│       ├── headers.lua       # HTTP headers
-│       ├── path.lua          # Path utilities
-│       └── string.lua        # String utilities
-├── src/                      # 📝 Seu código (módulos)
-│   └── users/                # Exemplo de módulo
-│       ├── init.lua          # Registrador do módulo
-│       ├── controllers/
-│       │   └── users.lua
-│       ├── services/
-│       │   └── users.lua
-│       ├── models/
-│       │   └── users.lua
-│       └── routes/
-│           └── users.lua
-├── migrations/               # 🔄 Database migrations
-│   └── 20260108230701_create_users_table.lua
-└── tests/                    # ✅ Testes automatizados
-    └── test-*.lua
-
+app.lua            monta a aplicação: middlewares + módulos
+config/            configuração por ambiente (development.lua, production.lua, test.lua)
+src/<módulo>/      init.lua (register), actions/, models/, services/, routes/
+views/             templates etlua (layout.etlua + páginas)
+public/            arquivos estáticos, servidos pelo Nginx em /public/
+migrations/        bin/crescent make:migration
+seeds/             bin/crescent make:seeder
+tests/             bin/crescent test
+crescent/  cli/    o framework, versionado junto com o projeto
+nginx.conf         Nginx de desenvolvimento local
+conf/              Nginx de produção e dos containers
+Dockerfile  docker-compose.yml  docker/
 ```
 
-### 🎯 Convenções de Diretórios
-
-- **`src/`**: Todos os seus módulos de negócio
-- **`crescent/`**: Core do framework (não modificar)
-- **`config/`**: Arquivos de configuração
-- **`migrations/`**: Versionamento do banco de dados
-- **`tests/`**: Testes automatizados
-
----
-
-## 🔧 Configuração Inicial
-
-### 1. Variáveis de Ambiente (.env)
-
-```bash
-# Ambiente
-APP_ENV=development
-
-# Servidor
-APP_HOST=0.0.0.0
-APP_PORT=8080
-
-# Banco de Dados
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=meu_banco
-DB_USER=root
-DB_PASSWORD=senha_segura
-```
-
-### 2. Testar Conexão MySQL
+O `app.lua` gerado:
 
 ```lua
--- teste-conexao.lua
-local MySQL = require('crescent.database.mysql')
+local Crescent = require("crescent")
+local Config = require("crescent.config")
 
-MySQL.test()
+local app = Crescent.new(Config.load())
+
+app:use(Crescent.middleware.security_headers.create())
+app:use(Crescent.middleware.request_log.create({
+    skip = function(ctx) return ctx.path == "/health" or ctx.path == "/ready" end,
+}))
+
+require("src.health").register(app)
+require("src.hello").register(app)
+
+return app
 ```
+
+## Primeiro módulo
+
+Gere um CRUD completo (model, service, actions, rotas, teste e migration):
 
 ```bash
-luvit teste-conexao.lua
+bin/crescent make:module Product
 ```
 
-### 3. Criar Primeira Migration
-
-```bash
-luvit crescent-cli make:migration create_products_table
-```
-
-### 4. Executar Migrations
-
-```bash
-luvit crescent-cli migrate
-```
-
----
-
-## 🎮 Primeiro Módulo
-
-Crie um módulo CRUD completo com um único comando:
-
-```bash
-luvit crescent-cli make:module Product
-```
-
-Isso cria:
-- ✅ Controller (`src/product/controllers/product.lua`)
-- ✅ Service (`src/product/services/product.lua`)
-- ✅ Model (`src/product/models/product.lua`)
-- ✅ Routes (`src/product/routes/product.lua`)
-- ✅ Module Init (`src/product/init.lua`)
-
-### Registrar Módulo no app.lua
+Registre o módulo no `app.lua`:
 
 ```lua
--- app.lua
-local Crescent = require('crescent')
-local app = Crescent.new()
-
--- Registra módulo Product
-local ProductModule = require("src.product")
-ProductModule.register(app)
-
--- app:listen(port, host) não recebe callback; "listening" já é
--- impresso pelo próprio framework
-app:listen(8080)
+require("src.product").register(app)
 ```
 
----
-
-## 🚀 Iniciando o Servidor
-
-### Modo Desenvolvimento
+Crie a tabela (com Docker: `docker compose exec app bin/crescent db:migrate`):
 
 ```bash
-luvit app.lua
+bin/crescent db:migrate
 ```
 
-Ou use o CLI:
+E teste:
 
 ```bash
-luvit crescent-cli server
+curl -X POST http://127.0.0.1:8080/products \
+  -H 'Content-Type: application/json' -d '{"name":"Teclado"}'
+# 201 {"data":{"id":1,"name":"Teclado","created_at":"...","updated_at":"..."}}
+
+curl http://127.0.0.1:8080/products
+# {"data":[...],"meta":{"page":1,"per_page":15,"total":1,"last_page":1,"from":1,"to":1}}
+
+curl http://127.0.0.1:8080/products/1
+curl -X PUT http://127.0.0.1:8080/products/1 \
+  -H 'Content-Type: application/json' -d '{"name":"Teclado mecânico"}'
+curl -X DELETE http://127.0.0.1:8080/products/1    # 204
 ```
 
-### Acessar API
+Um `POST` sem `name` responde `422` com os erros por campo; um id inexistente responde `404`.
 
-```bash
-# Listar produtos
-curl http://localhost:8080/product
+| Método | Caminho | Nome da rota |
+| --- | --- | --- |
+| GET | `/products` | `products.index` |
+| GET | `/products/{id}` | `products.show` |
+| POST | `/products` | `products.store` |
+| PUT | `/products/{id}` | `products.update` |
+| DELETE | `/products/{id}` | `products.destroy` |
 
-# Criar produto
-curl -X POST http://localhost:8080/product \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Notebook","price":2500}'
+## Próximos passos
 
-# Buscar por ID
-curl http://localhost:8080/product/1
-
-# Atualizar
-curl -X PUT http://localhost:8080/product/1 \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Notebook Dell","price":2800}'
-
-# Deletar
-curl -X DELETE http://localhost:8080/product/1
-```
-
----
-
-## 🧪 Executando Testes
-
-```bash
-# Rodar todos os testes
-luvit crescent-cli test
-
-# Rodar um arquivo de teste específico (substitua pelo nome real do seu teste)
-luvit tests/test-product.lua
-```
-
----
-
-## 📖 Próximos Passos
-
-Agora que você tem um projeto rodando, explore:
-
-1. **[CLI](/docs/cli)** - Aprenda todos os comandos disponíveis
-2. **[Core Concepts](/docs/core-concepts)** - Rotas, Controllers, Services
-3. **[Database & ORM](/docs/database)** - Modelos, relações, migrations
-4. **[Utilities](/docs/utilities)** - Testes, hash, helpers
-5. **[Deployment](/docs/deployment)** - Deploy em produção
-
----
-
-## 💡 Dicas Úteis
-
-### Hot Reload (Desenvolvimento)
-
-Use `nodemon` ou `entr` para reload automático:
-
-```bash
-# Com entr
-find . -name "*.lua" | entr -r luvit app.lua
-```
-
-### Debug
-
-```lua
--- Use p() para debug (pretty-print)
-p(user)  -- Imprime tabela formatada
-p(ctx.body)
-```
-
-### Performance
-
-```lua
--- Use LuaJIT JIT compilation
--- Já habilitado por padrão no Luvit
-```
-
----
-
-## 🆘 Troubleshooting
-
-### Erro: "Module not found"
-
-```bash
-# Instale dependências
-lit install
-```
-
-### Erro: "MySQL connection failed"
-
-1. Verifique se MySQL está rodando: `mysql.server status`
-2. Teste credenciais: `mysql -u root -p`
-3. Confira `.env`: `DB_HOST`, `DB_USER`, `DB_PASSWORD`
-
-### Porta já em uso
-
-```bash
-# Mate processo na porta 8080
-lsof -ti:8080 | xargs kill -9
-
-# Ou mude a porta no .env
-APP_PORT=3000
-```
-
-### CLI global (`crescent`) não encontrado ou dá erro de módulo
-
-A instalação global do CLI (comando `crescent`, via `install.sh`) hoje só
-funciona corretamente quando rodada de dentro do diretório do Crescent
-Framework — `crescent-cli.lua` resolve `require("crescent.utils....")`
-relativo ao diretório atual, e não ajusta `package.path` como o
-`bootstrap.lua` de um projeto faz. Rodando de outro diretório, use o caminho
-completo: `luvit /caminho/para/Crescent\ Framework/crescent-cli.lua <comando>`.
-
----
-
-## 📚 Recursos Adicionais
-
-- [GitHub Repository](https://github.com/daniel-m-tfs/crescent-framework)
-- [Starter Template](https://github.com/daniel-m-tfs/crescent-starter)
-- [Luvit Documentation](https://luvit.io/)
-- [Lit Package Manager](https://luvit.io/lit.html)
+- [Conceitos](/docs/core-concepts) — rotas, `ctx`, middleware, validação, erros e views.
+- [Banco de dados](/docs/database) — models, relações, query builder e migrations.
+- [Segurança](/docs/security) — JWT, sessões, CSRF, CORS e rate limit.
+- [CLI](/docs/cli) — todos os comandos do `bin/crescent`.
+- [Deploy](/docs/deployment) — imagem Docker e Nginx de produção.
