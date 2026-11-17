@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>document.documentElement.classList.add('js');</script>
+
+    <link rel="icon" type="image/x-icon" href="./crescent-logo-semfundo.ico">
+    <link rel="apple-touch-icon" href="./crescent-logo-512.png">
+
+    <title>Benchmark — Crescent 2.0 × Crescent 1.x × Node × Python</title>
+    <meta name="description"
+        content="Benchmark do Crescent 2.0 (OpenResty) contra o Crescent 1.x (Luvit), Node.js + Fastify e Python + FastAPI: mesmos endpoints, mesma máquina, mesmo MySQL. Números, gráficos, metodologia e dados brutos.">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#04060b">
+    <meta name="color-scheme" content="dark">
+    <link rel="canonical" href="https://crescent.tyne.com.br/benchmark.html">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://crescent.tyne.com.br/benchmark.html">
+    <meta property="og:site_name" content="Crescent Framework">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:title" content="Benchmark do Crescent 2.0">
+    <meta property="og:description"
+        content="Crescent 2.0 × Crescent 1.x × Node + Fastify × Python + FastAPI, com os mesmos endpoints e o mesmo MySQL. Metodologia e dados brutos abertos.">
+    <meta property="og:image" content="https://crescent.tyne.com.br/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Benchmark do Crescent 2.0">
+    <meta property="twitter:description"
+        content="Crescent 2.0 × Crescent 1.x × Node + Fastify × Python + FastAPI, com os mesmos endpoints e o mesmo MySQL.">
+    <meta property="twitter:image" content="https://crescent.tyne.com.br/og-image.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="menu.css">
+    <link rel="stylesheet" href="benchmark.css">
+</head>
+
+<body class="home bench-page">
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <nav class="navbar" aria-label="Principal">
+        <div class="container">
+            <div class="nav-content">
+                <a class="nav-brand" href="index.html" aria-label="Crescent — início">
+                    <picture>
+                        <source srcset="./crescent-logo-128.webp" type="image/webp">
+                        <img src="./crescent-logo-128.png" alt="" class="logo" width="40" height="40">
+                    </picture>
+                    <span class="brand-name">Crescent</span>
+                </a>
+                <div id="menu">
+                    <div id="menu-bar" onclick="menuOnClick()" role="button" tabindex="0" aria-label="Abrir menu"
+                        aria-controls="nav" aria-expanded="false">
+                        <div id="bar1" class="bar"></div>
+                        <div id="bar2" class="bar"></div>
+                        <div id="bar3" class="bar"></div>
+                    </div>
+                    <nav class="nav" id="nav" aria-label="Menu">
+                        <ul>
+                            <li><a href="index.html">Início</a></li>
+                            <li><a href="index.html#comecar">Começar</a></li>
+                            <li><a href="index.html#arquitetura">Arquitetura</a></li>
+                            <li><a href="benchmark.html" aria-current="page">Benchmark</a></li>
+                            <li><a href="docs.html">Documentação</a></li>
+                            <li><a href="https://github.com/daniel-m-tfs/crescent-framework" target="_blank"
+                                    rel="noopener" class="github-link">GitHub</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="menu-bg" id="menu-bg"></div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="conteudo">
+        <header class="scene bench-hero">
+            <div class="container">
+                <div class="scene-head">
+                    <p class="kicker"><span class="kicker-num">B</span>Benchmark</p>
+                    <h1 class="scene-title bench-title">Medido, <em>não prometido.</em></h1>
+                    <p class="scene-lede">
+                        Quatro aplicações com exatamente os mesmos endpoints — o Crescent 2.0, o Crescent 1.x, Node.js
+                        com Fastify e Python com FastAPI — medidas uma de cada vez, na mesma máquina, contra o mesmo
+                        MySQL e com a mesma carga.
+                    </p>
+                    <p class="bench-meta" id="bench-meta">Carregando dados…</p>
+                    <p class="bench-source">Código, scripts e dados brutos: <a href="https://github.com/daniel-m-tfs/crescent-benchmark" rel="noopener">github.com/daniel-m-tfs/crescent-benchmark</a> — rode na sua máquina.</p>
+                </div>
+
+                <div class="bench-tiles" id="bench-tiles" aria-live="polite"></div>
+            </div>
+        </header>
+
+        <section class="scene bench-results" aria-labelledby="resultados-title">
+            <div class="container">
+                <div class="scene-head">
+                    <p class="kicker"><span class="kicker-num">01</span>Resultados</p>
+                    <h2 id="resultados-title" class="scene-title">Cenário por cenário.</h2>
+                    <p class="scene-lede">
+                        Cada painel é um tipo de requisição, com sua própria escala. Passe o mouse (ou o foco) numa
+                        barra para ver latências, erros e memória.
+                    </p>
+                </div>
+
+                <div class="bench-controls" role="group" aria-label="Opções dos gráficos">
+                    <div class="seg" role="radiogroup" aria-label="Workers por aplicação" id="ctl-workers">
+                        <span class="seg-label" id="lbl-workers">Workers</span>
+                        <button type="button" role="radio" aria-checked="true" data-value="1">1 worker</button>
+                        <button type="button" role="radio" aria-checked="false" data-value="4">4 workers</button>
+                    </div>
+                    <div class="seg" role="radiogroup" aria-label="Métrica" id="ctl-metric">
+                        <span class="seg-label">Métrica</span>
+                        <button type="button" role="radio" aria-checked="true" data-value="rps">Requisições/s</button>
+                        <button type="button" role="radio" aria-checked="false" data-value="p99">Latência p99</button>
+                    </div>
+                </div>
+
+                <ul class="bench-legend" id="bench-legend" aria-label="Legenda"></ul>
+                <p class="bench-hint" id="bench-hint"></p>
+
+                <div class="bench-grid" id="bench-grid"></div>
+
+                <div class="bench-memory">
+                    <h3 class="bench-subtitle">Memória do processo (RSS)</h3>
+                    <p class="bench-note">Soma de todos os processos da aplicação: ociosa, logo após subir, e o pico
+                        observado durante a rodada. Menor é melhor.</p>
+                    <div class="bench-card" id="bench-memory"></div>
+                </div>
+
+                <details class="bench-table-wrap">
+                    <summary>Ver todos os números em tabela</summary>
+                    <div class="bench-table-scroll" id="bench-table"></div>
+                    <p class="bench-note"><a href="benchmark-results.csv" download>Baixar os resultados (CSV)</a></p>
+                </details>
+            </div>
+        </section>
+
+        <section class="scene bench-method" aria-labelledby="metodo-title">
+            <div class="container scene-grid">
+                <div class="scene-copy">
+                    <p class="kicker"><span class="kicker-num">02</span>Metodologia</p>
+                    <h2 id="metodo-title" class="scene-title">Regras iguais para todos.</h2>
+                    <p class="scene-lede">
+                        Comparação justa vale mais que número bonito. Estas são as regras — e, logo abaixo, os limites
+                        do que estes números dizem.
+                    </p>
+                    <p class="scene-lede">Tudo é reproduzível: o <a href="https://github.com/daniel-m-tfs/crescent-benchmark"
+                            rel="noopener">repositório do benchmark</a> tem as quatro aplicações, o script que mede e
+                        os resultados desta rodada.</p>
+                </div>
+                <div class="status-panel">
+                    <dl class="status-list">
+                        <div>
+                            <dt>Uma por vez</dt>
+                            <dd>Só uma aplicação ligada durante a medição. O banco é recriado com as mesmas 1000 linhas
+                                antes de cada uma.</dd>
+                        </div>
+                        <div>
+                            <dt>Mesma carga</dt>
+                            <dd><code id="m-wrk">wrk -t2 -c64</code>, aquecimento descartado e janela medida igual
+                                para todos os cenários.</dd>
+                        </div>
+                        <div>
+                            <dt>Repetições</dt>
+                            <dd>Os números publicados vêm de uma rodada única. Entre execuções, o mesmo app variou até
+                                ~25% nesta máquina, então diferenças pequenas são empate. O script já faz repetições
+                                (<code>--rounds 3</code>, com a ordem das aplicações alternada e a mediana); esta página
+                                será atualizada com essa rodada.</dd>
+                        </div>
+                        <div>
+                            <dt>Só o núcleo</dt>
+                            <dd>Sem log de acesso, CORS, rate limit ou headers de segurança em nenhuma das quatro.
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Produção</dt>
+                            <dd>Crescent 2 com cache de código e app montada no boot; Node com
+                                <code>NODE_ENV=production</code>; uvicorn com uvloop e httptools.</dd>
+                        </div>
+                        <div>
+                            <dt>Workers</dt>
+                            <dd>“1 worker” é a comparação direta. Em “4 workers”: <code>worker_processes 4</code>,
+                                <code>node:cluster</code> com 4 processos e <code>uvicorn --workers 4</code>. O 1.x
+                                (Luvit) roda num processo só e fica de fora.</dd>
+                        </div>
+                        <div>
+                            <dt>Banco</dt>
+                            <dd>64 conexões no total para todos. SQL parametrizado direto no driver de cada stack; o
+                                cenário “ORM” mostra o custo extra do <code>Model</code> do Crescent.</dd>
+                        </div>
+                        <div>
+                            <dt>Contrato</dt>
+                            <dd>Antes de medir, cada aplicação passa por uma checagem: as respostas precisam ser
+                                iguais. Se falhar, ela não é medida.</dd>
+                        </div>
+                    </dl>
+                    <div class="status-notes">
+                        <h3>Limites — leia antes de citar</h3>
+                        <ul class="bench-limits">
+                            <li>Carga, banco e aplicação rodam <strong>na mesma máquina</strong> e disputam CPU — com
+                                4 workers isso pesa mais. Os números comparam as aplicações entre si; não são
+                                capacidade de produção.</li>
+                            <li>O MySQL é local e as consultas são triviais. Numa aplicação real o banco costuma ser o
+                                gargalo, e as diferenças entre frameworks encolhem.</li>
+                            <li>O <code>mysql2</code> (Node) usa <em>prepared statements</em> do servidor; os outros
+                                usam o protocolo de texto com valores escapados — o jeito idiomático de cada driver.
+                            </li>
+                            <li>O Crescent 1.x usa <code>luasql</code>, um driver bloqueante: durante uma consulta o
+                                processo inteiro espera.</li>
+                            <li>Sem TLS e sem proxy na frente.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-brand-mark">
+                        <picture>
+                            <source srcset="./crescent-logo-128.webp" type="image/webp">
+                            <img src="./crescent-logo-128.png" alt="" class="footer-logo" width="44" height="44"
+                                loading="lazy" decoding="async">
+                        </picture>
+                        <span>Crescent Framework</span>
+                    </div>
+                    <p>Framework web em Lua sobre OpenResty, com MySQL.</p>
+                </div>
+                <div class="footer-column">
+                    <h2 class="footer-heading">Projeto</h2>
+                    <ul>
+                        <li><a href="https://github.com/daniel-m-tfs/crescent-starter" rel="noopener">Starter</a></li>
+                        <li><a href="https://github.com/daniel-m-tfs/crescent-framework" rel="noopener">Framework</a></li>
+                        <li><a href="https://github.com/daniel-m-tfs/crescent-framework/blob/main/LICENSE" rel="noopener">Licença MIT</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h2 class="footer-heading">Aprender</h2>
+                    <ul>
+                        <li><a href="docs.html">Documentação</a></li>
+                        <li><a href="benchmark.html">Benchmark</a></li>
+                        <li><a href="index.html#arquitetura">Arquitetura</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h2 class="footer-heading">Comunidade</h2>
+                    <ul>
+                        <li><a href="https://github.com/daniel-m-tfs/crescent-framework/issues" rel="noopener">Issues</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Crescent Framework · Distribuído sob a licença MIT.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="bench-tip" id="bench-tip" role="tooltip" hidden></div>
+
+    <script src="benchmark-data.js" defer></script>
+    <script src="benchmark.js" defer></script>
+    <script src="script.js" defer></script>
+    <script src="menu.js" defer></script>
+</body>
+
+</html>
