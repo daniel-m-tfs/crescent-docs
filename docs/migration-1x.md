@@ -2,7 +2,7 @@
 
 ## O que mudou
 
-O Crescent 2.0 é uma reescrita: troca o **Luvit** pelo **OpenResty** (Nginx + LuaJIT). O Nginx passa a cuidar do servidor HTTP, dos workers e dos arquivos estáticos, e o banco continua sendo MySQL. A organização em módulos (`src/<módulo>` com actions, services, models e rotas) continua a mesma, mas a API mudou em pontos que quebram código existente.
+O Crescent 2.0 é uma reescrita: troca o **Luvit** pelo **OpenResty** (Nginx + LuaJIT). O Nginx passa a cuidar do servidor HTTP, dos workers e dos arquivos estáticos, e o banco continua sendo MySQL. A organização em módulos (`src/<módulo>` com controllers, services, models e rotas) continua a mesma, mas a API mudou em pontos que quebram código existente.
 
 A forma mais simples de migrar é criar um projeto novo a partir do [starter](https://github.com/daniel-m-tfs/crescent-starter) e trazer seus módulos, ajustando-os com a lista abaixo.
 
@@ -24,7 +24,7 @@ A forma mais simples de migrar é criar um projeto novo a partir do [starter](ht
 | `Model:where(...):get()` devolvia linhas | devolve instâncias do model (use `to_table()` para JSON) |
 | middleware `static` | arquivos em `public/`, servidos pelo Nginx em `/public/` |
 | middleware `logger` | `Crescent.middleware.request_log` |
-| `luvit crescent-cli.lua <comando>` | `bin/crescent <comando>` |
+| `luvit crescent-cli.lua <comando>` | `lua cli.lua <comando>` (ou `bin/crescent <comando>`) |
 
 ## O que continua valendo
 

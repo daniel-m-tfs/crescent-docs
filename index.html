@@ -262,7 +262,7 @@
                     </div>
                     <div class="duty">
                         <h3>O Crescent cuida de</h3>
-                        <p>Rotas, actions, middleware, validação, erros padronizados, ORM e migrations, templates,
+                        <p>Rotas, controllers, middleware, validação, erros padronizados, ORM e migrations, templates,
                             segurança e CLI.</p>
                     </div>
                     <div class="duty">
@@ -294,7 +294,7 @@
                 <div class="code-window reveal" data-tabs>
                     <div class="code-tabs" role="tablist" aria-label="Arquivos de exemplo" hidden>
                         <button type="button" role="tab" id="tab-routes" aria-controls="panel-routes">src/hello/init.lua</button>
-                        <button type="button" role="tab" id="tab-action" aria-controls="panel-action">actions/hello.lua</button>
+                        <button type="button" role="tab" id="tab-action" aria-controls="panel-action">controllers/hello.lua</button>
                         <button type="button" role="tab" id="tab-app" aria-controls="panel-app">app.lua</button>
                         <button type="button" role="tab" id="tab-model" aria-controls="panel-model">models/user.lua</button>
                     </div>
@@ -302,15 +302,15 @@
                     <div class="code-panel" id="panel-routes">
                         <p class="code-file">src/hello/init.lua</p>
                         <div class="code-block">
-<pre><code class="language-lua">local actions = require("src.hello.actions.hello")
+<pre><code class="language-lua">local controller = require("src.hello.controllers.hello")
 
 local Module = {}
 
 function Module.register(app)
-    app:get("/", actions.index, "hello.index")
+    app:get("/", controller.index, "hello.index")
     app:get("/api/hello", app:validated({
         name = { type = "string", min_length = 1, max_length = 50 },
-    }, actions.greet, "query"), "hello.greet")
+    }, controller.greet, "query"), "hello.greet")
 end
 
 return Module</code></pre>
@@ -318,18 +318,18 @@ return Module</code></pre>
                     </div>
 
                     <div class="code-panel" id="panel-action">
-                        <p class="code-file">src/hello/actions/hello.lua</p>
+                        <p class="code-file">src/hello/controllers/hello.lua</p>
                         <div class="code-block">
-<pre><code class="language-lua">local HelloActions = {}
+<pre><code class="language-lua">local HelloController = {}
 
 -- GET /api/hello?name=Ada — `name` já foi validado por app:validated
-function HelloActions.greet(ctx)
+function HelloController.greet(ctx)
     local name = ctx.query.name
     if name == nil or name == "" then name = "World" end
     return ctx:json(200, { message = "Hello, " .. name .. "!" })
 end
 
-return HelloActions</code></pre>
+return HelloController</code></pre>
                         </div>
                     </div>
 
@@ -459,7 +459,7 @@ return User</code></pre>
                     <h2 id="status-title" class="scene-title">Onde estamos, sem exageros.</h2>
                     <p class="scene-lede">
                         O Crescent 2.0 é uma reescrita. A versão 1.x rodava sobre Luvit; a 2.0 entrega o HTTP ao
-                        OpenResty e mantém o estilo de módulos, actions e models declarativos.
+                        OpenResty e mantém o estilo de módulos, controllers e models declarativos.
                     </p>
                 </div>
 

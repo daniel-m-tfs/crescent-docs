@@ -22,12 +22,12 @@ Cada módulo expõe uma função `register(app)`:
 
 ```lua
 -- src/hello/init.lua
-local actions = require("src.hello.actions.hello")
+local controller = require("src.hello.controllers.hello")
 
 local Module = {}
 
 function Module.register(app)
-    app:get("/", actions.index, "hello.index")
+    app:get("/", controller.index, "hello.index")
 end
 
 return Module
@@ -107,11 +107,11 @@ app:route("users.show")   -- "/api/v1/users/{id}"
 
 - `HEAD` usa a rota `GET` automaticamente.
 - Caminho existente com outro método responde `405` com o header `Allow`; caminho inexistente responde `404` (`route_not_found`).
-- `bin/crescent routes` lista todas as rotas com método, caminho e nome.
+- `lua cli.lua routes` lista todas as rotas com método, caminho e nome.
 
-## Actions e o ctx
+## Controllers e o ctx
 
-Uma action é uma função que recebe o contexto da requisição (`ctx`) e responde:
+Um handler de rota é uma função que recebe o contexto da requisição (`ctx`) e responde. Nos módulos, os handlers ficam em `controllers/` e delegam as regras de negócio para `services/`:
 
 ```lua
 app:get("/users/{id}", function(ctx)
@@ -186,7 +186,7 @@ local auth = require("crescent.middleware.auth")
 app:get("/admin", auth.protect({ auth.jwt(), require_admin }, admin_action))
 ```
 
-`bin/crescent make:middleware nome` gera o esqueleto em `src/middleware/nome.lua`. Os middlewares prontos (auth, CORS, rate limit, sessão, CSRF, headers de segurança, log) estão em [Segurança](/docs/security) e [Utilitários](/docs/utilities).
+`lua cli.lua make:middleware nome` gera o esqueleto em `src/middleware/nome.lua`. Os middlewares prontos (auth, CORS, rate limit, sessão, CSRF, headers de segurança, log) estão em [Segurança](/docs/security) e [Utilitários](/docs/utilities).
 
 ## Validação
 
@@ -237,7 +237,7 @@ return ctx:error(409, "e-mail já cadastrado", { field = "email" }, "email_taken
 -- 409 {"status":409,"code":"email_taken","error":"e-mail já cadastrado","details":{"field":"email"}}
 ```
 
-Erros lançados (`error(...)`) dentro de actions e middlewares:
+Erros lançados (`error(...)`) dentro de controllers e middlewares:
 
 - Viram `500 internal_error` e são registrados no log com o request id. O detalhe (mensagem e stack trace) só aparece na resposta com `debug = true`.
 - Uma tabela com `status` 4xx vira essa resposta, sem log de erro. É assim que `Model:find_or_fail` produz `404 model_not_found`:

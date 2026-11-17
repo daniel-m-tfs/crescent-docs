@@ -15,7 +15,7 @@ database = {
 },
 ```
 
-`Crescent.new(config)` configura o banco no boot (sem abrir conexão: cada query pega uma conexão do pool do worker). A partir daí, models e query builder usam esse banco automaticamente, e as actions o recebem em `ctx.db`.
+`Crescent.new(config)` configura o banco no boot (sem abrir conexão: cada query pega uma conexão do pool do worker). A partir daí, models e query builder usam esse banco automaticamente, e os controllers o recebem em `ctx.db`.
 
 | Chave opcional | Padrão | Descrição |
 | --- | --- | --- |
@@ -53,7 +53,7 @@ return Model:extend({
 })
 ```
 
-`bin/crescent make:model User users` gera um esqueleto em `src/users/models/user.lua`. As regras de `validates` são as mesmas de [Validação](#validação), mais `unique = true` (consulta o banco; mantenha também um índice `UNIQUE`).
+`lua cli.lua make:model User users` gera um esqueleto em `src/users/models/user.lua`. As regras de `validates` são as mesmas de [Validação](#validação), mais `unique = true` (consulta o banco; mantenha também um índice `UNIQUE`).
 
 ### CRUD
 
@@ -217,10 +217,11 @@ end)
 ## Migrations
 
 ```bash
-bin/crescent make:migration create_orders_table   # migrations/AAAAMMDDHHMMSS_create_orders_table.lua
-bin/crescent db:migrate                           # aplica as pendentes
-bin/crescent db:status                            # lista o que rodou
-bin/crescent db:rollback                          # desfaz o último lote (batch)
+lua cli.lua make:migration create_orders_table     # CREATE TABLE orders
+lua cli.lua make:migration add_total_to_orders     # ALTER TABLE orders
+lua cli.lua db:migrate                             # aplica as pendentes
+lua cli.lua db:status                              # lista o que rodou
+lua cli.lua db:rollback                            # desfaz o último lote (batch)
 ```
 
 Cada migration retorna `up` e `down`, que devolvem uma string SQL ou uma lista delas:
@@ -246,19 +247,19 @@ return {
 ```
 
 - Os arquivos rodam em ordem de nome e ficam registrados na tabela `migrations`. Cada execução de `db:migrate` forma um lote.
-- O arquivo gerado por `make:migration` vem com uma tabela `example` de exemplo: edite antes de rodar.
+- O arquivo gerado por `make:migration` deduz a tabela do nome (`create_<tabela>` ou `add_x_to_<tabela>`) e traz colunas de exemplo: revise antes de rodar.
 - **DDL do MySQL faz commit implícito**: migrations não rodam em transação. Se uma migration com vários comandos falhar no meio, ela fica parcialmente aplicada e sem registro. Prefira um comando de schema por migration.
 
 ## Seeders
 
 ```bash
-bin/crescent make:seeder admin_user    # cria seeds/admin_user.lua
-bin/crescent db:seed                   # roda todos, em ordem de nome
-bin/crescent db:seed admin_user        # só um
+lua cli.lua make:seeder 01_admin_user   # cria seeds/01_admin_user.lua
+lua cli.lua db:seed                     # roda todos, em ordem de nome
+lua cli.lua db:seed 01_admin_user       # só um
 ```
 
 ```lua
--- seeds/admin_user.lua
+-- seeds/01_admin_user.lua
 local User = require("src.users.models.user")
 
 return function(db)

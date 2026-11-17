@@ -18,7 +18,7 @@ docker run -d -p 8080:8080 \
 O que a imagem faz:
 
 - Parte de `openresty/openresty:*-alpine-fat` e instala as dependências Lua em uma camada própria.
-- Roda como o usuário sem privilégios `crescent`; só `logs/` e `tmp/` são graváveis. Se a aplicação salva uploads, monte um volume gravável para o `upload_root`.
+- Roda como o usuário sem privilégios `crescent`; só `logs/`, `tmp/` e `storage/` são graváveis. Uploads vão para `storage/` (`upload_root = "storage"`): monte um volume nesse caminho para que sobrevivam a novos containers (o `docker-compose.yml` de desenvolvimento já usa o volume `app-storage`).
 - Usa `conf/nginx.docker.conf`: cache de código ligado, `worker_processes auto`, app construído no `init_by_lua` e logs em stdout/stderr.
 - Tem `HEALTHCHECK` em `/health`.
 - Com `RUN_MIGRATIONS=true`, o entrypoint roda `bin/crescent db:migrate` antes de subir (até 10 tentativas, a cada 3 s, enquanto o banco não responde). O padrão da imagem é `false`.

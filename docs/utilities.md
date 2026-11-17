@@ -29,7 +29,7 @@ end)
 - TLS é verificado por padrão, redirecionamentos não são seguidos e respostas acima de 10 MiB são abortadas (`max_response_size`).
 - Para chamadas avulsas: `HttpClient.get(url)`.
 
-> O Nginx resolve DNS e verifica certificados para o Lua: os `nginx.conf` gerados já trazem `resolver` e `lua_ssl_trusted_certificate`. Sem eles, nomes não resolvem e conexões HTTPS falham. O cliente funciona em actions, middlewares e timers, mas não em `init_by_lua`.
+> O Nginx resolve DNS e verifica certificados para o Lua: os `nginx.conf` gerados já trazem `resolver` e `lua_ssl_trusted_certificate`. Sem eles, nomes não resolvem e conexões HTTPS falham. O cliente funciona em controllers, middlewares e timers, mas não em `init_by_lua`.
 
 ## E-mail
 
@@ -81,7 +81,7 @@ app:use(Crescent.middleware.request_log.create({
     skip = function(ctx) return ctx.path == "/health" or ctx.path == "/ready" end,
 }))
 
--- nas actions, um logger já com o request id:
+-- nos controllers, um logger já com o request id:
 ctx.state.log:info("pedido criado", { order_id = order.id })
 ```
 

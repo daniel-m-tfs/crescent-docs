@@ -23,13 +23,20 @@ git clone https://github.com/daniel-m-tfs/crescent-starter.git meu-app
 cd meu-app
 ```
 
-Se você tem o repositório do framework, `bin/crescent new meu-app` gera o mesmo projeto.
+Se você tem o repositório do framework, `lua cli.lua new meu-app` gera o mesmo projeto e já cria o `.env` com `APP_KEY` e `JWT_SECRET` aleatórios (pule o `cp` abaixo).
 
 ### Com Docker (recomendado)
 
 ```bash
-cp .env.example .env
-docker compose up --build
+lua cli.lua setup    # git do zero, usuário/senha do MySQL e sobe o Docker
+```
+
+O `setup` pergunta antes de cada passo (Enter aceita o padrão): recomeça o histórico do git sem o remote do template e adiciona o seu remote (opcional), grava usuário e senha do banco no `.env` (que ele cria com `APP_KEY` e `JWT_SECRET` aleatórios) e sobe a aplicação com hot reload. Depois, no dia a dia:
+
+```bash
+lua cli.lua run      # sobe app + MySQL (hot reload)
+lua cli.lua rerun    # reconstrói a imagem: Dockerfile, dependências ou Nginx mudaram
+lua cli.lua stop     # para, mantendo o banco
 ```
 
 Pronto:
@@ -49,27 +56,26 @@ docker compose exec app bin/crescent routes
 ```bash
 ./deps.sh                      # instala as dependências Lua em ./lua_modules
 cp .env.example .env           # ajuste DB_* para o seu MySQL
-./bin/crescent server start    # http://127.0.0.1:8080
+lua cli.lua server start       # http://127.0.0.1:8080
 curl http://127.0.0.1:8080/health
 ```
 
-No Linux, aponte o `deps.sh` para o LuaJIT do OpenResty: `OPENRESTY_LUAJIT=/usr/local/openresty/luajit ./deps.sh` (o padrão é o caminho do Homebrew no macOS).
+O `deps.sh` encontra o LuaJIT do OpenResty (Homebrew, `/usr/local/openresty` ou `/opt/openresty`); para outro local, use `OPENRESTY_LUAJIT=/caminho/luajit ./deps.sh`.
 
-`./bin/crescent server stop` para o servidor. Em desenvolvimento o `nginx.conf` usa `lua_code_cache off`, então alterações no código valem na próxima requisição.
-
-> **Atenção:** o servidor lê o `.env`, mas a CLI (que roda no `resty`) **não**. Antes de `db:*` e `routes`, exporte as variáveis no shell: `set -a; . ./.env; set +a`. No Docker isso já é feito pelo `env_file`.
+`lua cli.lua server stop` para o servidor. Em desenvolvimento o `nginx.conf` usa `lua_code_cache off`, então alterações no código valem na próxima requisição.
 
 ## Estrutura do projeto
 
 ```
 app.lua            monta a aplicação: middlewares + módulos
 config/            configuração por ambiente (development.lua, production.lua, test.lua)
-src/<módulo>/      init.lua (register), actions/, models/, services/, routes/
+src/<módulo>/      init.lua (register), controllers/, services/, models/, routes/
 views/             templates etlua (layout.etlua + páginas)
 public/            arquivos estáticos, servidos pelo Nginx em /public/
-migrations/        bin/crescent make:migration
-seeds/             bin/crescent make:seeder
-tests/             bin/crescent test
+migrations/        lua cli.lua make:migration
+seeds/             lua cli.lua make:seeder
+storage/           uploads (upload_root = "storage")
+tests/             lua cli.lua test
 crescent/  cli/    o framework, versionado junto com o projeto
 nginx.conf         Nginx de desenvolvimento local
 conf/              Nginx de produção e dos containers
@@ -97,10 +103,10 @@ return app
 
 ## Primeiro módulo
 
-Gere um CRUD completo (model, service, actions, rotas, teste e migration):
+Gere um CRUD completo (controller, service, model, rotas, teste e migration):
 
 ```bash
-bin/crescent make:module Product
+lua cli.lua make:module Product
 ```
 
 Registre o módulo no `app.lua`:
@@ -112,7 +118,7 @@ require("src.product").register(app)
 Crie a tabela (com Docker: `docker compose exec app bin/crescent db:migrate`):
 
 ```bash
-bin/crescent db:migrate
+lua cli.lua db:migrate
 ```
 
 E teste:
@@ -146,5 +152,5 @@ Um `POST` sem `name` responde `422` com os erros por campo; um id inexistente re
 - [Conceitos](/docs/core-concepts) — rotas, `ctx`, middleware, validação, erros e views.
 - [Banco de dados](/docs/database) — models, relações, query builder e migrations.
 - [Segurança](/docs/security) — JWT, sessões, CSRF, CORS e rate limit.
-- [CLI](/docs/cli) — todos os comandos do `bin/crescent`.
+- [CLI](/docs/cli) — todos os comandos de `lua cli.lua`.
 - [Deploy](/docs/deployment) — imagem Docker e Nginx de produção.

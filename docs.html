@@ -205,7 +205,7 @@
                         <li><a href="#a-aplicação">A aplicação</a></li>
                         <li><a href="#configuração-e-ambiente">Configuração e ambiente</a></li>
                         <li><a href="#rotas">Rotas</a></li>
-                        <li><a href="#actions-e-o-ctx">Actions e o ctx</a></li>
+                        <li><a href="#controllers-e-o-ctx">Controllers e o ctx</a></li>
                         <li><a href="#middleware">Middleware</a></li>
                         <li><a href="#validação">Validação</a></li>
                         <li><a href="#erros">Erros</a></li>
@@ -243,8 +243,9 @@
                 <div class="nav-section">
                     <h3>CLI</h3>
                     <ul>
-                        <li><a href="#usando-o-bincrescent">Usando o bin/crescent</a></li>
+                        <li><a href="#usando-a-cli">Usando a CLI</a></li>
                         <li><a href="#servidor-e-rotas">Servidor e rotas</a></li>
+                        <li><a href="#desenvolvimento-com-docker">Desenvolvimento com Docker</a></li>
                         <li><a href="#geradores">Geradores</a></li>
                         <li><a href="#banco-de-dados">Banco de dados</a></li>
                         <li><a href="#testes">Testes</a></li>
@@ -344,13 +345,20 @@
 cd meu-app</code></pre>
 </div>
 
-<p>Se você tem o repositório do framework, <code>bin/crescent new meu-app</code> gera o mesmo projeto.</p>
+<p>Se você tem o repositório do framework, <code>lua cli.lua new meu-app</code> gera o mesmo projeto e já cria o <code>.env</code> com <code>APP_KEY</code> e <code>JWT_SECRET</code> aleatórios (pule o <code>cp</code> abaixo).</p>
 
 <h3>Com Docker (recomendado)</h3>
 
 <div class="code-block">
-    <pre><code class="language-bash">cp .env.example .env
-docker compose up --build</code></pre>
+    <pre><code class="language-bash">lua cli.lua setup    # git do zero, usuário/senha do MySQL e sobe o Docker</code></pre>
+</div>
+
+<p>O <code>setup</code> pergunta antes de cada passo (Enter aceita o padrão): recomeça o histórico do git sem o remote do template e adiciona o seu remote (opcional), grava usuário e senha do banco no <code>.env</code> (que ele cria com <code>APP_KEY</code> e <code>JWT_SECRET</code> aleatórios) e sobe a aplicação com hot reload. Depois, no dia a dia:</p>
+
+<div class="code-block">
+    <pre><code class="language-bash">lua cli.lua run      # sobe app + MySQL (hot reload)
+lua cli.lua rerun    # reconstrói a imagem: Dockerfile, dependências ou Nginx mudaram
+lua cli.lua stop     # para, mantendo o banco</code></pre>
 </div>
 
 <p>Pronto:</p>
@@ -372,17 +380,13 @@ docker compose up --build</code></pre>
 <div class="code-block">
     <pre><code class="language-bash">./deps.sh                      # instala as dependências Lua em ./lua_modules
 cp .env.example .env           # ajuste DB_* para o seu MySQL
-./bin/crescent server start    # http://127.0.0.1:8080
+lua cli.lua server start       # http://127.0.0.1:8080
 curl http://127.0.0.1:8080/health</code></pre>
 </div>
 
-<p>No Linux, aponte o <code>deps.sh</code> para o LuaJIT do OpenResty: <code>OPENRESTY_LUAJIT=/usr/local/openresty/luajit ./deps.sh</code> (o padrão é o caminho do Homebrew no macOS).</p>
+<p>O <code>deps.sh</code> encontra o LuaJIT do OpenResty (Homebrew, <code>/usr/local/openresty</code> ou <code>/opt/openresty</code>); para outro local, use <code>OPENRESTY_LUAJIT=/caminho/luajit ./deps.sh</code>.</p>
 
-<p><code>./bin/crescent server stop</code> para o servidor. Em desenvolvimento o <code>nginx.conf</code> usa <code>lua_code_cache off</code>, então alterações no código valem na próxima requisição.</p>
-
-<div class="note-box">
-    <p><strong>Atenção:</strong> o servidor lê o <code>.env</code>, mas a CLI (que roda no <code>resty</code>) <strong>não</strong>. Antes de <code>db:*</code> e <code>routes</code>, exporte as variáveis no shell: <code>set -a; . ./.env; set +a</code>. No Docker isso já é feito pelo <code>env_file</code>.</p>
-</div>
+<p><code>lua cli.lua server stop</code> para o servidor. Em desenvolvimento o <code>nginx.conf</code> usa <code>lua_code_cache off</code>, então alterações no código valem na próxima requisição.</p>
 
 
                 <hr>
@@ -394,12 +398,13 @@ curl http://127.0.0.1:8080/health</code></pre>
                 <div class="code-block">
     <pre><code class="language-none">app.lua            monta a aplicação: middlewares + módulos
 config/            configuração por ambiente (development.lua, production.lua, test.lua)
-src/&lt;módulo&gt;/      init.lua (register), actions/, models/, services/, routes/
+src/&lt;módulo&gt;/      init.lua (register), controllers/, services/, models/, routes/
 views/             templates etlua (layout.etlua + páginas)
 public/            arquivos estáticos, servidos pelo Nginx em /public/
-migrations/        bin/crescent make:migration
-seeds/             bin/crescent make:seeder
-tests/             bin/crescent test
+migrations/        lua cli.lua make:migration
+seeds/             lua cli.lua make:seeder
+storage/           uploads (upload_root = "storage")
+tests/             lua cli.lua test
 crescent/  cli/    o framework, versionado junto com o projeto
 nginx.conf         Nginx de desenvolvimento local
 conf/              Nginx de produção e dos containers
@@ -432,10 +437,10 @@ return app</code></pre>
             <section id="primeiro-módulo" class="doc-section">
                 <h2>Primeiro módulo</h2>
 
-                <p>Gere um CRUD completo (model, service, actions, rotas, teste e migration):</p>
+                <p>Gere um CRUD completo (controller, service, model, rotas, teste e migration):</p>
 
 <div class="code-block">
-    <pre><code class="language-bash">bin/crescent make:module Product</code></pre>
+    <pre><code class="language-bash">lua cli.lua make:module Product</code></pre>
 </div>
 
 <p>Registre o módulo no <code>app.lua</code>:</p>
@@ -447,7 +452,7 @@ return app</code></pre>
 <p>Crie a tabela (com Docker: <code>docker compose exec app bin/crescent db:migrate</code>):</p>
 
 <div class="code-block">
-    <pre><code class="language-bash">bin/crescent db:migrate</code></pre>
+    <pre><code class="language-bash">lua cli.lua db:migrate</code></pre>
 </div>
 
 <p>E teste:</p>
@@ -516,7 +521,7 @@ curl -X DELETE http://127.0.0.1:8080/products/1    # 204</code></pre>
     <li><a href="#a-aplicação">Conceitos</a> — rotas, <code>ctx</code>, middleware, validação, erros e views.</li>
     <li><a href="#configuração">Banco de dados</a> — models, relações, query builder e migrations.</li>
     <li><a href="#autenticação">Segurança</a> — JWT, sessões, CSRF, CORS e rate limit.</li>
-    <li><a href="#usando-o-bincrescent">CLI</a> — todos os comandos do <code>bin/crescent</code>.</li>
+    <li><a href="#usando-a-cli">CLI</a> — todos os comandos de <code>lua cli.lua</code>.</li>
     <li><a href="#imagem-docker">Deploy</a> — imagem Docker e Nginx de produção.</li>
 </ul>
 
@@ -549,12 +554,12 @@ curl -X DELETE http://127.0.0.1:8080/products/1    # 204</code></pre>
 
 <div class="code-block">
     <pre><code class="language-lua">-- src/hello/init.lua
-local actions = require("src.hello.actions.hello")
+local controller = require("src.hello.controllers.hello")
 
 local Module = {}
 
 function Module.register(app)
-    app:get("/", actions.index, "hello.index")
+    app:get("/", controller.index, "hello.index")
 end
 
 return Module</code></pre>
@@ -714,17 +719,17 @@ app:route("users.show")   -- "/api/v1/users/{id}"</code></pre>
 <ul>
     <li><code>HEAD</code> usa a rota <code>GET</code> automaticamente.</li>
     <li>Caminho existente com outro método responde <code>405</code> com o header <code>Allow</code>; caminho inexistente responde <code>404</code> (<code>route_not_found</code>).</li>
-    <li><code>bin/crescent routes</code> lista todas as rotas com método, caminho e nome.</li>
+    <li><code>lua cli.lua routes</code> lista todas as rotas com método, caminho e nome.</li>
 </ul>
 
 
                 <hr>
             </section>
 
-            <section id="actions-e-o-ctx" class="doc-section">
-                <h2>Actions e o ctx</h2>
+            <section id="controllers-e-o-ctx" class="doc-section">
+                <h2>Controllers e o ctx</h2>
 
-                <p>Uma action é uma função que recebe o contexto da requisição (<code>ctx</code>) e responde:</p>
+                <p>Um handler de rota é uma função que recebe o contexto da requisição (<code>ctx</code>) e responde. Nos módulos, os handlers ficam em <code>controllers/</code> e delegam as regras de negócio para <code>services/</code>:</p>
 
 <div class="code-block">
     <pre><code class="language-lua">app:get("/users/{id}", function(ctx)
@@ -884,7 +889,7 @@ end)</code></pre>
 app:get("/admin", auth.protect({ auth.jwt(), require_admin }, admin_action))</code></pre>
 </div>
 
-<p><code>bin/crescent make:middleware nome</code> gera o esqueleto em <code>src/middleware/nome.lua</code>. Os middlewares prontos (auth, CORS, rate limit, sessão, CSRF, headers de segurança, log) estão em <a href="#autenticação">Segurança</a> e <a href="#cliente-http">Utilitários</a>.</p>
+<p><code>lua cli.lua make:middleware nome</code> gera o esqueleto em <code>src/middleware/nome.lua</code>. Os middlewares prontos (auth, CORS, rate limit, sessão, CSRF, headers de segurança, log) estão em <a href="#autenticação">Segurança</a> e <a href="#cliente-http">Utilitários</a>.</p>
 
 
                 <hr>
@@ -974,7 +979,7 @@ end))</code></pre>
 -- 409 {"status":409,"code":"email_taken","error":"e-mail já cadastrado","details":{"field":"email"}}</code></pre>
 </div>
 
-<p>Erros lançados (<code>error(...)</code>) dentro de actions e middlewares:</p>
+<p>Erros lançados (<code>error(...)</code>) dentro de controllers e middlewares:</p>
 
 <ul>
     <li>Viram <code>500 internal_error</code> e são registrados no log com o request id. O detalhe (mensagem e stack trace) só aparece na resposta com <code>debug = true</code>.</li>
@@ -1113,7 +1118,7 @@ database = {
 },</code></pre>
 </div>
 
-<p><code>Crescent.new(config)</code> configura o banco no boot (sem abrir conexão: cada query pega uma conexão do pool do worker). A partir daí, models e query builder usam esse banco automaticamente, e as actions o recebem em <code>ctx.db</code>.</p>
+<p><code>Crescent.new(config)</code> configura o banco no boot (sem abrir conexão: cada query pega uma conexão do pool do worker). A partir daí, models e query builder usam esse banco automaticamente, e os controllers o recebem em <code>ctx.db</code>.</p>
 
 <table>
     <thead>
@@ -1185,7 +1190,7 @@ return Model:extend({
 })</code></pre>
 </div>
 
-<p><code>bin/crescent make:model User users</code> gera um esqueleto em <code>src/users/models/user.lua</code>. As regras de <code>validates</code> são as mesmas de <a href="#validação">Validação</a>, mais <code>unique = true</code> (consulta o banco; mantenha também um índice <code>UNIQUE</code>).</p>
+<p><code>lua cli.lua make:model User users</code> gera um esqueleto em <code>src/users/models/user.lua</code>. As regras de <code>validates</code> são as mesmas de <a href="#validação">Validação</a>, mais <code>unique = true</code> (consulta o banco; mantenha também um índice <code>UNIQUE</code>).</p>
 
 <h3>CRUD</h3>
 
@@ -1417,10 +1422,11 @@ end)</code></pre>
                 <h2>Migrations</h2>
 
                 <div class="code-block">
-    <pre><code class="language-bash">bin/crescent make:migration create_orders_table   # migrations/AAAAMMDDHHMMSS_create_orders_table.lua
-bin/crescent db:migrate                           # aplica as pendentes
-bin/crescent db:status                            # lista o que rodou
-bin/crescent db:rollback                          # desfaz o último lote (batch)</code></pre>
+    <pre><code class="language-bash">lua cli.lua make:migration create_orders_table     # CREATE TABLE orders
+lua cli.lua make:migration add_total_to_orders     # ALTER TABLE orders
+lua cli.lua db:migrate                             # aplica as pendentes
+lua cli.lua db:status                              # lista o que rodou
+lua cli.lua db:rollback                            # desfaz o último lote (batch)</code></pre>
 </div>
 
 <p>Cada migration retorna <code>up</code> e <code>down</code>, que devolvem uma string SQL ou uma lista delas:</p>
@@ -1459,13 +1465,13 @@ bin/crescent db:rollback                          # desfaz o último lote (batch
                 <h2>Seeders</h2>
 
                 <div class="code-block">
-    <pre><code class="language-bash">bin/crescent make:seeder admin_user    # cria seeds/admin_user.lua
-bin/crescent db:seed                   # roda todos, em ordem de nome
-bin/crescent db:seed admin_user        # só um</code></pre>
+    <pre><code class="language-bash">lua cli.lua make:seeder 01_admin_user   # cria seeds/01_admin_user.lua
+lua cli.lua db:seed                     # roda todos, em ordem de nome
+lua cli.lua db:seed 01_admin_user       # só um</code></pre>
 </div>
 
 <div class="code-block">
-    <pre><code class="language-lua">-- seeds/admin_user.lua
+    <pre><code class="language-lua">-- seeds/01_admin_user.lua
 local User = require("src.users.models.user")
 
 return function(db)
@@ -1996,21 +2002,19 @@ upload = {
                 <hr>
             </section>
 
-            <section id="usando-o-bincrescent" class="doc-section">
-                <h2>Usando o bin/crescent</h2>
+            <section id="usando-a-cli" class="doc-section">
+                <h2>Usando a CLI</h2>
 
-                <p>A CLI vem dentro do projeto e roda no mesmo LuaJIT do OpenResty que atende as requisições (via <code>resty</code>):</p>
+                <p>A CLI vem dentro do projeto. Rode-a da raiz do projeto com <code>lua cli.lua</code>:</p>
 
 <div class="code-block">
-    <pre><code class="language-bash">bin/crescent &lt;comando&gt; [argumentos]
-bin/crescent help</code></pre>
+    <pre><code class="language-bash">lua cli.lua &lt;comando&gt; [argumentos]
+lua cli.lua help</code></pre>
 </div>
 
-<p>No Docker, rode dentro do container: <code>docker compose exec app bin/crescent &lt;comando&gt;</code>.</p>
+<p>Geradores, <code>new</code>, <code>server</code> e <code>test</code> rodam no Lua comum (5.1 a 5.4 ou LuaJIT). Comandos que precisam do OpenResty (<code>db:*</code> e <code>routes</code>) são repassados automaticamente para <code>bin/crescent</code>, que roda no mesmo LuaJIT do OpenResty que atende as requisições (via <code>resty</code>). <code>bin/crescent &lt;comando&gt;</code> aceita os mesmos comandos e é o que se usa no Docker: <code>docker compose exec app bin/crescent &lt;comando&gt;</code>.</p>
 
-<div class="note-box">
-    <p><strong>Sem Docker:</strong> a CLI não lê o <code>.env</code> (só o servidor lê). Exporte as variáveis antes dos comandos que acessam o banco ou carregam o app (<code>db:*</code>, <code>routes</code>): <code>set -a; . ./.env; set +a</code>.</p>
-</div>
+<p>A CLI lê o <code>.env</code> da raiz do projeto (variáveis do ambiente têm prioridade). A saída é colorida no terminal; <code>NO_COLOR=1</code> desliga as cores.</p>
 
 <table>
     <thead>
@@ -2078,7 +2082,7 @@ bin/crescent help</code></pre>
 <p>Opções de <code>server</code>: <code>--conf &lt;arquivo&gt;</code> escolhe outra configuração do Nginx e <code>--env &lt;nome&gt;</code> define o <code>APP_ENV</code>:</p>
 
 <div class="code-block">
-    <pre><code class="language-bash">bin/crescent server start --conf conf/nginx.production.conf --env production</code></pre>
+    <pre><code class="language-bash">lua cli.lua server start --conf conf/nginx.production.conf --env production</code></pre>
 </div>
 
 <p>Erros de inicialização vão para <code>logs/error.log</code>.</p>
@@ -2087,10 +2091,46 @@ bin/crescent help</code></pre>
                 <hr>
             </section>
 
+            <section id="desenvolvimento-com-docker" class="doc-section">
+                <h2>Desenvolvimento com Docker</h2>
+
+                <table>
+    <thead>
+        <tr>
+            <th>Comando</th>
+            <th>Descrição</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>setup</code></td>
+            <td>Prepara o projeto, perguntando antes de cada passo: (1) <strong>git</strong> — recomeça o histórico do zero (<code>git init</code>, branch <code>main</code>, commit inicial) sem o remote do template e, opcionalmente, adiciona o seu remote e faz o push; (2) <strong>banco</strong> — usuário e senha do MySQL do Docker gravados no <code>.env</code> (senha vazia = gerada; <code>DB_ROOT_PASSWORD</code> aleatória); (3) <strong>Docker</strong> — sobe a aplicação com <code>run</code>.</td>
+        </tr>
+        <tr>
+            <td><code>run [--logs]</code></td>
+            <td><code>docker compose up -d</code>, espera o <code>/health</code> responder e mostra as URLs. O código fica montado no container com <code>lua_code_cache off</code>: alterações em <code>src/</code>, <code>views/</code> e <code>app.lua</code> valem na próxima requisição. <code>--logs</code> acompanha os logs da aplicação.</td>
+        </tr>
+        <tr>
+            <td><code>rerun [--logs] [--fresh]</code></td>
+            <td>Reconstrói a imagem e reinicia (<code>up -d --build</code>, com cache): use depois de mudar <code>Dockerfile</code>, dependências (<code>deps.sh</code>) ou configuração do Nginx. <code>--fresh</code> reconstrói sem cache.</td>
+        </tr>
+        <tr>
+            <td><code>stop</code></td>
+            <td><code>docker compose down</code>: para os containers e mantém os volumes (banco e uploads).</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>Se o volume do MySQL já existe, o <code>setup</code> avisa: o MySQL só lê usuário e senha ao criar o volume (<code>docker compose down -v</code> recria, apagando os dados do banco do Docker). O <code>setup</code> se recusa a rodar no repositório do próprio framework.</p>
+
+
+                <hr>
+            </section>
+
             <section id="geradores" class="doc-section">
                 <h2>Geradores</h2>
 
-                <p>Os geradores <strong>nunca sobrescrevem</strong> arquivos. <code>BlogPost</code> e <code>blog-post</code> viram <code>blog_post</code> em nomes de arquivo e <code>BlogPost</code> no código. Quando o módulo é omitido, ele recebe o próprio nome.</p>
+                <p>Os geradores <strong>nunca sobrescrevem</strong> arquivos e mostram cada arquivo criado (<code>✓ Controller  src/...</code>). <code>BlogPost</code> e <code>blog-post</code> viram <code>blog_post</code> em nomes de arquivo e <code>BlogPost</code> no código. Quando o módulo é omitido, ele recebe o próprio nome.</p>
 
 <table>
     <thead>
@@ -2105,8 +2145,8 @@ bin/crescent help</code></pre>
             <td>módulo CRUD completo em <code>src/&lt;nome&gt;/</code>, teste e migration (veja abaixo)</td>
         </tr>
         <tr>
-            <td><code>make:action &lt;nome&gt; [módulo]</code></td>
-            <td><code>src/&lt;módulo&gt;/actions/&lt;nome&gt;.lua</code></td>
+            <td><code>make:controller &lt;nome&gt; [módulo]</code></td>
+            <td><code>src/&lt;módulo&gt;/controllers/&lt;nome&gt;.lua</code></td>
         </tr>
         <tr>
             <td><code>make:service &lt;nome&gt; [módulo]</code></td>
@@ -2134,7 +2174,7 @@ bin/crescent help</code></pre>
         </tr>
         <tr>
             <td><code>make:seeder &lt;nome&gt;</code></td>
-            <td><code>seeds/&lt;nome&gt;.lua</code></td>
+            <td><code>seeds/&lt;nome&gt;.lua</code> (prefixe com <code>01_</code> para definir a ordem)</td>
         </tr>
         <tr>
             <td><code>new &lt;nome&gt;</code></td>
@@ -2143,25 +2183,46 @@ bin/crescent help</code></pre>
     </tbody>
 </table>
 
-<p>Nomes começam com letra e usam letras, números, <code>_</code> ou <code>-</code> (migrations e seeders: só letras, números e <code>_</code>).</p>
+<p>Nomes começam com letra e usam letras, números, <code>_</code> ou <code>-</code>. Migrations usam só letras, números e <code>_</code>; seeders também podem começar com número (<code>01_admin_user</code>). <code>make:action</code> (nome do 2.0.0) continua funcionando como alias de <code>make:controller</code>.</p>
+
+<p><code>make:migration</code> deduz a tabela do nome: <code>create_products_table</code> (ou <code>create_products</code>) gera um <code>CREATE TABLE products</code>; <code>add_price_to_products</code>, <code>remove_x_from_products</code> e <code>alter_products_table</code> geram um esqueleto de <code>ALTER TABLE products</code>.</p>
 
 <h3>make:module</h3>
 
+<p>Todo módulo segue a mesma estrutura (a do Crescent 1.x):</p>
+
 <div class="code-block">
-    <pre><code class="language-bash">bin/crescent make:module Product</code></pre>
+    <pre><code class="language-none">src/&lt;módulo&gt;/
+  init.lua          Module.register(app)
+  controllers/      recebem ctx, chamam services e respondem (ctx:json, ctx:view, ctx:error)
+  services/         regras de negócio, sem ctx (fáceis de testar)
+  models/           Model:extend({ table, fillable, validates, ... })
+  routes/           function(app, prefix) com rotas nomeadas</code></pre>
 </div>
 
 <div class="code-block">
-    <pre><code class="language-none">src/product/init.lua              register(app): registra as rotas em /products
-src/product/models/product.lua    Model (tabela products, campo name)
-src/product/services/product.lua  regras de negócio (page, find, create, update, delete)
-src/product/actions/product.lua   index, show, store, update, destroy + schema de validação
-src/product/routes/product.lua    rotas nomeadas products.*
-tests/test-product-module.lua
-migrations/&lt;data&gt;_create_products_table.lua</code></pre>
+    <pre><code class="language-bash">lua cli.lua make:module Product</code></pre>
 </div>
 
-<p>Depois, registre <code>require("src.product").register(app)</code> no <code>app.lua</code> e rode <code>bin/crescent db:migrate</code>. As rotas geradas estão em <a href="#primeiro-módulo">Primeiro módulo</a>.</p>
+<div class="code-block">
+    <pre><code class="language-none">🌙 Creating module Product
+
+✓ Module      src/product/init.lua
+✓ Controller  src/product/controllers/product.lua
+✓ Service     src/product/services/product.lua
+✓ Model       src/product/models/product.lua
+✓ Routes      src/product/routes/product.lua
+✓ Test        tests/test-product-module.lua
+✓ Migration   migrations/20261117140952_create_products_table.lua
+
+ℹ Register the module in app.lua:
+    require("src.product").register(app)
+ℹ Then create the table and run the module test:
+    lua cli.lua db:migrate
+    lua cli.lua test product</code></pre>
+</div>
+
+<p>O controller traz <code>index</code>, <code>show</code>, <code>store</code>, <code>update</code>, <code>destroy</code> e o schema de validação; o service traz <code>page</code>, <code>find</code>, <code>create</code>, <code>update</code> e <code>delete</code>. Para acrescentar peças a um módulo existente, passe o módulo: <code>lua cli.lua make:controller Report product</code>. As rotas geradas estão em <a href="#primeiro-módulo">Primeiro módulo</a>.</p>
 
 
                 <hr>
@@ -2212,15 +2273,26 @@ migrations/&lt;data&gt;_create_products_table.lua</code></pre>
                 <h2>Testes</h2>
 
                 <div class="code-block">
-    <pre><code class="language-bash">bin/crescent test            # todos os arquivos tests/test*.lua
-bin/crescent test product    # só os que contêm "product" no nome
-./test.sh                    # atalho do projeto</code></pre>
+    <pre><code class="language-bash">lua cli.lua test             # todos os arquivos tests/test*.lua
+lua cli.lua test product     # só os que contêm "product" no nome
+lua cli.lua test:http        # tests/test-http.sh contra um OpenResty real
+./test.sh                    # test + test:http</code></pre>
 </div>
 
-<p>Cada arquivo roda no <code>resty</code>. Os testes usam <code>crescent.utils.tests</code> e podem chamar a aplicação sem servidor, com <code>app:handle</code>:</p>
+<p>Cada arquivo roda no <code>resty</code>. A saída mostra cada teste (<code>✓</code>/<code>✗</code> com a mensagem de erro) e, no fim, um resumo com arquivos, testes, tempo e a lista dos arquivos que falharam:</p>
 
 <div class="code-block">
-    <pre><code class="language-lua">package.path = "./?.lua;./?/init.lua;" .. package.path
+    <pre><code class="language-none">🌙 Test summary
+
+  Files:  3 run, 3 passed, 0 failed
+  Tests:  5 run, 5 passed, 0 failed
+  Time:   0s
+
+✅ All tests passed! (3/3 files)
+``` Os testes usam `crescent.utils.tests` e podem chamar a aplicação sem servidor, com `app:handle`:
+
+```lua
+package.path = "./?.lua;./?/init.lua;" .. package.path
 
 local tests = require("crescent.utils.tests")
 local Crescent = require("crescent")
@@ -2242,7 +2314,7 @@ assert(tests.runSuite("Hello", { greets_by_name = greets_by_name }))</code></pre
 
 <p>Asserções disponíveis: <code>assertEquals</code>, <code>assertNotEquals</code>, <code>assertTrue</code>, <code>assertFalse</code>, <code>assertNil</code>, <code>assertNotNil</code>, <code>assertType</code>, <code>assertContains</code>, <code>assertNotContains</code>, <code>assertMatches</code>, <code>assertTableEquals</code>, <code>assertError</code>, <code>assertNoError</code>.</p>
 
-<p><code>test:http</code> roda a suíte de integração HTTP do repositório do framework (<code>tests/test-http.sh</code>); projetos novos não trazem esse arquivo.</p>
+<p><code>test:http</code> roda <code>tests/test-http.sh</code>: projetos novos trazem um teste que sobe o OpenResty com <code>APP_ENV=test</code> na porta 8080, confere <code>/health</code>, <code>/</code> e <code>/api/hello</code> com <code>curl</code> e para o servidor. Acrescente suas rotas com a função <code>expect &lt;status&gt; &lt;caminho&gt; [texto]</code>.</p>
 
 
                 <hr>
@@ -2281,7 +2353,7 @@ end)</code></pre>
 </ul>
 
 <div class="note-box">
-    <p>O Nginx resolve DNS e verifica certificados para o Lua: os <code>nginx.conf</code> gerados já trazem <code>resolver</code> e <code>lua_ssl_trusted_certificate</code>. Sem eles, nomes não resolvem e conexões HTTPS falham. O cliente funciona em actions, middlewares e timers, mas não em <code>init_by_lua</code>.</p>
+    <p>O Nginx resolve DNS e verifica certificados para o Lua: os <code>nginx.conf</code> gerados já trazem <code>resolver</code> e <code>lua_ssl_trusted_certificate</code>. Sem eles, nomes não resolvem e conexões HTTPS falham. O cliente funciona em controllers, middlewares e timers, mas não em <code>init_by_lua</code>.</p>
 </div>
 
 
@@ -2348,7 +2420,7 @@ log:with({ request_id = ctx.request_id }):warn("cota excedida")</code></pre>
     skip = function(ctx) return ctx.path == "/health" or ctx.path == "/ready" end,
 }))
 
--- nas actions, um logger já com o request id:
+-- nos controllers, um logger já com o request id:
 ctx.state.log:info("pedido criado", { order_id = order.id })</code></pre>
 </div>
 
@@ -2437,7 +2509,7 @@ docker run -d -p 8080:8080 \
 
 <ul>
     <li>Parte de <code>openresty/openresty:*-alpine-fat</code> e instala as dependências Lua em uma camada própria.</li>
-    <li>Roda como o usuário sem privilégios <code>crescent</code>; só <code>logs/</code> e <code>tmp/</code> são graváveis. Se a aplicação salva uploads, monte um volume gravável para o <code>upload_root</code>.</li>
+    <li>Roda como o usuário sem privilégios <code>crescent</code>; só <code>logs/</code>, <code>tmp/</code> e <code>storage/</code> são graváveis. Uploads vão para <code>storage/</code> (<code>upload_root = "storage"</code>): monte um volume nesse caminho para que sobrevivam a novos containers (o <code>docker-compose.yml</code> de desenvolvimento já usa o volume <code>app-storage</code>).</li>
     <li>Usa <code>conf/nginx.docker.conf</code>: cache de código ligado, <code>worker_processes auto</code>, app construído no <code>init_by_lua</code> e logs em stdout/stderr.</li>
     <li>Tem <code>HEALTHCHECK</code> em <code>/health</code>.</li>
     <li>Com <code>RUN_MIGRATIONS=true</code>, o entrypoint roda <code>bin/crescent db:migrate</code> antes de subir (até 10 tentativas, a cada 3 s, enquanto o banco não responde). O padrão da imagem é <code>false</code>.</li>
@@ -2646,7 +2718,7 @@ real_ip_recursive on;</code></pre>
             <section id="o-que-mudou" class="doc-section">
                 <h2>O que mudou</h2>
 
-                <p>O Crescent 2.0 é uma reescrita: troca o <strong>Luvit</strong> pelo <strong>OpenResty</strong> (Nginx + LuaJIT). O Nginx passa a cuidar do servidor HTTP, dos workers e dos arquivos estáticos, e o banco continua sendo MySQL. A organização em módulos (<code>src/&lt;módulo&gt;</code> com actions, services, models e rotas) continua a mesma, mas a API mudou em pontos que quebram código existente.</p>
+                <p>O Crescent 2.0 é uma reescrita: troca o <strong>Luvit</strong> pelo <strong>OpenResty</strong> (Nginx + LuaJIT). O Nginx passa a cuidar do servidor HTTP, dos workers e dos arquivos estáticos, e o banco continua sendo MySQL. A organização em módulos (<code>src/&lt;módulo&gt;</code> com controllers, services, models e rotas) continua a mesma, mas a API mudou em pontos que quebram código existente.</p>
 
 <p>A forma mais simples de migrar é criar um projeto novo a partir do <a href="https://github.com/daniel-m-tfs/crescent-starter">starter</a> e trazer seus módulos, ajustando-os com a lista abaixo.</p>
 
@@ -2723,7 +2795,7 @@ real_ip_recursive on;</code></pre>
         </tr>
         <tr>
             <td><code>luvit crescent-cli.lua &lt;comando&gt;</code></td>
-            <td><code>bin/crescent &lt;comando&gt;</code></td>
+            <td><code>lua cli.lua &lt;comando&gt;</code> (ou <code>bin/crescent &lt;comando&gt;</code>)</td>
         </tr>
     </tbody>
 </table>
