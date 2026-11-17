@@ -27,9 +27,11 @@ FILES = [
     "getting-started.md",
     "core-concepts.md",
     "database.md",
+    "security.md",
     "cli.md",
     "utilities.md",
     "deployment.md",
+    "migration-1x.md",
 ]
 
 # ---------------------------------------------------------------------------
@@ -198,7 +200,7 @@ ITALIC_RE = re.compile(r"(?<!\*)\*([^*]+)\*(?!\*)")
 
 def resolve_link(url, anchor_map):
     # /docs/xxx -> âncora da primeira seção (H2) do arquivo xxx nesta página única
-    m = re.match(r"^/docs/([a-z-]+)(#.*)?$", url)
+    m = re.match(r"^/docs/([a-z0-9-]+)(#.*)?$", url)
     if m:
         key = m.group(1)
         target = anchor_map.get(key)
@@ -209,14 +211,22 @@ def resolve_link(url, anchor_map):
 
 def format_inline(text, anchor_map):
     text = html.escape(text, quote=False)
-    text = INLINE_CODE_RE.sub(lambda m: f"<code>{m.group(1)}</code>", text)
+    # código inline vira placeholder antes de negrito/itálico, senão um `*`
+    # dentro de código (ex.: `DB_*`, `{path*}`) casaria com outro `*` da linha
+    codes = []
+
+    def stash_code(m):
+        codes.append(f"<code>{m.group(1)}</code>")
+        return f"\x00{len(codes) - 1}\x00"
+
+    text = INLINE_CODE_RE.sub(stash_code, text)
     text = LINK_RE.sub(
         lambda m: f'<a href="{resolve_link(m.group(2), anchor_map)}">{m.group(1)}</a>',
         text,
     )
     text = BOLD_RE.sub(lambda m: f"<strong>{m.group(1)}</strong>", text)
     text = ITALIC_RE.sub(lambda m: f"<em>{m.group(1)}</em>", text)
-    return text
+    return re.sub("\x00(\\d+)\x00", lambda m: codes[int(m.group(1))], text)
 
 
 # ---------------------------------------------------------------------------

@@ -11,11 +11,11 @@
     <link rel="apple-touch-icon" href="./crescent-logo-semfundo.png">
 
     <!-- SEO Meta Tags -->
-    <title>Documentação - Crescent Framework | Framework Web Lua Completo</title>
+    <title>Documentação - Crescent Framework | Framework Web Lua sobre OpenResty</title>
     <meta name="description"
-        content="Documentação completa do Crescent Framework: aprenda a usar o framework web Lua com ORM, migrations, CLI e arquitetura modular. Tutoriais, exemplos e guias.">
+        content="Documentação do Crescent Framework 2.0, framework web Lua sobre OpenResty (Nginx + LuaJIT) com MySQL: rotas, middleware, validação, ORM, migrations, segurança, CLI e deploy com Docker.">
     <meta name="keywords"
-        content="documentação lua framework, crescent framework docs, lua web framework tutorial, guia lua web, lua orm documentation, crescent lua api, framework web lua guia">
+        content="documentação lua framework, crescent framework docs, openresty framework, luajit web framework, nginx lua, lua mysql orm, lua web framework tutorial, crescent lua api">
     <meta name="author" content="Crescent Framework Team">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://crescent.tyne.com.br/docs.html">
@@ -25,7 +25,7 @@
     <meta property="og:url" content="https://crescent.tyne.com.br/docs.html">
     <meta property="og:title" content="Documentação - Crescent Framework">
     <meta property="og:description"
-        content="Documentação completa do framework web Lua: ORM, migrations, CLI e muito mais.">
+        content="Documentação do Crescent 2.0: framework web Lua sobre OpenResty (Nginx + LuaJIT) com MySQL, ORM, migrations, segurança e CLI.">
     <meta property="og:image" content="https://crescent.tyne.com.br/crescent-logo-semfundo.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -36,9 +36,32 @@
     <meta property="twitter:url" content="https://crescent.tyne.com.br/docs.html">
     <meta property="twitter:title" content="Documentação - Crescent Framework">
     <meta property="twitter:description"
-        content="Documentação completa do framework web Lua: ORM, migrations, CLI e muito mais.">
+        content="Documentação do Crescent 2.0: framework web Lua sobre OpenResty (Nginx + LuaJIT) com MySQL, ORM, migrations, segurança e CLI.">
     <meta property="twitter:image" content="https://crescent.tyne.com.br/crescent-logo-semfundo.png">
     <meta property="twitter:image:alt" content="Crescent Framework Logo">
+
+    <!-- JSON-LD Schema for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "Documentação do Crescent Framework 2.0",
+      "description": "Guia do Crescent 2.0, framework web Lua sobre OpenResty (Nginx + LuaJIT) com MySQL: primeiros passos, rotas, middleware, ORM, migrations, segurança, CLI e deploy.",
+      "inLanguage": "pt-BR",
+      "url": "https://crescent.tyne.com.br/docs.html",
+      "image": "https://crescent.tyne.com.br/og-image.png",
+      "dateModified": "2026-11-16",
+      "about": {
+        "@type": "SoftwareApplication",
+        "name": "Crescent Framework",
+        "softwareVersion": "2.0.0",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Linux, macOS",
+        "programmingLanguage": "Lua",
+        "codeRepository": "https://github.com/daniel-m-tfs/crescent-framework"
+      }
+    }
+    </script>
 
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="docs.css">
@@ -143,12 +166,14 @@
                     </div>
                     <nav class="nav" id="nav">
                         <ul>
-                            <li><a href="index.html">Home</a></li>
-                            <li><a href="index.html#features">Features</a></li>
-                            <li><a href="index.html#getting-started">Get Started</a></li>
+                            <li><a href="index.html">Início</a></li>
+                            <li><a href="index.html#comecar">Começar</a></li>
+                            <li><a href="index.html#arquitetura">Arquitetura</a></li>
+                            <li><a href="index.html#codigo">Código</a></li>
+                            <li><a href="index.html#recursos">Recursos</a></li>
                             <li><a href="docs.html" class="active">Documentação</a></li>
                             <li><a href="https://github.com/daniel-m-tfs/crescent-framework" target="_blank"
-                                    class="github-link">GitHub</a></li>
+                                    rel="noopener" class="github-link">GitHub</a></li>
                         </ul>
                     </nav>
                 </div>
@@ -172,18 +197,18 @@
         <main class="docs-content">
             <div class="hero-section">
                 <h1>🌙 Crescent Framework</h1>
-                <p class="lead">Framework web moderno e performático construído em Lua, Luvit e MySQL.</p>
+                <p class="lead">Framework web em Lua sobre OpenResty (Nginx + LuaJIT) com MySQL. Documentação da versão 2.0.</p>
 
                 <div class="highlight-box"
                     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 2rem; padding: 2rem; border-radius: 1rem;">
                     <h3 style="color: white; margin-bottom: 0.75rem;">🚀 Comece Agora!</h3>
-                    <p style="margin: 0.5rem 0; color: rgba(255, 255, 255, 0.95);">Baixe o Crescent Starter e comece a
-                        desenvolver em minutos:</p>
-                    <a href="https://github.com/daniel-m-tfs/crescent-framework/releases"
+                    <p style="margin: 0.5rem 0; color: rgba(255, 255, 255, 0.95);">Use o template crescent-starter
+                        (hello world, Docker e MySQL) e rode com <code>docker compose up --build</code>:</p>
+                    <a href="https://github.com/daniel-m-tfs/crescent-starter"
                         style="display: inline-block; background: white; color: #667eea; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-decoration: none; font-weight: 700; margin-top: 0.75rem; transition: all 0.3s;"
                         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)'"
                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                        📦 Download crescent-starter.zip
+                        📦 crescent-starter no GitHub
                     </a>
                 </div>
             </div>
@@ -199,7 +224,7 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <h3>Crescent Framework</h3>
-                    <p>Framework web Lua moderno e performático</p>
+                    <p>Framework web Lua sobre OpenResty</p>
                 </div>
                 <div class="footer-section">
                     <h3>Links</h3>

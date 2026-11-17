@@ -1,816 +1,307 @@
-# 🎯 Conceitos Básicos
+# Conceitos
 
-Entenda os principais componentes da arquitetura Crescent.
+## A aplicação
 
----
+O `app.lua` cria a aplicação com `Crescent.new(config)`, registra middlewares e módulos e **retorna o `app`**. O Nginx executa esse arquivo **uma vez por worker** e, a cada requisição, chama `require("app"):run()`:
 
-## 🛣️ Rotas
-
-Rotas definem os endpoints da sua API e conectam URLs aos controllers.
-
-### Definindo Rotas Básicas
-
-```lua
--- app.lua
-local Crescent = require('crescent')
-local app = Crescent.new()
-
--- GET
-app:get('/hello', function(ctx)
-    return ctx.json(200, { message = "Hello World" })
-end)
-
--- POST
-app:post('/users', function(ctx)
-    local body = ctx.body
-    return ctx.json(201, body)
-end)
-
--- PUT
-app:put('/users/{id}', function(ctx)
-    local id = ctx.params.id
-    return ctx.json(200, { id = id })
-end)
-
--- DELETE
-app:delete('/users/{id}', function(ctx)
-    local id = ctx.params.id
-    return ctx.no_content()
-end)
-
-app:listen(8080)
-```
-
-### Parâmetros de Rota
-
-```lua
--- Parâmetro único
-app:get('/users/{id}', function(ctx)
-    local id = ctx.params.id
-    return ctx.json(200, { userId = id })
-end)
-
--- Múltiplos parâmetros
-app:get('/posts/{postId}/comments/{commentId}', function(ctx)
-    local postId = ctx.params.postId
-    local commentId = ctx.params.commentId
-    return ctx.json(200, { postId = postId, commentId = commentId })
-end)
-```
-
-### Query Parameters
-
-```lua
-app:get('/search', function(ctx)
-    local query = ctx.query.q
-    local page = ctx.query.page or 1
-    local limit = ctx.query.limit or 10
-    
-    return ctx.json(200, {
-        query = query,
-        page = tonumber(page),
-        limit = tonumber(limit)
-    })
-end)
-
--- GET /search?q=lua&page=2&limit=20
-```
-
-### Request Body
-
-```lua
-app:post('/users', function(ctx)
-    local body = ctx.body
-    
-    -- Acessar campos
-    local name = body.name
-    local email = body.email
-    
-    return ctx.json(201, {
-        name = name,
-        email = email
-    })
-end)
-```
-
-### Organização em Arquivos
-
-```lua
--- src/users/routes/users.lua
-local controller = require("src.users.controllers.users")
-
-return function(app, prefix)
-    prefix = prefix or "/users"
-    
-    app:get(prefix, function(ctx)
-        return controller:index(ctx)
-    end)
-    
-    app:get(prefix .. "/{id}", function(ctx)
-        return controller:show(ctx)
-    end)
-    
-    app:post(prefix, function(ctx)
-        return controller:create(ctx)
-    end)
-    
-    app:put(prefix .. "/{id}", function(ctx)
-        return controller:update(ctx)
-    end)
-    
-    app:delete(prefix .. "/{id}", function(ctx)
-        return controller:delete(ctx)
-    end)
-end
-```
-
-### Registrar Rotas no App
-
-```lua
--- app.lua
-local userRoutes = require("src.users.routes.users")
-userRoutes(app, "/api/users")
-```
-
----
-
-## 🎮 Controllers
-
-Controllers recebem requisições HTTP e retornam respostas. Devem ser finos e delegar lógica para services.
-
-### Estrutura Básica
-
-```lua
--- src/users/controllers/users.lua
-local service = require("src.users.services.users")
-local UsersController = {}
-
-function UsersController:index(ctx)
-    local users = service:getAll()
-    return ctx.json(200, users)
-end
-
-function UsersController:show(ctx)
-    local id = ctx.params.id
-    local user = service:getById(id)
-    
-    if user then
-        return ctx.json(200, user)
-    end
-    
-    return ctx.json(404, { error = "User not found" })
-end
-
-function UsersController:create(ctx)
-    local body = ctx.body or {}
-    
-    -- Validação básica
-    if not body.name or not body.email then
-        return ctx.json(400, { error = "Name and email are required" })
-    end
-    
-    local user = service:create(body)
-    return ctx.json(201, user)
-end
-
-function UsersController:update(ctx)
-    local id = ctx.params.id
-    local body = ctx.body or {}
-    
-    local user = service:update(id, body)
-    
-    if user then
-        return ctx.json(200, user)
-    end
-    
-    return ctx.json(404, { error = "User not found" })
-end
-
-function UsersController:delete(ctx)
-    local id = ctx.params.id
-    local success = service:delete(id)
-    
-    if success then
-        return ctx.no_content()
-    end
-    
-    return ctx.json(404, { error = "User not found" })
-end
-
-return UsersController
-```
-
-### Context Object (ctx)
-
-O objeto `ctx` contém toda informação da requisição:
-
-```lua
-function Controller:example(ctx)
-    -- Parâmetros de rota
-    local id = ctx.params.id
-    
-    -- Query parameters
-    local page = ctx.query.page
-    
-    -- Request body
-    local body = ctx.body
-    
-    -- Headers
-    local auth = ctx.headers['authorization']
-    
-    -- Method
-    local method = ctx.method  -- GET, POST, etc
-    
-    -- Path
-    local path = ctx.path  -- /users/123
-    
-    -- Response helpers
-    return ctx.json(200, data)
-    return ctx.text(200, "Hello")
-    return ctx.html(200, "<h1>Hello</h1>")
-    return ctx.no_content()  -- 204
-    return ctx.redirect("/new-url", 302)  -- (location, status) — nessa ordem
-end
-```
-
-### Validação no Controller
-
-```lua
-function UsersController:create(ctx)
-    local body = ctx.body or {}
-    
-    -- Validação manual
-    local errors = {}
-    
-    if not body.name or body.name == "" then
-        table.insert(errors, "Name is required")
-    end
-    
-    if not body.email or not string.match(body.email, ".+@.+%.%w+") then
-        table.insert(errors, "Valid email is required")
-    end
-    
-    if #errors > 0 then
-        return ctx.json(422, { errors = errors })
-    end
-    
-    -- Criar usuário
-    local user = service:create(body)
-    return ctx.json(201, user)
-end
-```
-
-### Error Handling
-
-```lua
-function UsersController:create(ctx)
-    local success, result = pcall(function()
-        return service:create(ctx.body)
-    end)
-    
-    if not success then
-        -- Log error
-        print("Error creating user:", result)
-        
-        return ctx.json(500, {
-            error = "Internal server error",
-            message = result
-        })
-    end
-    
-    return ctx.json(201, result)
-end
-```
-
----
-
-## ⚙️ Services
-
-Services contêm a lógica de negócio da aplicação. Devem ser independentes de HTTP.
-
-### Estrutura Básica
-
-```lua
--- src/users/services/users.lua
-local UsersService = {}
-local User = require("src.users.models.user")
-
-function UsersService:getAll()
-    return User:all()
-end
-
-function UsersService:getById(id)
-    return User:find(id)
-end
-
-function UsersService:create(data)
-    -- Validação adicional
-    if not data.name or #data.name < 3 then
-        error("Name must be at least 3 characters")
-    end
-    
-    return User:create(data)
-end
-
-function UsersService:update(id, data)
-    local user = User:find(id)
-    
-    if not user then
-        return nil
-    end
-    
-    user:update(data)
-    return user
-end
-
-function UsersService:delete(id)
-    local user = User:find(id)
-    
-    if not user then
-        return false
-    end
-    
-    user:delete()
-    return true
-end
-
-return UsersService
-```
-
-### Lógica de Negócio Complexa
-
-```lua
--- src/orders/services/orders.lua
-local OrdersService = {}
-local Order = require("src.orders.models.order")
-local OrderItem = require("src.orders.models.order_item")
-local Product = require("src.products.models.product")
-local User = require("src.users.models.user")
-
-function OrdersService:createOrder(userId, items)
-    -- Validar usuário
-    local user = User:find(userId)
-    if not user then
-        error("User not found")
-    end
-    
-    -- Validar produtos e calcular total
-    local total = 0
-    local validatedItems = {}
-    
-    for _, item in ipairs(items) do
-        local product = Product:find(item.productId)
-        
-        if not product then
-            error("Product " .. item.productId .. " not found")
-        end
-        
-        if product.stock < item.quantity then
-            error("Insufficient stock for " .. product.name)
-        end
-        
-        local subtotal = product.price * item.quantity
-        total = total + subtotal
-        
-        table.insert(validatedItems, {
-            product_id = product.id,
-            quantity = item.quantity,
-            price = product.price,
-            subtotal = subtotal
-        })
-    end
-    
-    -- Criar pedido
-    local order = Order:create({
-        user_id = userId,
-        total = total,
-        status = "pending"
-    })
-    
-    -- Adicionar itens ao pedido (order_items é uma tabela separada — o Model
-    -- não tem um `addItem`/`items` prontos, então isso é feito na mão aqui;
-    -- se quiser algo reutilizável, defina um método customizado na classe
-    -- Order, como `function Order:isLowStock()` é mostrado em database.md)
-    for _, item in ipairs(validatedItems) do
-        OrderItem:create({
-            order_id = order.id,
-            product_id = item.product_id,
-            quantity = item.quantity,
-            price = item.price
-        })
-
-        -- Atualizar estoque
-        local product = Product:find(item.product_id)
-        product:update({
-            stock = product.stock - item.quantity
-        })
-    end
-    
-    return order
-end
-
-function OrdersService:cancelOrder(orderId)
-    local order = Order:find(orderId)
-    
-    if not order then
-        error("Order not found")
-    end
-    
-    if order.status ~= "pending" then
-        error("Only pending orders can be cancelled")
-    end
-    
-    -- Devolver produtos ao estoque
-    local items = OrderItem:where("order_id", order.id):get()
-
-    for _, item in ipairs(items) do
-        local product = Product:find(item.product_id)
-        product:update({
-            stock = product.stock + item.quantity
-        })
-    end
-    
-    -- Atualizar status
-    order:update({ status = "cancelled" })
-    
-    return order
-end
-
-return OrdersService
-```
-
-### Services com Transações
-
-```lua
-function OrdersService:processPayment(orderId, paymentData)
-    local db = require('crescent.database.mysql')
-    
-    -- Iniciar transação
-    db:query("START TRANSACTION")
-    
-    local success, err = pcall(function()
-        local order = Order:find(orderId)
-        
-        if not order then
-            error("Order not found")
-        end
-        
-        -- Processar pagamento (API externa)
-        local paymentResult = PaymentGateway:charge(paymentData)
-        
-        if not paymentResult.success then
-            error("Payment failed: " .. paymentResult.error)
-        end
-        
-        -- Atualizar pedido
-        order:update({
-            status = "paid",
-            payment_id = paymentResult.id
-        })
-        
-        -- Enviar email de confirmação
-        EmailService:sendOrderConfirmation(order)
-    end)
-    
-    if success then
-        db:query("COMMIT")
-        return true
-    else
-        db:query("ROLLBACK")
-        error(err)
-    end
-end
-```
-
-> ⚠️ **Isso não é uma transação atômica de verdade hoje.** `crescent/database/mysql.lua`
-> pega uma conexão do pool a cada chamada de `query()` e devolve ao final dela — não
-> há garantia de que `START TRANSACTION`, as queries do meio e o `COMMIT`/`ROLLBACK`
-> rodem na mesma conexão. Trate como limitação conhecida (ver [Database & ORM](/docs/database))
-> até o driver expor uma conexão dedicada por transação.
-
----
-
-## 💾 Models (Básico)
-
-Models representam dados e interagem com o banco via ORM ActiveRecord.
-
-### Definição Básica
-
-```lua
--- src/users/models/user.lua
-local Model = require("crescent.database.model")
-
-local User = Model:extend({
-    table = "users",
-    primary_key = "id",
-    timestamps = true,
-    
-    fillable = {
-        "name",
-        "email",
-        "password"
-    },
-    
-    hidden = {
-        "password"
-    },
-    
-    validates = {
-        name = { required = true, min_length = 3, max_length = 100 },
-        email = { required = true, email = true, unique = true },
-        password = { required = true, min_length = 6 }
+```nginx
+location / {
+    content_by_lua_block {
+        require("app"):run()
     }
-})
-
-return User
+}
 ```
 
-### Operações CRUD
+Consequências práticas:
+
+- Código no topo de `app.lua` e dos módulos roda uma vez por worker, não por requisição. Não guarde estado de requisição em variáveis de módulo; use `ctx.state`.
+- Em produção (`lua_code_cache on`) é preciso recarregar o Nginx para aplicar mudanças. Em desenvolvimento o `nginx.conf` usa `lua_code_cache off` e recarrega o código a cada requisição.
+- O Nginx de produção constrói o app já no `init_by_lua_block`: um erro de configuração falha o start/reload em vez da primeira requisição.
+
+Cada módulo expõe uma função `register(app)`:
 
 ```lua
--- CREATE
-local user = User:create({
-    name = "John Doe",
-    email = "john@example.com",
-    password = "hashed_password"
-})
+-- src/hello/init.lua
+local actions = require("src.hello.actions.hello")
 
--- READ
-local user = User:find(1)
-local users = User:all()
-local user = User:where("email", "john@example.com"):first()
-
--- UPDATE
-user:update({name = "Jane Doe"})
-
--- DELETE
-user:delete()
-```
-
-Para mais detalhes sobre Models, veja [Database & ORM](/docs/database).
-
----
-
-## 🔒 Middleware
-
-Middleware processa requisições antes que cheguem aos controllers.
-`crescent/middleware/{auth,logger,cors,security,static}.lua` já trazem
-implementações prontas — normalmente você só precisa registrá-las com
-`app:use(...)`, sem reescrever nada.
-
-> ⚠️ **Middleware no Crescent é sempre global.** `app:use(middleware)`
-> registra a função pra rodar em **toda** requisição — não existe
-> `app:get(path, middleware, handler)` nem middleware escopado por
-> grupo de rotas (`Server:group(prefix, fn)` só agrupa prefixo de path,
-> não aplica middleware). Se precisar proteger só algumas rotas, ou você
-> escreve um middleware que confere `ctx.path` e deixa passar
-> (`return next()`) pras rotas públicas, ou faz a checagem manualmente
-> dentro do handler daquela rota específica.
-
-### Middleware de Autenticação (JWT pronto)
-
-```lua
--- app.lua
-local auth = require('crescent.middleware.auth')
-
--- Protege TODAS as rotas registradas depois desta linha
-app:use(auth.jwt({ secret = env.get("JWT_SECRET") }))
-```
-
-`auth.jwt(options)` verifica o header `Authorization: Bearer <token>`,
-valida o JWT e guarda o payload em `ctx.state.jwt_payload` /
-`ctx.state.user` (não `ctx.user`). `auth.protected(options)` é um atalho
-pra `auth.jwt(options)`. Ver `crescent/middleware/auth.lua` pra `bearer`,
-`basic` e `api_key`, e [Utilities](/docs/utilities) para a API completa.
-
-### Protegendo só algumas rotas
-
-Como middleware é sempre global, pra proteger só um prefixo de rotas
-escreva um middleware que decide com base em `ctx.path`:
-
-```lua
-local jwt_middleware = auth.jwt({ secret = env.get("JWT_SECRET") })
-
-app:use(function(ctx, next)
-    if ctx.path:match("^/admin") then
-        return jwt_middleware(ctx, next)
-    end
-    return next()
-end)
-```
-
-### Middleware de Logging
-
-```lua
--- app.lua
-local logger = require('crescent.middleware.logger')
-
-app:use(logger.basic())     -- uma linha por requisição
--- ou
-app:use(logger.detailed())  -- log completo (headers, query, params)
-```
-
-### Middleware CORS
-
-```lua
--- app.lua
-local cors = require('crescent.middleware.cors')
-
-app:use(cors.create({
-    origin = "*",
-    methods = "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-    headers = "Content-Type, Authorization",
-    credentials = false
-}))
-
--- ou o preset permissivo de desenvolvimento
-app:use(cors.default())
-```
-
-Headers de resposta (CORS ou qualquer outro) sempre passam por
-`ctx.res:setHeader(nome, valor)` — `ctx.headers` é só a tabela de headers
-**da requisição** (somente leitura, na prática) e escrever nela não afeta
-a resposta enviada.
-
-### Ordem dos Middlewares
-
-```lua
--- app.lua
-local cors = require('crescent.middleware.cors')
-local logger = require('crescent.middleware.logger')
-local auth = require('crescent.middleware.auth')
-local env = require('crescent.utils.env')
-
--- Ordem importa! Cada app:use() roda antes das rotas, na ordem registrada
-app:use(cors.default())                                     -- 1. CORS primeiro
-app:use(logger.basic())                                     -- 2. Logging
-app:use(auth.jwt({ secret = env.get("JWT_SECRET") }))        -- 3. Auth por último
-
--- Rotas
-app:get('/api/users', function(ctx)
-    return usersController:index(ctx)
-end)
-```
-
----
-
-## 🏗️ Módulos
-
-Módulos agrupam funcionalidades relacionadas (controllers, services, models, routes).
-
-### Estrutura de Módulo
-
-```
-src/users/
-├── init.lua                 # Registrador do módulo
-├── controllers/
-│   └── users.lua
-├── services/
-│   └── users.lua
-├── models/
-│   └── user.lua
-└── routes/
-    └── users.lua
-```
-
-### Module Init
-
-```lua
--- src/users/init.lua
 local Module = {}
 
 function Module.register(app)
-    -- Registrar rotas
-    local routes = require("src.users.routes.users")
-    routes(app, "/api/users")
-    
-    print("✓ Módulo Users carregado")
+    app:get("/", actions.index, "hello.index")
 end
 
 return Module
 ```
 
-### Registrar no App
+## Configuração e ambiente
+
+`Config.load()` carrega `config/<APP_ENV>.lua` (padrão `development`). Os arquivos de config leem variáveis com `crescent.env`:
 
 ```lua
--- app.lua
-local Crescent = require('crescent')
-local app = Crescent.new()
+-- config/production.lua
+local Env = require("crescent.env")
 
--- Registrar módulos
-local UsersModule = require("src.users")
-local ProductsModule = require("src.products")
-
-UsersModule.register(app)
-ProductsModule.register(app)
-
-app:listen(8080)
-```
-
-### Gerar Módulo via CLI
-
-```bash
-luvit crescent-cli make:module Product
-```
-
-Cria toda a estrutura automaticamente!
-
----
-
-## 📊 Fluxo de Requisição
-
-```
-Cliente HTTP
-    ↓
-[Middleware CORS]
-    ↓
-[Middleware Logger]
-    ↓
-[Middleware Auth]
-    ↓
-[Router] → Encontra rota
-    ↓
-[Controller] → Recebe requisição
-    ↓
-[Service] → Lógica de negócio
-    ↓
-[Model/ORM] → Banco de dados
-    ↓
-[Service] ← Retorna dados
-    ↓
-[Controller] ← Formata resposta
-    ↓
-Cliente HTTP ← JSON response
-```
-
----
-
-## 💡 Boas Práticas
-
-### Controllers
-
-- ✅ Mantenha finos (thin controllers)
-- ✅ Delegue lógica para services
-- ✅ Valide entrada básica
-- ✅ Trate erros com try/catch (pcall)
-- ✅ Retorne status codes apropriados
-
-### Services
-
-- ✅ Lógica de negócio aqui
-- ✅ Independente de HTTP
-- ✅ Reutilizável entre controllers
-- ✅ Use transações quando necessário
-- ✅ Valide regras de negócio
-
-### Rotas
-
-- ✅ Use padrões RESTful
-- ✅ Agrupe por prefixo (`/api/v1`)
-- ✅ Organize em arquivos separados
-- ✅ Use nomes descritivos
-
-### Middleware
-
-- ✅ Ordem importa
-- ✅ CORS primeiro
-- ✅ Auth/validação depois
-- ✅ Use `next()` para continuar
-
----
-
-## 🧪 Testando Componentes
-
-```lua
--- tests/test-users.lua
-local tests = require('crescent.utils.tests')
-local UsersService = require('src.users.services.users')
-
-local userTests = {
-    testCreate = function()
-        local user = UsersService:create({
-            name = "Test User",
-            email = "test@example.com"
-        })
-        
-        tests.assertNotNil(user)
-        tests.assertEquals(user.name, "Test User")
-    end,
-    
-    testValidation = function()
-        tests.assertError(function()
-            UsersService:create({ name = "AB" })  -- Too short
-        end, "at least 3 characters")
-    end
+return {
+    environment = "production",
+    debug = false,
+    server = { host = "127.0.0.1", port = 8080, max_body_size = 5 * 1024 * 1024 },
+    database = {
+        host = Env.get("DB_HOST"),
+        port = Env.number("DB_PORT", 3306),
+        database = Env.get("DB_NAME"),
+        user = Env.get("DB_USER"),
+        password = Env.get("DB_PASSWORD"),
+    },
 }
-
-tests.runSuite("Users Service Tests", userTests)
 ```
 
----
+| Função | Retorno |
+| --- | --- |
+| `Env.get(nome, padrão)` | string; ordem: variável do processo, depois `.env`, depois o padrão |
+| `Env.number(nome, padrão)` | número (erro se o valor não for numérico) |
+| `Env.boolean(nome, padrão)` | `true`/`false` a partir de `true`, `1`, `yes`, `false`, `0`, `no` |
 
-## 📖 Próximas Seções
+> **Pegadinha do Nginx:** o Nginx limpa o ambiente dos workers. **Toda variável lida pela aplicação precisa de uma diretiva `env NOME;`** no `nginx.conf` e nos arquivos de `conf/`, senão `Env.get` não a enxerga (em produção, sem `.env`, ela simplesmente vem vazia). Os arquivos gerados já declaram `APP_*`, `DB_*`, `JWT_SECRET` e `SMTP_*`.
 
-- **[Database & ORM](/docs/database)** - Models em detalhes
-- **[Utilities](/docs/utilities)** - Testes e helpers
-- **[CLI](/docs/cli)** - Geradores de código
+O `.env` é só conveniência local; em produção use variáveis de ambiente de verdade. A porta é definida pelo `listen` do `nginx.conf` (o `server.port` da config é apenas validado).
+
+Outras chaves aceitas pela config da aplicação:
+
+| Chave | Uso |
+| --- | --- |
+| `debug` | inclui detalhes internos nas respostas de erro e desativa o cache de templates |
+| `database` | conexão MySQL; quando tem `database`, o app configura o banco e expõe `ctx.db` |
+| `views_root` / `view_layout` | pasta dos templates (padrão `views`) e layout padrão |
+| `error_handler` | função `(ctx, err)` para erros não tratados (veja [Erros](#erros)) |
+| `logger` | instância de `crescent.logger` ou `function(level, message, fields)` |
+| `secret_key` / `secret_key_fallbacks` | segredo de cookies assinados, sessões e CSRF (padrão: `APP_KEY`) |
+| `upload_root` / `upload` | destino de `ctx:save_upload` e limites de upload |
+
+## Rotas
+
+```lua
+app:get("/users", list_users)
+app:post("/users", create_user)
+app:put("/users/{id}", update_user)
+app:patch("/users/{id}", patch_user)
+app:delete("/users/{id}", delete_user)
+```
+
+| Padrão | Exemplo | `ctx.params` |
+| --- | --- | --- |
+| `/users/{id}` | `/users/42` | `{ id = "42" }` |
+| `/posts/{slug?}` | `/posts` e `/posts/ola` | `slug` é `nil` quando ausente |
+| `/files/{path*}` | `/files/a/b/c.txt` | `{ path = "a/b/c.txt" }` (só no último segmento) |
+
+Parâmetros chegam sempre como **string**. Rotas estáticas têm prioridade sobre rotas com parâmetros, independentemente da ordem de registro.
+
+Grupos e nomes:
+
+```lua
+app:group("/api/v1", function(api)
+    api:get("/users/{id}", show_user, "users.show")   -- GET /api/v1/users/{id}
+end)
+
+app:route("users.show")   -- "/api/v1/users/{id}"
+```
+
+- `HEAD` usa a rota `GET` automaticamente.
+- Caminho existente com outro método responde `405` com o header `Allow`; caminho inexistente responde `404` (`route_not_found`).
+- `bin/crescent routes` lista todas as rotas com método, caminho e nome.
+
+## Actions e o ctx
+
+Uma action é uma função que recebe o contexto da requisição (`ctx`) e responde:
+
+```lua
+app:get("/users/{id}", function(ctx)
+    local user = User:find_or_fail(ctx.params.id)
+    return ctx:json(200, { data = user:to_table() })
+end)
+```
+
+### Dados da requisição
+
+| Campo | Conteúdo |
+| --- | --- |
+| `ctx.params` | parâmetros da rota |
+| `ctx.query` | query string (valores string; chave repetida vira lista) |
+| `ctx.body` | JSON ou form decodificado em tabela; outros tipos ficam como string |
+| `ctx.raw_body` | corpo original em texto |
+| `ctx.files` | arquivos de um `multipart/form-data` (veja [Uploads](#uploads)) |
+| `ctx:get_header("User-Agent")` | header (nome sem diferenciar maiúsculas) |
+| `ctx:get_bearer()` | token de `Authorization: Bearer ...`, ou `nil` |
+| `ctx:cookie("nome")` | cookie (veja [Cookies](#cookies)) |
+| `ctx.method`, `ctx.path`, `ctx.route` | método, caminho e padrão da rota encontrada |
+| `ctx.request_id`, `ctx.remote_addr` | id da requisição (também no header `X-Request-Id`) e IP do cliente |
+| `ctx.state` | tabela livre para passar dados entre middleware e action |
+| `ctx.db`, `ctx.config`, `ctx.app`, `ctx.debug` | banco, configuração, aplicação e modo debug |
+
+Um corpo JSON inválido é recusado antes da action com `400 malformed_json`.
+
+### Respostas
+
+| Método | Resposta |
+| --- | --- |
+| `ctx:json(status, valor)` | JSON (`application/json; charset=utf-8`) |
+| `ctx:text(status, texto)` | texto puro |
+| `ctx:html(status, html)` | HTML |
+| `ctx:view(nome, dados, opções)` | template etlua (veja [Views e layouts](#views-e-layouts)) |
+| `ctx:redirect(url, status)` | redirecionamento (padrão `302`) |
+| `ctx:no_content()` | `204` sem corpo |
+| `ctx:error(status, mensagem, detalhes, código)` | erro JSON padronizado |
+| `ctx:header(nome, valor)` | define um header da resposta (encadeável) |
+
+Atalhos: retornar uma **tabela** envia `200` JSON e retornar uma **string** envia `200` texto. Uma action que não responde nem retorna nada gera `500 empty_response`.
+
+```lua
+app:get("/ping", function() return { pong = true } end)   -- 200 {"pong":true}
+```
+
+- `ctx:redirect` aceita só caminhos locais (`/...`); para outro domínio passe `{ allowed_hosts = { "exemplo.com" } }` como terceiro argumento.
+- Para listas vazias em JSON use `json.array({})` (de `crescent.json`), senão uma tabela vazia vira `{}`.
+- Models não viram JSON sozinhos: use `model:to_table()`.
+
+## Middleware
+
+Um middleware recebe `(ctx, next)`. Chame `next()` para continuar; para **bloquear**, responda sem chamar `next()`:
+
+```lua
+app:use(function(ctx, next)
+    if ctx:get_header("X-Api-Key") ~= "segredo" then
+        return ctx:error(401, "unauthorized", nil, "unauthorized")
+    end
+    ctx.state.client = "interno"
+    return next()
+end)
+```
+
+- Middlewares rodam na ordem de `app:use`, antes do roteamento, em todas as requisições.
+- Código depois de `next()` roda depois da action. Para alterar headers da resposta nesse momento, use `ctx.res:before_flush(function(res) ... end)`, pois a resposta normalmente já foi enviada quando `next()` retorna.
+- Para proteger uma rota só, envolva a action com `auth.protect` (aceita um middleware ou uma lista):
+
+```lua
+local auth = require("crescent.middleware.auth")
+
+app:get("/admin", auth.protect({ auth.jwt(), require_admin }, admin_action))
+```
+
+`bin/crescent make:middleware nome` gera o esqueleto em `src/middleware/nome.lua`. Os middlewares prontos (auth, CORS, rate limit, sessão, CSRF, headers de segurança, log) estão em [Segurança](/docs/security) e [Utilitários](/docs/utilities).
+
+## Validação
+
+`app:validated(schema, action, origem)` valida antes de chamar a action e responde `422 validation_failed` com os erros por campo. A origem padrão é `"body"`; use `"query"` para a query string.
+
+```lua
+app:post("/users", app:validated({
+    name = { required = true, string = true, min_length = 3, max_length = 50 },
+    email = { required = true, email = true },
+    age = { number = true, min = 18 },
+    role = { custom = function(v) return v == "admin" or v == "user", "role inválido" end },
+}, function(ctx)
+    return ctx:json(201, ctx.body)
+end))
+```
+
+Resposta de erro:
+
+```json
+{
+  "status": 422,
+  "code": "validation_failed",
+  "error": "validation failed",
+  "details": { "name": [{ "code": "min_length", "message": "name must be at least 3 characters" }] }
+}
+```
+
+| Regra | Valida |
+| --- | --- |
+| `required` | presente e diferente de `""` |
+| `type = "string"` | tipo Lua exato (interrompe as demais regras do campo) |
+| `string`, `number` | tipo do valor |
+| `min_length`, `max_length`, `length` | tamanho de strings (em caracteres UTF-8) |
+| `email`, `format` | e-mail simples; padrão Lua (`format = "^%d+$"`) |
+| `min`, `max`, `range = { 1, 10 }` | limites de números |
+| `custom` | `function(valor)` que retorna `true` ou `false, "mensagem"` |
+
+Campos ausentes só falham com `required`. Valores de query string e de formulários são **strings**: `number = true` só passa para JSON; para query use `format` ou converta com `tonumber` na action.
+
+Para validar manualmente: `local ok, errors = ctx:validate(schema, "query")`.
+
+## Erros
+
+Todo erro é um JSON com `status`, `code` (estável, para o cliente tratar) e `error` (mensagem); `details` é opcional:
+
+```lua
+return ctx:error(409, "e-mail já cadastrado", { field = "email" }, "email_taken")
+-- 409 {"status":409,"code":"email_taken","error":"e-mail já cadastrado","details":{"field":"email"}}
+```
+
+Erros lançados (`error(...)`) dentro de actions e middlewares:
+
+- Viram `500 internal_error` e são registrados no log com o request id. O detalhe (mensagem e stack trace) só aparece na resposta com `debug = true`.
+- Uma tabela com `status` 4xx vira essa resposta, sem log de erro. É assim que `Model:find_or_fail` produz `404 model_not_found`:
+
+```lua
+error({ status = 403, code = "no_access", public_message = "sem acesso" })
+-- 403 {"status":403,"code":"no_access","error":"sem acesso"}
+```
+
+Para personalizar a resposta de erros 500, registre um handler (ele precisa responder):
+
+```lua
+app:on_error(function(ctx, err)
+    return ctx:json(500, { error = "algo deu errado", request_id = ctx.request_id })
+end)
+```
+
+Códigos que o próprio framework gera:
+
+| Código | Status | Quando |
+| --- | --- | --- |
+| `route_not_found` | 404 | nenhuma rota para o caminho |
+| `method_not_allowed` | 405 | caminho existe com outro método |
+| `validation_failed` | 422 | `app:validated` |
+| `model_not_found` | 404 | `find_or_fail` |
+| `malformed_json`, `malformed_form` | 400 | corpo inválido |
+| `invalid_redirect` | 400 | `ctx:redirect` para destino não permitido |
+| `internal_error`, `empty_response` | 500 | erro não tratado; action sem resposta |
+| `template_error` | 500 | falha ao renderizar um template |
+
+Autenticação, CSRF, CORS, rate limit e uploads têm seus próprios códigos (`missing_credentials`, `csrf_invalid`, `rate_limited`...), listados em [Segurança](/docs/security).
+
+## Views e layouts
+
+Templates usam [etlua](https://github.com/leafo/etlua) e ficam em `views/`. O nome inclui a extensão `.etlua`:
+
+```lua
+app:get("/", function(ctx)
+    return ctx:view("hello/index.etlua", { title = "Início" }, { layout = "layout.etlua" })
+end)
+```
+
+```html
+<!-- views/hello/index.etlua -->
+<h1><%= title %></h1>
+<ul>
+  <% for _, item in ipairs(items or {}) do %>
+    <li><%= item %></li>
+  <% end %>
+</ul>
+```
+
+```html
+<!-- views/layout.etlua -->
+<!doctype html>
+<html lang="pt-BR">
+<head><title><%= title or "Crescent" %></title></head>
+<body><%- content %></body>
+</html>
+```
+
+- `<%= valor %>` escapa HTML; `<%- valor %>` imprime sem escapar (use só com HTML confiável, como `content` e `csrf_field()`).
+- O layout recebe a página pronta em `content` e os mesmos dados da página.
+- Opções: `status` (padrão `200`) e `layout`. Defina `view_layout = "layout.etlua"` na config para ter um layout padrão; `layout = false` desliga em uma página.
+- Helpers globais: `app.view_renderer:helper("upper", function(s) return s:upper() end)`.
+- Com o middleware de sessão ativo, todo template recebe `csrf_token()` e `csrf_field()`.
+- Templates ficam em cache quando `debug = false`.

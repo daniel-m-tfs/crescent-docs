@@ -1,909 +1,142 @@
-# 🚀 Deployment & Production
+# Deploy
 
-Guia completo para colocar sua aplicação Crescent em produção.
+## Imagem Docker
 
----
-
-## 📋 Pré-requisitos
-
-### Servidor Linux
+O `Dockerfile` do projeto gera a imagem de produção:
 
 ```bash
-# Ubuntu/Debian
-sudo apt update
-sudo apt install -y curl git build-essential libssl-dev
+docker build -t meu-app .
 
-# CentOS/RHEL
-sudo yum install -y curl git gcc make openssl-devel
+docker run -d -p 8080:8080 \
+  -e APP_ENV=production \
+  -e DB_HOST=db.interno -e DB_NAME=meu_app -e DB_USER=meu_app -e DB_PASSWORD=... \
+  -e APP_KEY=... -e JWT_SECRET=... \
+  -e RUN_MIGRATIONS=true \
+  meu-app
 ```
 
-### Instalar Luvit
+O que a imagem faz:
+
+- Parte de `openresty/openresty:*-alpine-fat` e instala as dependências Lua em uma camada própria.
+- Roda como o usuário sem privilégios `crescent`; só `logs/` e `tmp/` são graváveis. Se a aplicação salva uploads, monte um volume gravável para o `upload_root`.
+- Usa `conf/nginx.docker.conf`: cache de código ligado, `worker_processes auto`, app construído no `init_by_lua` e logs em stdout/stderr.
+- Tem `HEALTHCHECK` em `/health`.
+- Com `RUN_MIGRATIONS=true`, o entrypoint roda `bin/crescent db:migrate` antes de subir (até 10 tentativas, a cada 3 s, enquanto o banco não responde). O padrão da imagem é `false`.
+
+Para rodar um comando avulso com a mesma imagem, passe-o como argumento:
 
 ```bash
-curl -L https://github.com/luvit/lit/raw/master/get-lit.sh | sh
+docker run --rm --env-file prod.env meu-app bin/crescent db:migrate
 ```
 
-Adicionar ao PATH:
+Com várias réplicas, prefira rodar as migrations uma vez, num passo do deploy, em vez de `RUN_MIGRATIONS=true` em todas.
 
-```bash
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-```
+## Docker Compose (desenvolvimento)
 
-### Instalar NGINX
-
-```bash
-# Ubuntu/Debian
-sudo apt install -y nginx
-
-# CentOS/RHEL
-sudo yum install -y nginx
-
-# Iniciar e habilitar
-sudo systemctl start nginx
-sudo systemctl enable nginx
-```
-
-### Instalar MySQL/MariaDB
-
-```bash
-# Ubuntu/Debian
-sudo apt install -y mysql-server
-
-# CentOS/RHEL
-sudo yum install -y mariadb-server
-
-# Iniciar
-sudo systemctl start mysql
-sudo systemctl enable mysql
-
-# Secure installation
-sudo mysql_secure_installation
-```
-
----
-
-## 🔧 Configuração do Projeto
-
-### 1. Clonar Projeto
-
-```bash
-cd /var/www
-sudo git clone https://github.com/seu-usuario/seu-projeto.git meu-app
-sudo chown -R $USER:$USER /var/www/meu-app
-cd /var/www/meu-app
-```
-
-### 2. Instalar Dependências
-
-```bash
-# Crescent Framework
-lit install daniel-m-tfs/crescent-framework
-
-# Outras dependências (se houver)
-lit install luvit/secure-socket
-lit install luvit/json
-```
-
-### 3. Configurar Ambiente
+O `docker-compose.yml` é para desenvolvimento:
 
 ```bash
 cp .env.example .env
-nano .env
+docker compose up --build
 ```
+
+- Sobe a app e um MySQL 8.4 (exposto só em `127.0.0.1:3307`; dados no volume `mysql-data`).
+- Usa `conf/nginx.docker-dev.conf`: um worker e `lua_code_cache off`, com o código montado em `/app` para recarga automática.
+- Roda as migrations pendentes ao subir e cria o banco de testes (`DB_TEST_NAME`) na primeira inicialização do volume.
+- `APP_PORT` muda a porta no host. As senhas do `.env.example` são só para desenvolvimento.
+
+Não use esse arquivo em produção: ele monta o código-fonte e desliga o cache de código.
+
+## Sem Docker
+
+Instale OpenResty, LuaRocks e as dependências (`./deps.sh`) no servidor e use `conf/nginx.production.conf` (revise antes):
 
 ```bash
-# .env (produção)
-APP_ENV=production
-APP_PORT=8080
-APP_HOST=127.0.0.1
+APP_ENV=production openresty -p /srv/app/ -c conf/nginx.production.conf
 
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=meu_banco_producao
-DB_USER=meu_usuario
-DB_PASSWORD=senha_forte_aqui
-
-JWT_SECRET=chave_super_secreta_aleatoria_64_caracteres_ou_mais
+# ou, de dentro do projeto
+bin/crescent server start --conf conf/nginx.production.conf --env production
 ```
 
-### 4. Criar Banco de Dados
+- `-p` é a raiz do projeto (com `/` no final): caminhos relativos, `.env`, `logs/` e o `lua_package_path` partem dela.
+- O arquivo traz `user nobody;` (só tem efeito quando o master roda como root), `worker_processes auto`, `lua_code_cache on`, access log em JSON e timeouts de cliente.
+- O `init_by_lua_block { require("app") }` constrói o app no master: um erro de configuração faz o start ou o `reload` falhar, em vez de quebrar a primeira requisição.
+- Deploy de código novo: atualize os arquivos e rode `openresty -p /srv/app/ -c conf/nginx.production.conf -s reload` (ou `bin/crescent server reload --conf conf/nginx.production.conf`).
+- O caminho do bundle de CAs (`lua_ssl_trusted_certificate`) é o do Debian/Ubuntu; ajuste em outras distribuições.
 
-```bash
-mysql -u root -p
-```
+Use o supervisor do seu sistema (systemd, por exemplo) para iniciar o OpenResty no boot e repassar as variáveis de ambiente.
 
-```sql
-CREATE DATABASE meu_banco_producao CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'meu_usuario'@'localhost' IDENTIFIED BY 'senha_forte_aqui';
-GRANT ALL PRIVILEGES ON meu_banco_producao.* TO 'meu_usuario'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-```
+## Variáveis de ambiente
 
-### 5. Executar Migrations
+| Variável | Uso |
+| --- | --- |
+| `APP_ENV` | ambiente (`development`, `production`, `test`); escolhe `config/<APP_ENV>.lua` |
+| `APP_DEBUG` | `true` mostra detalhes de erros (só desenvolvimento) |
+| `APP_KEY` | segredo de cookies assinados, sessões e CSRF (32+ caracteres) |
+| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | conexão MySQL |
+| `DB_TEST_NAME` | banco usado pelo ambiente `test` |
+| `JWT_SECRET` | segredo do `auth.jwt()` (32+ bytes) |
+| `PASSWORD_HASH_ITERATIONS` | iterações do PBKDF2 (padrão 600000) |
+| `SMTP_SERVER`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_FROM_NAME` | e-mail |
+| `NGINX_CONF`, `RUN_MIGRATIONS` | Docker: configuração do Nginx e migrations ao subir |
+| `APP_PORT`, `DB_FORWARD_PORT`, `DB_ROOT_PASSWORD` | Docker Compose |
 
-```bash
-luvit crescent-cli migrate
-```
+Gere segredos com `openssl rand -base64 48`.
 
----
+> Cada variável lida pela aplicação precisa de uma diretiva `env NOME;` em **todos** os arquivos do Nginx que você usa (`nginx.conf` e `conf/*.conf`). Ao criar uma variável nova, acrescente a diretiva, senão ela chega vazia nos workers.
 
-## 🌐 NGINX Reverse Proxy
+## TLS, proxy e IP real
 
-### Configuração Básica
+Normalmente o TLS termina num balanceador ou proxy na frente do OpenResty. Nesse caso, faça o Nginx confiar no IP informado pelo proxy, descomentando no `conf/nginx.production.conf` (ou `nginx.docker.conf`):
 
 ```nginx
-# /etc/nginx/sites-available/meu-app
+set_real_ip_from 10.0.0.0/8;          # rede do seu balanceador
+real_ip_header X-Forwarded-For;
+real_ip_recursive on;
+```
+
+Assim `ctx.remote_addr` (usado pelo rate limit e pelos logs) passa a ser o IP do cliente. Nunca confie no `X-Forwarded-For` sem isso: qualquer cliente pode forjá-lo.
+
+Para terminar o TLS no próprio OpenResty, ajuste o bloco `server`:
+
+```nginx
 server {
-    listen 80;
-    server_name meuapp.com www.meuapp.com;
+    listen 443 ssl;
+    server_name app.example.com;
+    ssl_certificate     /etc/letsencrypt/live/app.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/app.example.com/privkey.pem;
 
-    # Logs
-    access_log /var/log/nginx/meu-app-access.log;
-    error_log /var/log/nginx/meu-app-error.log;
+    location /public/ {
+        alias public/;
+        expires 1h;
+    }
 
-    # Proxy para Luvit
     location / {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_http_version 1.1;
-        
-        # Headers importantes
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # Timeouts
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-        
-        # Cache bypass
-        proxy_cache_bypass $http_upgrade;
-    }
-
-    # Arquivos estáticos (se houver)
-    location /static {
-        alias /var/www/meu-app/public;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
+        content_by_lua_block {
+            require("app"):run()
+        }
     }
 }
 ```
 
-### Habilitar Site
-
-```bash
-# Criar link simbólico
-sudo ln -s /etc/nginx/sites-available/meu-app /etc/nginx/sites-enabled/
-
-# Testar configuração
-sudo nginx -t
-
-# Recarregar NGINX
-sudo systemctl reload nginx
-```
-
-> O Crescent Framework já vem com um `config/nginx.conf` de referência bem
-> mais completo que o exemplo básico acima — com rate limiting por zona
-> (`limit_req_zone`), cache de assets estáticos, headers de segurança e
-> bloqueio de scanners comuns (`/wp-admin`, `/phpmyadmin`, etc). Vale usar
-> ele como ponto de partida em vez do exemplo mínimo acima; a seção SSL
-> abaixo já reflete a versão com SSL desse arquivo.
-
----
-
-## 🔒 SSL/HTTPS com Let's Encrypt
-
-### Instalar Certbot
-
-```bash
-# Ubuntu/Debian
-sudo apt install -y certbot python3-certbot-nginx
-
-# CentOS/RHEL
-sudo yum install -y certbot python3-certbot-nginx
-```
-
-### Obter Certificado
-
-```bash
-sudo certbot --nginx -d meuapp.com -d www.meuapp.com
-```
-
-### Configuração NGINX com SSL
-
-Esta é a versão adaptada do `config/nginx.conf` que já vem no Crescent
-Framework — troque `yourdomain.com` pelo seu domínio real:
-
-```nginx
-# /etc/nginx/sites-available/meu-app
-
-upstream crescent_backend {
-    server 127.0.0.1:8080;
-    keepalive 64;
-}
-
-# Rate limiting zones
-limit_req_zone $binary_remote_addr zone=general_limit:10m rate=10r/s;
-limit_req_zone $binary_remote_addr zone=api_limit:10m rate=20r/s;
-limit_req_zone $binary_remote_addr zone=auth_limit:10m rate=5r/s;
-
-server {
-    listen 80;
-    server_name meuapp.com www.meuapp.com;
-
-    # Redirecionar para HTTPS
-    return 301 https://$server_name$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name meuapp.com www.meuapp.com;
-
-    # SSL
-    ssl_certificate /etc/letsencrypt/live/meuapp.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/meuapp.com/privkey.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
-    ssl_prefer_server_ciphers off;
-    ssl_session_cache shared:SSL:50m;
-    ssl_session_timeout 1d;
-
-    # Headers de segurança
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-    add_header X-Frame-Options "DENY" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-
-    # Logs
-    access_log /var/log/nginx/meu-app-access.log;
-    error_log /var/log/nginx/meu-app-error.log;
-
-    client_max_body_size 10M;
-
-    # Rotas normais
-    location / {
-        limit_req zone=general_limit burst=20 nodelay;
-        limit_req_status 429;
-
-        proxy_pass http://crescent_backend;
-        proxy_http_version 1.1;
-
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header Connection "";
-
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-    }
-
-    # Rotas de API — limite mais permissivo
-    location /api/ {
-        limit_req zone=api_limit burst=30 nodelay;
-        limit_req_status 429;
-
-        proxy_pass http://crescent_backend;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header Connection "";
-    }
-
-    # Rotas de auth (login/register) — limite restritivo
-    location ~ ^/(login|register|auth)/ {
-        limit_req zone=auth_limit burst=5 nodelay;
-        limit_req_status 429;
-
-        proxy_pass http://crescent_backend;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # /health sem rate limit (usado pelo monitoramento externo, ver seção abaixo)
-    location /health {
-        access_log off;
-        proxy_pass http://crescent_backend;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header Connection "";
-    }
-
-    # Arquivos estáticos
-    location /static/ {
-        alias /var/www/meu-app/public;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # Bloqueia acesso a arquivos ocultos, backups e scanners comuns
-    location ~ /\. { deny all; access_log off; log_not_found off; }
-    location ~ ~$ { deny all; access_log off; log_not_found off; }
-    location ~ /(wp-admin|wp-login|phpmyadmin|admin) { deny all; access_log off; log_not_found off; }
-}
-```
-
-### Renovação Automática
-
-```bash
-# Testar renovação
-sudo certbot renew --dry-run
-
-# Crontab para renovação automática
-sudo crontab -e
-```
-
-Adicionar:
-```
-0 0 * * * certbot renew --quiet --post-hook "systemctl reload nginx"
-```
-
----
-
-## 🔧 Systemd Service
-
-### Criar Service Unit
-
-```bash
-sudo nano /etc/systemd/system/meu-app.service
-```
-
-```ini
-[Unit]
-Description=Crescent Framework Application
-After=network.target mysql.service
-Wants=mysql.service
-
-[Service]
-Type=simple
-User=www-data
-Group=www-data
-WorkingDirectory=/var/www/meu-app
-Environment="PATH=/home/www-data/.local/bin:/usr/local/bin:/usr/bin:/bin"
-Environment="APP_ENV=production"
-
-# app.lua é o entrypoint real (faz require("./bootstrap") e chama
-# app:listen()); bootstrap.lua sozinho só ajusta package.path e não sobe
-# servidor nenhum — apontar o ExecStart pra ele faz o serviço encerrar
-# imediatamente e ficar em loop de restart.
-ExecStart=/home/www-data/.local/bin/luvit app.lua
-
-Restart=always
-RestartSec=10
-StartLimitIntervalSec=60
-StartLimitBurst=3
-StandardOutput=journal
-StandardError=journal
-SyslogIdentifier=meu-app
-
-# Recursos (opcional)
-MemoryLimit=512M
-CPUQuota=50%
-
-# Segurança
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=true
-ReadWritePaths=/var/www/meu-app
-
-[Install]
-WantedBy=multi-user.target
-```
-
-> Isso corresponde ao `config/crescent.service` que já vem no Crescent
-> Framework, com duas correções: o `ExecStart` de lá aponta pra um
-> `example.lua` que não existe no repo (deveria ser `app.lua`, igual acima),
-> e ele define tanto `APP_ENV` quanto `NODE_ENV` (resíduo de outro stack) —
-> o framework só lê `APP_ENV`.
-
-### Gerenciar Service
-
-```bash
-# Recarregar systemd
-sudo systemctl daemon-reload
-
-# Habilitar (iniciar no boot)
-sudo systemctl enable meu-app
-
-# Iniciar
-sudo systemctl start meu-app
-
-# Status
-sudo systemctl status meu-app
-
-# Parar
-sudo systemctl stop meu-app
-
-# Reiniciar
-sudo systemctl restart meu-app
-
-# Logs em tempo real
-sudo journalctl -u meu-app -f
-```
-
----
-
-## 📊 Monitoramento e Logs
-
-### Logs Systemd
-
-```bash
-# Últimas 100 linhas
-sudo journalctl -u meu-app -n 100
-
-# Seguir em tempo real
-sudo journalctl -u meu-app -f
-
-# Filtrar por data
-sudo journalctl -u meu-app --since "2026-01-09"
-
-# Filtrar por prioridade
-sudo journalctl -u meu-app -p err
-```
-
-### Logs NGINX
-
-```bash
-# Access log
-sudo tail -f /var/log/nginx/meu-app-access.log
-
-# Error log
-sudo tail -f /var/log/nginx/meu-app-error.log
-
-# Analisar códigos de status
-awk '{print $9}' /var/log/nginx/meu-app-access.log | sort | uniq -c | sort -rn
-
-# Top 10 IPs
-awk '{print $1}' /var/log/nginx/meu-app-access.log | sort | uniq -c | sort -rn | head -10
-```
-
-### Logs da Aplicação
-
-```lua
--- Implementar logger
-local Logger = {}
-
-function Logger:log(level, message, data)
-    local timestamp = os.date("%Y-%m-%d %H:%M:%S")
-    local logEntry = string.format(
-        "[%s] [%s] %s",
-        timestamp,
-        level,
-        message
-    )
-    
-    if data then
-        logEntry = logEntry .. " " .. require('json').encode(data)
-    end
-    
-    print(logEntry)  -- systemd captura isso
-end
-
-function Logger:info(message, data)
-    self:log("INFO", message, data)
-end
-
-function Logger:error(message, data)
-    self:log("ERROR", message, data)
-end
-
-return Logger
-```
-
----
-
-## ⚡ Performance
-
-### NGINX Optimizations
-
-```nginx
-# /etc/nginx/nginx.conf
-worker_processes auto;
-worker_rlimit_nofile 65535;
-
-events {
-    worker_connections 4096;
-    use epoll;
-    multi_accept on;
-}
-
-http {
-    # Básico
-    sendfile on;
-    tcp_nopush on;
-    tcp_nodelay on;
-    keepalive_timeout 65;
-    types_hash_max_size 2048;
-    
-    # Buffer
-    client_body_buffer_size 128k;
-    client_max_body_size 10M;
-    client_header_buffer_size 1k;
-    large_client_header_buffers 4 8k;
-    
-    # Gzip
-    gzip on;
-    gzip_vary on;
-    gzip_comp_level 6;
-    gzip_types text/plain text/css text/xml text/javascript 
-               application/json application/javascript application/xml+rss;
-    gzip_disable "msie6";
-    
-    # Cache estático
-    open_file_cache max=10000 inactive=30s;
-    open_file_cache_valid 60s;
-    open_file_cache_min_uses 2;
-    open_file_cache_errors on;
-    
-    # Rate limiting
-    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
-    limit_req_zone $binary_remote_addr zone=auth:10m rate=3r/s;
-}
-```
-
-### MySQL Optimization
-
-```bash
-sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
-```
-
-```ini
-[mysqld]
-# InnoDB
-innodb_buffer_pool_size = 1G
-innodb_log_file_size = 256M
-innodb_flush_log_at_trx_commit = 2
-innodb_flush_method = O_DIRECT
-
-# Query cache
-query_cache_size = 64M
-query_cache_type = 1
-
-# Connections
-max_connections = 200
-
-# Logs (desabilitar em produção para performance)
-slow_query_log = 1
-slow_query_log_file = /var/log/mysql/slow.log
-long_query_time = 2
-```
-
-Aplicar:
-```bash
-sudo systemctl restart mysql
-```
-
----
-
-## 🔐 Segurança
-
-### Firewall (UFW)
-
-```bash
-# Habilitar UFW
-sudo ufw enable
-
-# Permitir SSH
-sudo ufw allow 22/tcp
-
-# Permitir HTTP/HTTPS
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-
-# Verificar status
-sudo ufw status
-```
-
-### Fail2Ban
-
-```bash
-# Instalar
-sudo apt install -y fail2ban
-
-# Configurar
-sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
-sudo nano /etc/fail2ban/jail.local
-```
-
-```ini
-[DEFAULT]
-bantime = 3600
-findtime = 600
-maxretry = 5
-
-[sshd]
-enabled = true
-
-[nginx-http-auth]
-enabled = true
-
-[nginx-limit-req]
-enabled = true
-```
-
-```bash
-# Iniciar
-sudo systemctl enable fail2ban
-sudo systemctl start fail2ban
-
-# Status
-sudo fail2ban-client status
-```
-
-### Hardening MySQL
-
-```sql
--- Remover usuários anônimos
-DELETE FROM mysql.user WHERE User='';
-
--- Remover banco de teste
-DROP DATABASE IF EXISTS test;
-
--- Permitir root apenas localmente
-DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
-
-FLUSH PRIVILEGES;
-```
-
-### Variáveis de Ambiente Seguras
-
-```bash
-# Nunca commite .env no Git!
-# Usar variáveis do sistema
-
-sudo nano /etc/systemd/system/meu-app.service
-```
-
-```ini
-[Service]
-Environment="DB_PASSWORD=senha_segura_aqui"
-Environment="JWT_SECRET=token_secreto_aqui"
-```
-
----
-
-## 🔄 Deploy Automatizado
-
-### Script de Deploy
-
-```bash
-#!/bin/bash
-# deploy.sh
-
-set -e  # Exit on error
-
-APP_DIR="/var/www/meu-app"
-BACKUP_DIR="/var/backups/meu-app"
-
-echo "🚀 Starting deployment..."
-
-# 1. Backup atual
-echo "📦 Creating backup..."
-mkdir -p $BACKUP_DIR
-tar -czf $BACKUP_DIR/backup-$(date +%Y%m%d-%H%M%S).tar.gz $APP_DIR
-
-# 2. Pull código
-echo "📥 Pulling latest code..."
-cd $APP_DIR
-git pull origin main
-
-# 3. Instalar dependências
-echo "📚 Installing dependencies..."
-lit install
-
-# 4. Migrations
-echo "🗄️ Running migrations..."
-luvit crescent-cli migrate
-
-# 5. Reiniciar serviço
-echo "🔄 Restarting service..."
-sudo systemctl restart meu-app
-
-# 6. Verificar status
-echo "✅ Checking status..."
-sleep 2
-sudo systemctl status meu-app --no-pager
-
-# 7. Reload NGINX
-echo "🌐 Reloading NGINX..."
-sudo nginx -t && sudo systemctl reload nginx
-
-echo "✨ Deployment complete!"
-```
-
-Tornar executável:
-```bash
-chmod +x deploy.sh
-```
-
-### GitHub Actions
-
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy to Production
-
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Deploy via SSH
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SERVER_IP }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          cd /var/www/meu-app
-          ./deploy.sh
-```
-
----
-
-## 🩺 Health Checks
-
-### Endpoint de Status
-
-Em `app.lua`, guarde o horário de início antes de `app:listen()`:
-
-```lua
--- app.lua
-_G.APP_START_TIME = os.time()
-```
-
-O arquivo de rotas segue a mesma convenção usada por `make:routes`/`make:module`
-(`function(app, prefix)`, não um objeto "router" separado):
-
-```lua
--- src/health/routes/health.lua
-return function(app, prefix)
-    app:get(prefix or "/health", function(ctx)
-        -- Verificar banco
-        local db = require('crescent.database.mysql')
-        local dbOk = pcall(function()
-            db:query("SELECT 1")
-        end)
-
-        return ctx.json(200, {
-            status = "ok",
-            timestamp = os.date("%Y-%m-%d %H:%M:%S"),
-            -- os.clock() mede CPU consumida pelo processo, não tempo de
-            -- parede — para uptime real, compare contra o horário salvo
-            -- na subida do servidor
-            uptime_seconds = os.time() - (_G.APP_START_TIME or os.time()),
-            database = dbOk and "connected" or "disconnected"
-        })
-    end)
-end
-```
-
-### Monitoramento Externo
-
-```bash
-# Criar script de verificação
-nano /usr/local/bin/check-app.sh
-```
-
-```bash
-#!/bin/bash
-
-URL="https://meuapp.com/health"
-RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" $URL)
-
-if [ $RESPONSE -eq 200 ]; then
-    echo "✅ App is healthy"
-    exit 0
-else
-    echo "❌ App is down (HTTP $RESPONSE)"
-    # Reiniciar serviço
-    sudo systemctl restart meu-app
-    exit 1
-fi
-```
-
-```bash
-chmod +x /usr/local/bin/check-app.sh
-
-# Cron a cada 5 minutos
-crontab -e
-```
-
-```
-*/5 * * * * /usr/local/bin/check-app.sh >> /var/log/app-health.log 2>&1
-```
-
----
-
-## 🐛 Troubleshooting
-
-### App não inicia
-
-```bash
-# Verificar logs
-sudo journalctl -u meu-app -n 100
-
-# Verificar sintaxe Lua
-luvit -e "require('bootstrap')"
-
-# Verificar permissões
-ls -la /var/www/meu-app
-sudo chown -R www-data:www-data /var/www/meu-app
-```
-
-### Erro 502 Bad Gateway
-
-```bash
-# App está rodando?
-sudo systemctl status meu-app
-
-# Porta correta?
-netstat -tulpn | grep 8080
-
-# Testar localmente
-curl http://localhost:8080
-```
-
-### Banco de dados não conecta
-
-```bash
-# MySQL está rodando?
-sudo systemctl status mysql
-
-# Testar conexão
-mysql -h localhost -u meu_usuario -p meu_banco_producao
-
-# Verificar .env
-cat .env | grep DB_
-```
-
-### Logs grandes
-
-```bash
-# Limitar tamanho do journal
-sudo journalctl --vacuum-time=7d
-sudo journalctl --vacuum-size=500M
-
-# Rotação de logs NGINX
-sudo nano /etc/logrotate.d/nginx
-```
-
-```
-/var/log/nginx/*.log {
-    daily
-    missingok
-    rotate 14
-    compress
-    delaycompress
-    notifempty
-    create 0640 www-data adm
-    sharedscripts
-    postrotate
-        systemctl reload nginx > /dev/null
-    endscript
-}
-```
-
----
-
-## 📖 Próximas Seções
-
-- **[Getting Started](/docs/getting-started)** - Instalação e início
-- **[Core Concepts](/docs/core-concepts)** - Routes, Controllers, Services
-- **[Database](/docs/database)** - ORM e Migrations
-- **[CLI](/docs/cli)** - Comandos disponíveis
+Com o site 100% em HTTPS, ligue `hsts = true` no middleware de [headers de segurança](#headers-de-segurança). Arquivos estáticos ficam em `public/` e são servidos pelo Nginx em `/public/`, sem passar pelo Lua.
+
+## Logs e observabilidade
+
+- **Access log** do Nginx: uma linha JSON por requisição com horário, request id (`rid`), IP, método, URI, status, bytes e duração. É a fonte de verdade do tráfego.
+- **Error log**: erros do Nginx e as entradas JSON do `crescent.logger` (log por requisição, erros 500 com request id).
+- No Docker, os dois vão para stdout/stderr (`docker logs`); fora dele, para `logs/`.
+- `X-Request-Id`: o Crescent mantém o do proxy quando ele envia um, senão usa o `$request_id` do Nginx, e devolve o valor na resposta. Use-o para cruzar logs.
+- `/health` (liveness) e `/ready` (readiness, verifica o banco). Veja [Health e readiness](#health-e-readiness).
+
+## Checklist de produção
+
+- `APP_ENV=production` e `debug = false` (o `config/production.lua` já define).
+- `APP_KEY` e `JWT_SECRET` com 32+ caracteres, fora do repositório; nada de `.env` em produção.
+- Usuário do MySQL com acesso só ao banco da aplicação; migrations aplicadas no deploy.
+- Toda variável nova declarada com `env NOME;` nos arquivos do Nginx.
+- `client_max_body_size` e limites de upload ajustados ao que a aplicação aceita.
+- `set_real_ip_from` configurado se houver proxy; rate limit no login.
+- HSTS só com HTTPS em todo o site; CORS com lista explícita de origens.
+- Balanceador usando `/ready`; orquestrador reiniciando por `/health`.
+- `lua_shared_dict` (`crescent_limits`, `crescent_jwt`, `crescent_sessions`) mantidos no conf; lembre que eles são locais a cada servidor.

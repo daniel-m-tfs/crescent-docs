@@ -1,6 +1,7 @@
 # 📚 Sistema de Documentação do Crescent Framework
 
 Este repositório contém o site de documentação e o site institucional do Crescent Framework.
+A documentação descreve o **Crescent 2.0** (OpenResty + LuaJIT, MySQL).
 
 **Site publicado:** https://crescent.tyne.com.br
 
@@ -9,12 +10,14 @@ Este repositório contém o site de documentação e o site institucional do Cre
 ```
 crescent-docs/
 ├── docs/                    # 📝 Arquivos Markdown fonte (edite estes)
-│   ├── getting-started.md   # 🚀 Instalação e primeiros passos
-│   ├── core-concepts.md     # 🎯 Rotas, Controllers, Services, Models
-│   ├── database.md          # 🗄️ ORM, Migrations, Query Builder
-│   ├── cli.md                # 🛠️ Comandos do CLI
-│   ├── utilities.md         # 🧰 Testes, Hash, Helpers
-│   └── deployment.md        # 🚀 Deploy, NGINX, SSL, Systemd
+│   ├── getting-started.md   # 🚀 Requisitos, starter com Docker, estrutura, primeiro módulo
+│   ├── core-concepts.md     # 🎯 app.lua, config/env, rotas, ctx, middleware, validação, erros, views
+│   ├── database.md          # 🗄️ MySQL, models, relações, query builder, transações, migrations, seeders
+│   ├── security.md          # 🔐 Auth/JWT, senhas, CORS, headers, rate limit, cookies, sessões, CSRF, uploads
+│   ├── cli.md               # 🛠️ Comandos do bin/crescent
+│   ├── utilities.md         # 🧰 Cliente HTTP, e-mail, logs, JSON, health/ready
+│   ├── deployment.md        # 🚀 Docker, Nginx de produção, variáveis de ambiente, proxy, logs
+│   └── migration-1x.md      # 🔄 Migrando do Crescent 1.x (Luvit)
 ├── convert-docs.py           # 🔧 Gera docs.html a partir de docs/*.md
 ├── docs-template.html        # 🧩 "Chrome" estático (head/SEO/navbar/footer/scripts)
 ├── index.html                # Homepage
@@ -45,8 +48,9 @@ highlighting (Prism.js), tabelas GFM, listas ordenadas/não-ordenadas,
 negrito/itálico/código inline, links (inclusive `/docs/arquivo` → âncora
 interna da seção certa, já que tudo vira uma página única), `---` como
 separador de seção, e blockquotes (`>`) como caixas `.note-box`. IDs de
-seção são desambiguados automaticamente quando o mesmo título (ex. "Boas
-Práticas") aparece em mais de um `.md`.
+seção são desambiguados automaticamente quando o mesmo título aparece em
+mais de um `.md`. Os IDs vêm do texto dos títulos `##` (com acentos), então
+links internos usam `#título-em-minúsculas` (ex.: `#query-builder`).
 
 Nunca edite `docs.html` manualmente — a próxima execução de
 `convert-docs.py` sobrescreve qualquer mudança feita direto nele.
@@ -83,7 +87,6 @@ commitar (ver seção acima). Não edite `docs.html` direto.
 
 - **Framework:** https://github.com/daniel-m-tfs/crescent-framework
 - **Starter:** https://github.com/daniel-m-tfs/crescent-starter
-- **LuaRocks:** https://luarocks.org/modules/crescent
 
 ## 📝 Licença
 
