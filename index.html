@@ -285,8 +285,8 @@
                         <code>validation_failed</code>.
                     </p>
                     <p class="scene-lede">
-                        Os três primeiros arquivos são o hello world do starter, sem cortes. O model é o exemplo da
-                        documentação.
+                        Os três primeiros arquivos vêm do hello world do starter (a action mostra só o endpoint
+                        JSON). O model é o exemplo da documentação.
                     </p>
                 </div>
 
@@ -298,7 +298,7 @@
                         <button type="button" role="tab" id="tab-model" aria-controls="panel-model">models/user.lua</button>
                     </div>
 
-                    <div class="code-panel" id="panel-routes" role="tabpanel" aria-labelledby="tab-routes">
+                    <div class="code-panel" id="panel-routes">
                         <p class="code-file">src/hello/init.lua</p>
                         <div class="code-block">
 <pre><code class="language-lua">local actions = require("src.hello.actions.hello")
@@ -316,7 +316,7 @@ return Module</code></pre>
                         </div>
                     </div>
 
-                    <div class="code-panel" id="panel-action" role="tabpanel" aria-labelledby="tab-action">
+                    <div class="code-panel" id="panel-action">
                         <p class="code-file">src/hello/actions/hello.lua</p>
                         <div class="code-block">
 <pre><code class="language-lua">local HelloActions = {}
@@ -332,7 +332,7 @@ return HelloActions</code></pre>
                         </div>
                     </div>
 
-                    <div class="code-panel" id="panel-app" role="tabpanel" aria-labelledby="tab-app">
+                    <div class="code-panel" id="panel-app">
                         <p class="code-file">app.lua</p>
                         <div class="code-block">
 <pre><code class="language-lua">-- Montado uma vez por worker; o nginx chama require("app"):run()
@@ -353,7 +353,7 @@ return app</code></pre>
                         </div>
                     </div>
 
-                    <div class="code-panel" id="panel-model" role="tabpanel" aria-labelledby="tab-model">
+                    <div class="code-panel" id="panel-model">
                         <p class="code-file">src/users/models/user.lua</p>
                         <div class="code-block">
 <pre><code class="language-lua">local Model = require("crescent.model")
@@ -483,7 +483,7 @@ return User</code></pre>
                     </dl>
                     <div class="status-notes">
                         <h3>Vindo do 1.x</h3>
-                        <p>A API mudou em pontos pontuais — por exemplo, <code>ctx.json(...)</code> virou
+                        <p>A API mudou em alguns pontos — por exemplo, <code>ctx.json(...)</code> virou
                             <code>ctx:json(...)</code> e middleware interrompe a cadeia retornando uma resposta. As notas
                             de migração estão no <a href="https://github.com/daniel-m-tfs/crescent-framework"
                                 rel="noopener">README do framework</a>.</p>

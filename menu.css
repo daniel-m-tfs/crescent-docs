@@ -1,114 +1,184 @@
-/* **************** */
+/* Navbar menu — shared by index.html and docs.html.
+   Desktop: inline links. Mobile: a toggle (#menu-bar) opens a panel (#nav)
+   over a dimmed backdrop (#menu-bg). Class names/IDs are part of the
+   contract with docs-template.html and menu.js. */
 
 #menu {
+    position: relative;
     z-index: 2;
+    display: flex;
+    align-items: center;
 }
 
 #menu-bar {
-    width: 45px;
-    height: 40px;
-    margin: 30px 0 20px 20px;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    margin-right: -10px;
+    border-radius: 8px;
     cursor: pointer;
 }
 
 .bar {
-    height: 5px;
-    width: 100%;
-    background-color: var(--primary);
     display: block;
-    border-radius: 5px;
-    transition: 0.3s ease;
-}
-
-#bar1 {
-    transform: translateY(-4px);
-}
-
-#bar3 {
-    transform: translateY(4px);
-}
-
-.nav {
-    transition: 0.3s ease;
-    display: none;
+    width: 22px;
+    height: 1.5px;
+    border-radius: 2px;
+    background-color: var(--text, #e8edf6);
+    transition: transform 0.3s ease, opacity 0.2s ease;
 }
 
 .nav ul {
-    padding: 0 22px;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 .nav li {
     list-style: none;
-    padding: 12px 0;
 }
 
 .nav li a {
-    color: white;
-    font-size: 20px;
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    color: var(--text-dim, #a6b1c6);
+    font-size: 0.875rem;
+    font-weight: 500;
     text-decoration: none;
+    transition: color 0.2s ease;
 }
 
-.nav li a:hover {
-    color: var(--accent);
+.nav li a:hover,
+.nav li a.active,
+.nav li a[aria-current="page"] {
+    color: var(--text, #e8edf6);
 }
 
-.menu-bg,
-#menu {
-    top: 0;
-    right: 20px;
-    position: absolute;
+.nav li a.github-link {
+    margin-left: 0.5rem;
+    padding: 0.4rem 1rem;
+    border: 1px solid rgba(170, 195, 240, 0.22);
+    border-radius: 999px;
+    color: var(--text, #e8edf6);
+}
+
+.nav li a.github-link:hover {
+    border-color: rgba(207, 224, 255, 0.5);
 }
 
 .menu-bg {
-    z-index: 1;
-    width: 0;
-    height: 0;
-    margin: 30px 0 20px 20px;
-    background: radial-gradient(circle, var(--secondary), var(--dark-light));
-    border-radius: 50%;
-    transition: 0.3s ease;
-    box-shadow: 0 0 20px var(--secondary);
+    display: none;
 }
 
-.change {
-    display: block;
-}
+/* ---------- Mobile ---------- */
 
-.change .bar {
-    background-color: white;
-}
+@media (max-width: 900px) {
+    #menu-bar {
+        display: flex;
+    }
 
-.change #bar1 {
-    transform: translateY(4px) rotateZ(-45deg);
-}
+    .nav {
+        display: none;
+        position: fixed;
+        top: var(--nav-h, 72px);
+        left: 0;
+        right: 0;
+        max-height: calc(100vh - var(--nav-h, 72px));
+        overflow-y: auto;
+        padding: 0.75rem 1.25rem 1.75rem;
+        background: #05070d;
+        border-bottom: 1px solid rgba(170, 195, 240, 0.12);
+    }
 
-.change #bar2 {
-    opacity: 0;
-}
+    .nav.change {
+        display: block;
+    }
 
-.change #bar3 {
-    transform: translateY(-6px) rotateZ(45deg);
-}
+    .nav ul {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+    }
 
-.change-bg {
-    width: 620px;
-    height: 620px;
-    transform: translate(60%, -30%);
-}
+    .nav li {
+        border-bottom: 1px solid rgba(170, 195, 240, 0.08);
+    }
 
-.github-link {
-    background: linear-gradient(45deg, var(--secondary) 0%, var(--accent) 100%);
-    padding: 0.5rem 1.5rem;
-    border-radius: 0.5rem;
-    color: white !important;
-}
+    .nav li:last-child {
+        border-bottom: 0;
+        padding-top: 1rem;
+    }
 
-@media (max-width: 480px) {
-    .change-bg {
-        width: 550px;
-        height: 680px;
-        transform: translate(60%, -30%);
+    .nav li a {
+        display: flex;
+        min-height: 52px;
+        padding: 0.75rem 0.25rem;
+        font-size: 1.0625rem;
+        color: var(--text, #e8edf6);
+    }
+
+    .nav li a.github-link {
+        justify-content: center;
+        margin-left: 0;
+    }
+
+    .menu-bg {
+        display: block;
+        position: fixed;
+        top: var(--nav-h, 72px);
+        left: 0;
+        right: 0;
+        height: calc(100vh - var(--nav-h, 72px));
+        z-index: 1;
+        background: rgba(2, 3, 7, 0.6);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    }
+
+    .menu-bg.change-bg {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.3s ease;
+    }
+
+    #menu-bar.change #bar1 {
+        transform: translateY(6.5px) rotate(45deg);
+    }
+
+    #menu-bar.change #bar2 {
+        opacity: 0;
+    }
+
+    #menu-bar.change #bar3 {
+        transform: translateY(-6.5px) rotate(-45deg);
     }
 }
 
-/* **************** */
+@media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+    .nav.change {
+        animation: menu-in 0.3s ease both;
+    }
+
+    @keyframes menu-in {
+        from {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+}
