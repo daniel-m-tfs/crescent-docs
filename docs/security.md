@@ -248,6 +248,9 @@ Nos templates, inclua o campo com `<%-` (sem escape, pois é HTML):
 
 Requisições `POST`, `PUT`, `PATCH` e `DELETE` precisam enviar o token no campo `_csrf` ou no header `X-CSRF-Token` (para AJAX, leia a meta tag). Sem token válido: `403 csrf_invalid`.
 
+- **Protegido contra BREACH:** o segredo de 256 bits fica na sessão e nunca aparece numa resposta. `csrf_token()` devolve o segredo mascarado com uma máscara aleatória nova a cada requisição, então páginas comprimidas não repetem os bytes do segredo. Qualquer token mascarado do segredo atual é aceito (várias abas funcionam).
+- `ctx.session:regenerate()` no login troca o segredo: tokens obtidos antes do login deixam de valer.
+
 ## Uploads
 
 Requisições `multipart/form-data` são lidas em streaming: os campos de texto vão para `ctx.body` e os arquivos para `ctx.files`, gravados em arquivos temporários.

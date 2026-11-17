@@ -1453,7 +1453,7 @@ lua cli.lua db:rollback                            # desfaz o último lote (batc
 
 <ul>
     <li>Os arquivos rodam em ordem de nome e ficam registrados na tabela <code>migrations</code>. Cada execução de <code>db:migrate</code> forma um lote.</li>
-    <li>O arquivo gerado por <code>make:migration</code> vem com uma tabela <code>example</code> de exemplo: edite antes de rodar.</li>
+    <li>O arquivo gerado por <code>make:migration</code> deduz a tabela do nome (<code>create_&lt;tabela&gt;</code> ou <code>add_x_to_&lt;tabela&gt;</code>) e traz colunas de exemplo: revise antes de rodar.</li>
     <li><strong>DDL do MySQL faz commit implícito</strong>: migrations não rodam em transação. Se uma migration com vários comandos falhar no meio, ela fica parcialmente aplicada e sem registro. Prefira um comando de schema por migration.</li>
 </ul>
 
@@ -1880,6 +1880,11 @@ app:use(csrf.create({
 </div>
 
 <p>Requisições <code>POST</code>, <code>PUT</code>, <code>PATCH</code> e <code>DELETE</code> precisam enviar o token no campo <code>_csrf</code> ou no header <code>X-CSRF-Token</code> (para AJAX, leia a meta tag). Sem token válido: <code>403 csrf_invalid</code>.</p>
+
+<ul>
+    <li><strong>Protegido contra BREACH:</strong> o segredo de 256 bits fica na sessão e nunca aparece numa resposta. <code>csrf_token()</code> devolve o segredo mascarado com uma máscara aleatória nova a cada requisição, então páginas comprimidas não repetem os bytes do segredo. Qualquer token mascarado do segredo atual é aceito (várias abas funcionam).</li>
+    <li><code>ctx.session:regenerate()</code> no login troca o segredo: tokens obtidos antes do login deixam de valer.</li>
+</ul>
 
 
                 <hr>
