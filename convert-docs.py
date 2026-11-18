@@ -30,6 +30,7 @@ FILES = [
     "security.md",
     "cli.md",
     "utilities.md",
+    "cache-queue.md",
     "deployment.md",
     "migration-1x.md",
 ]

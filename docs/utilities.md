@@ -120,4 +120,4 @@ require("crescent.health").register(app, {
 | `GET /health` | `200` enquanto o worker responde; não consulta dependências |
 | `GET /ready` | `200` se todos os checks passam, `503` caso contrário, com status e duração de cada check |
 
-Sem `checks`, `/ready` verifica o banco (`SELECT 1`) quando há um configurado. Mensagens de erro dos checks só aparecem na resposta com `debug = true`; sempre vão para o log. Use `/health` para reiniciar o processo e `/ready` para o balanceador decidir se envia tráfego.
+Sem `checks`, `/ready` verifica o banco (`SELECT 1`) quando há um configurado e o Redis (`PING`) quando algum driver de cache ou fila usa Redis. Mensagens de erro dos checks só aparecem na resposta com `debug = true`; sempre vão para o log. Use `/health` para reiniciar o processo e `/ready` para o balanceador decidir se envia tráfego.

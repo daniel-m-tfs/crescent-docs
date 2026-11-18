@@ -9,7 +9,7 @@ lua cli.lua <comando> [argumentos]
 lua cli.lua help
 ```
 
-Geradores, `new`, `server` e `test` rodam no Lua comum (5.1 a 5.4 ou LuaJIT). Comandos que precisam do OpenResty (`db:*` e `routes`) são repassados automaticamente para `bin/crescent`, que roda no mesmo LuaJIT do OpenResty que atende as requisições (via `resty`). `bin/crescent <comando>` aceita os mesmos comandos e é o que se usa no Docker: `docker compose exec app bin/crescent <comando>`.
+Geradores, `new`, `server` e `test` rodam no Lua comum (5.1 a 5.4 ou LuaJIT). Comandos que precisam do OpenResty (`db:*`, `queue:*`, `cache:clear` e `routes`) são repassados automaticamente para `bin/crescent`, que roda no mesmo LuaJIT do OpenResty que atende as requisições (via `resty`). `bin/crescent <comando>` aceita os mesmos comandos e é o que se usa no Docker: `docker compose exec app bin/crescent <comando>`.
 
 A CLI lê o `.env` da raiz do projeto (variáveis do ambiente têm prioridade). A saída é colorida no terminal; `NO_COLOR=1` desliga as cores.
 
@@ -43,10 +43,10 @@ Erros de inicialização vão para `logs/error.log`.
 
 | Comando | Descrição |
 | --- | --- |
-| `setup` | Prepara o projeto, perguntando antes de cada passo: (1) **git** — recomeça o histórico do zero (`git init`, branch `main`, commit inicial) sem o remote do template e, opcionalmente, adiciona o seu remote e faz o push; (2) **banco** — usuário e senha do MySQL do Docker gravados no `.env` (senha vazia = gerada; `DB_ROOT_PASSWORD` aleatória); (3) **Docker** — sobe a aplicação com `run`. |
+| `setup` | Prepara o projeto, perguntando antes de cada passo: (1) **git** — recomeça o histórico do zero (`git init`, branch `main`, commit inicial) sem o remote do template e, opcionalmente, adiciona o seu remote e faz o push; (2) **banco** — usuário e senha do MySQL do Docker gravados no `.env` (senha vazia = gerada; `DB_ROOT_PASSWORD` aleatória); (3) **cache e filas** — memória do servidor (`shared`) ou Redis (`COMPOSE_PROFILES=redis`, `CACHE_DRIVER`/`QUEUE_DRIVER=redis` e `REDIS_PASSWORD` aleatória; veja [Cache e filas](/docs/cache-queue)); (4) **Docker** — sobe a aplicação com `run`. |
 | `run [--logs]` | `docker compose up -d`, espera o `/health` responder e mostra as URLs. O código fica montado no container com `lua_code_cache off`: alterações em `src/`, `views/` e `app.lua` valem na próxima requisição. `--logs` acompanha os logs da aplicação. |
 | `rerun [--logs] [--fresh]` | Reconstrói a imagem e reinicia (`up -d --build`, com cache): use depois de mudar `Dockerfile`, dependências (`deps.sh`) ou configuração do Nginx. `--fresh` reconstrói sem cache. |
-| `stop` | `docker compose down`: para os containers e mantém os volumes (banco e uploads). |
+| `stop` | `docker compose down` (inclusive `redis` e `worker`): para os containers e mantém os volumes (banco, Redis e uploads). |
 
 Se o volume do MySQL já existe, o `setup` avisa: o MySQL só lê usuário e senha ao criar o volume (`docker compose down -v` recria, apagando os dados do banco do Docker). O `setup` se recusa a rodar no repositório do próprio framework.
 
@@ -62,6 +62,7 @@ Os geradores **nunca sobrescrevem** arquivos e mostram cada arquivo criado (`✓
 | `make:model <nome> [módulo]` | `src/<módulo>/models/<nome>.lua` |
 | `make:routes <nome> [módulo]` | `src/<módulo>/routes/<nome>.lua` |
 | `make:middleware <nome> [módulo]` | `src/middleware/<nome>.lua` (ou dentro do módulo) |
+| `make:job <nome> [módulo]` | `src/<módulo>/jobs/<nome>.lua`: job de fila com `handle(payload, job)` e `failed` |
 | `make:test <nome>` | `tests/test-<nome>.lua` |
 | `make:migration <nome>` | `migrations/AAAAMMDDHHMMSS_<nome>.lua` |
 | `make:seeder <nome>` | `seeds/<nome>.lua` (prefixe com `01_` para definir a ordem) |
@@ -118,6 +119,19 @@ O controller traz `index`, `show`, `store`, `update`, `destroy` e o schema de va
 | `db:seed [nome]` | — | roda todos os seeders, ou só um |
 
 Os comandos usam `config.database` do ambiente atual (`APP_ENV`). Detalhes em [Migrations](#migrations) e [Seeders](#seeders).
+
+## Filas e cache
+
+Os comandos de fila exigem `QUEUE_DRIVER=redis`: com o driver `shared` a fila vive na memória do servidor, que a CLI não alcança. Detalhes em [Cache e filas](/docs/cache-queue).
+
+| Comando | Descrição |
+| --- | --- |
+| `queue:work [--queue=a,b] [--once]` | processa jobs; `--sleep`, `--max-jobs`, `--max-time`, `--stop-when-empty`; logs JSON no stdout |
+| `queue:status [fila]` | contagem de ready, delayed, reserved e failed |
+| `queue:failed [fila]` | últimos jobs que falharam (`--limit=20`) |
+| `queue:retry <id\|all> [--queue=]` | reenfileira jobs que falharam, com as tentativas zeradas |
+| `queue:clear-failed [fila]` | apaga os jobs que falharam |
+| `cache:clear` | apaga as chaves do prefixo do cache (Redis) |
 
 ## Testes
 

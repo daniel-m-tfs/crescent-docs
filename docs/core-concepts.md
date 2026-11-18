@@ -61,7 +61,7 @@ return {
 | `Env.number(nome, padrão)` | número (erro se o valor não for numérico) |
 | `Env.boolean(nome, padrão)` | `true`/`false` a partir de `true`, `1`, `yes`, `false`, `0`, `no` |
 
-> **Pegadinha do Nginx:** o Nginx limpa o ambiente dos workers. **Toda variável lida pela aplicação precisa de uma diretiva `env NOME;`** no `nginx.conf` e nos arquivos de `conf/`, senão `Env.get` não a enxerga (em produção, sem `.env`, ela simplesmente vem vazia). Os arquivos gerados já declaram `APP_*`, `DB_*`, `JWT_SECRET` e `SMTP_*`.
+> **Pegadinha do Nginx:** o Nginx limpa o ambiente dos workers. **Toda variável lida pela aplicação precisa de uma diretiva `env NOME;`** no `nginx.conf` e nos arquivos de `conf/`, senão `Env.get` não a enxerga (em produção, sem `.env`, ela simplesmente vem vazia). Os arquivos gerados já declaram `APP_*`, `DB_*`, `JWT_SECRET`, `SMTP_*`, `REDIS_*`, `CACHE_DRIVER` e `QUEUE_DRIVER`.
 
 O `.env` é só conveniência local; em produção use variáveis de ambiente de verdade. A porta é definida pelo `listen` do `nginx.conf` (o `server.port` da config é apenas validado).
 
@@ -71,6 +71,7 @@ Outras chaves aceitas pela config da aplicação:
 | --- | --- |
 | `debug` | inclui detalhes internos nas respostas de erro e desativa o cache de templates |
 | `database` | conexão MySQL; quando tem `database`, o app configura o banco e expõe `ctx.db` |
+| `cache` / `queue` / `redis` | expõem `ctx.cache` e `ctx.queue`; `redis` é usado pelos drivers `redis` (veja [Cache e filas](/docs/cache-queue)) |
 | `views_root` / `view_layout` | pasta dos templates (padrão `views`) e layout padrão |
 | `error_handler` | função `(ctx, err)` para erros não tratados (veja [Erros](#erros)) |
 | `logger` | instância de `crescent.logger` ou `function(level, message, fields)` |
@@ -136,6 +137,7 @@ end)
 | `ctx.request_id`, `ctx.remote_addr` | id da requisição (também no header `X-Request-Id`) e IP do cliente |
 | `ctx.state` | tabela livre para passar dados entre middleware e action |
 | `ctx.db`, `ctx.config`, `ctx.app`, `ctx.debug` | banco, configuração, aplicação e modo debug |
+| `ctx.cache`, `ctx.queue`, `ctx.redis` | cache, fila de jobs e cliente Redis, quando configurados |
 
 Um corpo JSON inválido é recusado antes da action com `400 malformed_json`.
 

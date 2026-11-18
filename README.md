@@ -16,6 +16,7 @@ crescent-docs/
 │   ├── security.md          # 🔐 Auth/JWT, senhas, CORS, headers, rate limit, cookies, sessões, CSRF, uploads
 │   ├── cli.md               # 🛠️ Comandos do bin/crescent
 │   ├── utilities.md         # 🧰 Cliente HTTP, e-mail, logs, JSON, health/ready
+│   ├── cache-queue.md       # ⚡ Cache, filas (jobs em segundo plano) e Redis opcional
 │   ├── deployment.md        # 🚀 Docker, Nginx de produção, variáveis de ambiente, proxy, logs
 │   └── migration-1x.md      # 🔄 Migrando do Crescent 1.x (Luvit)
 ├── convert-docs.py           # 🔧 Gera docs.html a partir de docs/*.md

@@ -44,6 +44,7 @@ docker compose up --build
 - Usa `conf/nginx.docker-dev.conf`: um worker e `lua_code_cache off`, com o código montado em `/app` para recarga automática.
 - Roda as migrations pendentes ao subir e cria o banco de testes (`DB_TEST_NAME`) na primeira inicialização do volume.
 - `APP_PORT` muda a porta no host. As senhas do `.env.example` são só para desenvolvimento.
+- Com `COMPOSE_PROFILES=redis` no `.env`, sobem também um Redis 7.4 (AOF ligado, senha `REDIS_PASSWORD`, exposto em `127.0.0.1:6380`, dados no volume `redis-data`) e o serviço `worker` (`bin/crescent queue:work`). Veja [Cache e filas](/docs/cache-queue).
 
 Não use esse arquivo em produção: ele monta o código-fonte e desliga o cache de código.
 
@@ -78,8 +79,10 @@ Use o supervisor do seu sistema (systemd, por exemplo) para iniciar o OpenResty 
 | `JWT_SECRET` | segredo do `auth.jwt()` (32+ bytes) |
 | `PASSWORD_HASH_ITERATIONS` | iterações do PBKDF2 (padrão 600000) |
 | `SMTP_SERVER`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_FROM_NAME` | e-mail |
+| `CACHE_DRIVER`, `QUEUE_DRIVER` | `shared` (memória do servidor, padrão) ou `redis`; a fila também aceita `sync` |
+| `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_DB` | conexão Redis (só usada pelos drivers `redis`) |
 | `NGINX_CONF`, `RUN_MIGRATIONS` | Docker: configuração do Nginx e migrations ao subir |
-| `APP_PORT`, `DB_FORWARD_PORT`, `DB_ROOT_PASSWORD` | Docker Compose |
+| `APP_PORT`, `DB_FORWARD_PORT`, `DB_ROOT_PASSWORD`, `COMPOSE_PROFILES`, `REDIS_FORWARD_PORT` | Docker Compose |
 
 Gere segredos com `openssl rand -base64 48`.
 
@@ -121,13 +124,30 @@ server {
 
 Com o site 100% em HTTPS, ligue `hsts = true` no middleware de [headers de segurança](#headers-de-segurança). Arquivos estáticos ficam em `public/` e são servidos pelo Nginx em `/public/`, sem passar pelo Lua.
 
+## Workers de fila
+
+Com `QUEUE_DRIVER=shared`, os jobs rodam dentro do próprio OpenResty: o `init_worker_by_lua` dos confs chama `app:start_workers()`. Não há processo extra, mas os jobs pendentes se perdem num restart e cada servidor só processa a própria fila.
+
+Com várias réplicas ou jobs que não podem se perder, use `QUEUE_DRIVER=redis` em todos os containers e rode workers com a mesma imagem:
+
+```bash
+docker run -d --env-file prod.env meu-app bin/crescent queue:work
+docker run -d --env-file prod.env meu-app bin/crescent queue:work --queue=mail
+```
+
+- Escale rodando mais containers de worker; cada um processa um job por vez.
+- Um job cujo worker morre (deploy, OOM) volta para a fila quando passa o `timeout` dele: escreva handlers idempotentes.
+- O `HEALTHCHECK` da imagem testa o HTTP; desligue-o nos containers de worker (`healthcheck: disable: true` no compose).
+- `--max-time=3600` faz o worker sair depois de uma hora para o orquestrador reiniciá-lo, o que ajuda com vazamentos de memória em jobs.
+- Os logs dos jobs saem em JSON no stdout do worker.
+
 ## Logs e observabilidade
 
 - **Access log** do Nginx: uma linha JSON por requisição com horário, request id (`rid`), IP, método, URI, status, bytes e duração. É a fonte de verdade do tráfego.
 - **Error log**: erros do Nginx e as entradas JSON do `crescent.logger` (log por requisição, erros 500 com request id).
 - No Docker, os dois vão para stdout/stderr (`docker logs`); fora dele, para `logs/`.
 - `X-Request-Id`: o Crescent mantém o do proxy quando ele envia um, senão usa o `$request_id` do Nginx, e devolve o valor na resposta. Use-o para cruzar logs.
-- `/health` (liveness) e `/ready` (readiness, verifica o banco). Veja [Health e readiness](#health-e-readiness).
+- `/health` (liveness) e `/ready` (readiness, verifica o banco e, quando usado, o Redis). Veja [Health e readiness](#health-e-readiness).
 
 ## Checklist de produção
 
@@ -139,4 +159,5 @@ Com o site 100% em HTTPS, ligue `hsts = true` no middleware de [headers de segur
 - `set_real_ip_from` configurado se houver proxy; rate limit no login.
 - HSTS só com HTTPS em todo o site; CORS com lista explícita de origens.
 - Balanceador usando `/ready`; orquestrador reiniciando por `/health`.
-- `lua_shared_dict` (`crescent_limits`, `crescent_jwt`, `crescent_sessions`) mantidos no conf; lembre que eles são locais a cada servidor.
+- `lua_shared_dict` (`crescent_limits`, `crescent_jwt`, `crescent_sessions`, `crescent_cache`, `crescent_queue`) mantidos no conf; lembre que eles são locais a cada servidor.
+- Mais de uma réplica: `CACHE_DRIVER=redis` e `QUEUE_DRIVER=redis`, Redis com senha e fora da internet pública, e workers rodando `queue:work`.

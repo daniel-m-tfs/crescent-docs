@@ -28,10 +28,10 @@ Se você tem o repositório do framework, `lua cli.lua new meu-app` gera o mesmo
 ### Com Docker (recomendado)
 
 ```bash
-lua cli.lua setup    # git do zero, usuário/senha do MySQL e sobe o Docker
+lua cli.lua setup    # git do zero, usuário/senha do MySQL, Redis opcional e sobe o Docker
 ```
 
-O `setup` pergunta antes de cada passo (Enter aceita o padrão): recomeça o histórico do git sem o remote do template e adiciona o seu remote (opcional), grava usuário e senha do banco no `.env` (que ele cria com `APP_KEY` e `JWT_SECRET` aleatórios) e sobe a aplicação com hot reload. Depois, no dia a dia:
+O `setup` pergunta antes de cada passo (Enter aceita o padrão): recomeça o histórico do git sem o remote do template e adiciona o seu remote (opcional), grava usuário e senha do banco no `.env` (que ele cria com `APP_KEY` e `JWT_SECRET` aleatórios), pergunta se você quer Redis para cache e filas (sem ele, ambos usam a memória do servidor) e sobe a aplicação com hot reload. Depois, no dia a dia:
 
 ```bash
 lua cli.lua run      # sobe app + MySQL (hot reload)
@@ -152,5 +152,6 @@ Um `POST` sem `name` responde `422` com os erros por campo; um id inexistente re
 - [Conceitos](/docs/core-concepts) — rotas, `ctx`, middleware, validação, erros e views.
 - [Banco de dados](/docs/database) — models, relações, query builder e migrations.
 - [Segurança](/docs/security) — JWT, sessões, CSRF, CORS e rate limit.
+- [Cache e filas](/docs/cache-queue) — `ctx.cache`, jobs em segundo plano e Redis opcional.
 - [CLI](/docs/cli) — todos os comandos de `lua cli.lua`.
 - [Deploy](/docs/deployment) — imagem Docker e Nginx de produção.

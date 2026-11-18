@@ -62,7 +62,7 @@
       "softwareVersion": "2.0",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Linux, macOS (OpenResty ou Docker)",
-      "description": "Framework web em Lua sobre OpenResty (Nginx + LuaJIT) com MySQL: rotas, middleware, validação, ORM com migrations, segurança (JWT, sessões, CSRF, rate limit), logs estruturados e CLI.",
+      "description": "Framework web em Lua sobre OpenResty (Nginx + LuaJIT) com MySQL: rotas, middleware, validação, ORM com migrations, segurança (JWT, sessões, CSRF, rate limit), cache e filas, logs estruturados e CLI.",
       "image": "https://crescent.tyne.com.br/og-image.png",
       "offers": {
         "@type": "Offer",
@@ -406,16 +406,16 @@ return User</code></pre>
                         <p class="feature-api"><code>app:validated(schema, action)</code></p>
                     </li>
                     <li class="feature reveal">
-                        <h3>ORM para MySQL</h3>
-                        <p>Models, relações com eager loading, paginação, soft deletes e hooks. Todo SQL é
-                            parametrizado.</p>
+                        <h3>ORM e migrations</h3>
+                        <p>Models com relações, paginação, soft deletes e hooks; migrations e seeders versionados. Todo
+                            SQL é parametrizado.</p>
                         <p class="feature-api"><code>Model:extend{ ... }</code></p>
                     </li>
                     <li class="feature reveal">
-                        <h3>Migrations e seeders</h3>
-                        <p>Arquivos versionados com <code>up</code> e <code>down</code>, rollback e status. No Docker,
-                            as pendentes rodam ao subir.</p>
-                        <p class="feature-api"><code>bin/crescent db:migrate</code></p>
+                        <h3>Cache e filas</h3>
+                        <p>Cache e jobs em segundo plano com retry na memória do servidor, sem serviço extra. Redis
+                            opcional para durabilidade e várias réplicas.</p>
+                        <p class="feature-api"><code>ctx.queue:push(job, payload)</code></p>
                     </li>
                     <li class="feature reveal">
                         <h3>Segurança</h3>
